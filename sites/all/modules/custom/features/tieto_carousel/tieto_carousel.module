@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto carousel feature.
+ */
+
+include_once 'tieto_carousel.features.inc';
+
+function tieto_carousel_js_alter(&$js) {
+  $js['sites/all/libraries/flexslider/jquery.flexslider-min.js']['group'] = JS_THEME;
+  $js['sites/all/modules/contrib/flexslider/assets/js/flexslider.load.js']['group'] = JS_THEME;
+  $js['sites/all/modules/contrib/flexslider/flexslider_views_slideshow/js/flexslider_views_slideshow.js']['group'] = JS_THEME;
+  $js['sites/all/themes/tietocom/js/script.js']['group'] = JS_THEME;  
+}

@@ -1,0 +1,23 @@
+diff --git a/docroot/sites/all/modules/contrib/views_load_more/./views_load_more_backup.module b/docroot/sites/all/modules/contrib/views_load_more/./views_load_more.module
+index 00403c0..47abefa 100644
+--- a/docroot/sites/all/modules/contrib/views_load_more/./views_load_more_backup.module
++++ b/docroot/sites/all/modules/contrib/views_load_more/./views_load_more.module
+@@ -91,6 +91,18 @@ function theme_views_load_more_pager($vars) {
+     $li_next = "&nbsp;";
+   }
+ 
++  if (isset($_REQUEST['page']) && $_REQUEST['page'] >= $pager_total[$element]-1) {
++    $access_id = $_REQUEST['access_id'];
++    $query_p = array("access_id[0]" => $access_id[0], "page" => 0);
++    $li_p = l(
++      t("Less"), "",
++      array( 'query' => $query_p));
++    $items[] = array(
++      'class' => array('pager-previous'),
++      'data' => $li_p,
++    );
++  }
++
+   if ($pager_total[$element] > 1) {
+     $items[] = array(
+       'class' => array('pager-next'),

@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the workday.com Tieto Jobs feature.
+ */
+
+include_once 'tieto_workday_jobs.features.inc';

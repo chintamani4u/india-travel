@@ -1,0 +1,140 @@
+<form action="#" method="post" name="releases-subscribe-form" id="releases-subscribe-form">
+							<h1>Registrera dig</h1>
+							<div class="content report">				
+								<div class="form-leave-comment">
+									<div>
+										<label for="f_name">Namn *
+										<span class="error" id="nameMissing">Du har inte fyllt i något namn. Vänligen låt oss veta vem vi ska registrera.</span></label>
+										<input type="text" title="Förnamn och Efternamn" value="Förnamn och Efternamn" name="f_name" id="f_name" class="hidableInfo">
+									</div>
+									
+									<div>
+										<label for="email">E-postadress *
+										<span class="error" id="emailMissing">You Du har inte fyllt i någon e-postadress. Vänligen fyll i.</span>
+										<span class="error" id="emailAddresNotValid">Den angivna e-postadressen verkar felaktig. Vänligen kontrollera e-postadressen.</span>
+										</label>
+										<input type="text" title="E-postadress" value="E-postadress" name="email" id="email" class="hidableInfo">
+									</div>
+									
+									<div>
+										<label for="organization">Organisation</label>
+										<input type="text" title="Företags- eller organisationsnamn" value="Företags- eller organisationsnamn" id="organization" class="filled hidableInfo">
+									</div>
+
+									<div class="form-selection">							
+										<label for="all-releases">Prenumerera på *
+										<span class="error" id="languageMissing">Du har inte valt något att registrera dig till. Vänligen välj även på vilket/vilka språk du vill få e-post.</span></label>		
+										
+										<div class="selection-field-area field-area-selected">
+											<a class="eventcheck radio eventchecked" href="#" id="all-releases">
+												<input type="radio" checked="checked" value="press-and-stock" id="press-and-stock">Press releases
+											</a>
+											<div class="select-language">
+												<a class="eventcheck eng" href="#"><input type="checkbox" value="all">Eng</a>
+												<a class="eventcheck fin" href="#"><input type="checkbox" value="all">Fin</a>
+												<a class="eventcheck swe eventchecked" href="#"><input type="checkbox" value="all">Sve</a>
+											</div>
+										</div>
+
+										<div class="selection-field-area field-area-disabled">
+											<a class="eventcheck radio" href="#">
+												<input type="radio" value="stock-only" id="stock-only">Stock exchange releases
+											</a>								
+											<div class="select-language">
+												<select id="preferredLanguage" name="preferredLanguage">
+													<option class="eng" value="en">Eng</option>
+													<option class="fin" value="fi">Fin</option>													
+													<option class="swe" value="sv" selected="selected">Sve</option>
+												</select>
+											</div>
+										</div>
+
+										<div class="selection-field-area field-area-disabled">
+											<a class="eventcheck radio" href="#"><input type="radio" value="selected-industries" id="selected-industries">Endast pressmeddelanden från valda branscher</a>						
+
+											<div class="industries-selection">
+												<p>Välj en eller flera branscher och/eller erbjudanden att prenumerera på. Välj även på vilket/vilka språk du önskar dessa e-postmeddelanden.</p>
+		        									
+												<div class="dropdown-area">
+													<div class="select-industries">
+														<select id="dropdown-values" class="select-ind-off" disabled="">
+														
+															<option selected="selected" value="">Välj...</option>
+															<option value="852684|852686|852642">Fordon</option>
+															<option value="852685|852687|852643">Energi</option>
+															<option value="756975|756978|757180">Bank och försäkring</option>
+															<option value="756984|756985|757182">Skog</option>
+															<option value="852662|852671|852648">Vård, omsorg och skola</option>
+															<option value="852663|852672|852649">Logistik</option>
+															<option value="756995|756994|757201">Tillverkning</option>
+															<option value="852667|852673|852650">Media</option>
+															<option value="852668|852674|852651">Olja och gas</option>
+															<option value="756986|757013|757195">Offentlig sektor</option>
+															<option value="852669|852676|852660">Telekom</option>
+															<option value="852670|852677|852661">Handel</option>
+														</select>
+		            									
+														<select style="display:none;" id="dropdown-all-values" class="select-ind-off">
+														
+															<option selected="selected" value="">Välj...</option>
+															<option value="852684|852686|852642">Fordon</option>
+															<option value="852685|852687|852643">Energi</option>
+															<option value="756975|756978|757180">Bank och försäkring</option>
+															<option value="756984|756985|757182">Skog</option>
+															<option value="852662|852671|852648">Vård, omsorg och skola</option>
+															<option value="852663|852672|852649">Logistik</option>
+															<option value="756995|756994|757201">Tillverkning</option>
+															<option value="852667|852673|852650">Media</option>
+															<option value="852668|852674|852651">Olja och gas</option>
+															<option value="756986|757013|757195">Offentlig sektor</option>
+															<option value="852669|852676|852660">Telekom</option>
+															<option value="852670|852677|852661">Handel</option>
+														</select>
+											            
+														<div class="add-more"><a href="#">Lägg till</a></div>
+													</div>
+
+													<div style="display:none;" class="select-industries">
+														<div class="select-language">
+															<a class="eventcheck eng" href="#"><input type="checkbox" value="" name="p_list_id">Eng</a>
+															<a class="eventcheck fin" href="#"><input type="checkbox" value="" name="p_list_id">Fin</a>
+															<a class="eventcheck swe" href="#"><input type="checkbox" value="" name="p_list_id">Sve</a>
+														</div>
+														<div id="remove" class="select-all">
+															<a class="eventcheck" href="#"><input type="checkbox" value="" name=""><input type="checkbox" value="" name=""></a>
+														</div>
+													</div>
+		        									
+												</div>
+											</div>
+										 </div>
+									</div>
+									<div>
+										<input type="submit" title="Registrera dig" value="Registrera dig" class="send" id="send-releases-subscription">
+									</div>
+									
+									<input type="hidden" value="swe" id="RootPageLanguage">
+									<input type="hidden" value="http://www.huginonline.com/plsql/try/user_sign_up3.subscribe" id="PressUrl">
+									<input type="hidden" value="https://cns.omxgroup.com/cdsPublic/addDynamicSubscription.action" id="StockUrl">
+
+									<div style="display:none;" id="pressHelpers">
+										<input type="hidden" value="3114" name="f_id">
+										<input type="hidden" value="5" name="lan">									
+										<input type="hidden" value="3114" name="p_firm_id">
+										<input type="hidden" value="1058" name="p_firm_id">
+										<input type="hidden" value="f_name" name="p_mandatory">
+										<input type="hidden" value="email" name="p_mandatory">
+										<input type="hidden" value="p_list_id" name="p_mandatory">
+										<input type="hidden" value="aspx?elepath=1415,5895,12160,26615" name="p_file_ext">
+										<input type="hidden" value="http://www.tieto.se/" name="base_href">
+									</div>
+
+									<div style="display:none;" id="stockHelpers">
+										<input type="hidden" value="1057" name="disclosingPartyId">
+										<input type="hidden" value="6" name="infoTypes">
+										<input type="hidden" value="http://www.tieto.se/press/materialbank/press-och-borsmeddelanden-registrera-dig?result=success" name="successUrl">
+										<input type="hidden" value="http://www.tieto.se/press/materialbank/press-och-borsmeddelanden-registrera-dig?result=error" name="failureUrl">
+									</div>
+								</div>
+							</div>
+						</form>

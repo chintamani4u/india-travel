@@ -1,0 +1,112 @@
+<?php
+
+/*
+ * Updates the Contact personnel images into a default image, adds images to users that don't have one already
+
+function tieto_contact_update_7002() {
+
+  $query = new EntityFieldQuery();
+
+  $result = $query->entityCondition('entity_type', 'node')
+                  ->propertyCondition('type', 'contact')
+                  ->execute();
+
+  $i = 0;
+
+  // Load all the contact nodes
+
+  foreach (node_load_multiple(array_keys($result['node'])) as $key => $val) {
+
+    if (count($val->field_image_atom) > 0) { // Check if the atom has an image set
+
+      $atom = scald_atom_load($val->field_image_atom[LANGUAGE_NONE][0]['sid']);
+
+      // When inserting the first image, use the image previously uploaded; otherwise use a serialized copy
+
+      if ($i > 0) {
+
+        db_query("update {file_managed} set filename = 'chat_user_icon_" . $i . ".jpg',
+                  uri = 'public://atoms/images/chat_user_icon_" . $i . ".jpg'
+                  where fid = '" . $atom->base_entity->fid . "'");
+
+        $atom->base_entity->filename = 'chat_user_icon_' . $i . '.jpg';
+        $atom->base_entity->uri = 'public://atoms/images/chat_user_icon_' . $i . '.jpg';
+        $atom->file_source = 'public://atoms/images/chat_user_icon_' . $i . '.jpg';
+        $atom->thumbnail_source = 'public://atoms/images/chat_user_icon_' . $i . '.jpg';
+      }
+      else {
+
+        db_query("update {file_managed} set filename = 'chat_user_icon.jpg',
+                  uri = 'public://atoms/images/chat_user_icon.jpg'
+                  where fid = '" . $atom->base_entity->fid . "'");
+
+        $atom->base_entity->filename = 'chat_user_icon.jpg';
+        $atom->base_entity->uri = 'public://atoms/images/chat_user_icon.jpg';
+        $atom->file_source = 'public://atoms/images/chat_user_icon.jpg';
+        $atom->thumbnail_source = 'public://atoms/images/chat_user_icon.jpg';
+      }
+
+      copy(drupal_realpath('public://') . "/atoms/images/chat_user_icon.jpg",
+           drupal_realpath('public://') . "/atoms/images/chat_user_icon_" . $i . ".jpg");
+
+      scald_atom_save($atom);
+    }
+    else {
+
+      if ($i > 0) {
+
+        copy(drupal_realpath('public://') . "/atoms/images/chat_user_icon.jpg",
+             drupal_realpath('public://') . "/atoms/images/chat_user_icon_" . $i . ".jpg");
+
+        $file = new stdClass;
+
+        $file->uid = 1;
+        $file->filename = 'scald_user_icon_' . $i . '.jpg';
+        $file->uri = 'public://atoms/images/chat_user_icon_' . $i . '.jpg';
+        $file->status = 1;
+        $file->filemime = 'image/png';
+
+        file_save($file);
+      }
+      else {
+
+        $file = new stdClass;
+
+        $file->uid = 0;
+        $file->filename = 'scald_user_icon.jpg';
+        $file->uri = 'public://atoms/images/chat_user_icon.jpg';
+        $file->status = 1;
+        $file->filemime = 'image/png';
+
+        file_save($file);
+      }
+
+      // Fetch the latest entered file entry and create a new scald entry
+
+      $result = db_query("SELECT fid FROM {file_managed} order by fid desc limit 0,1");
+
+      $results = $result->fetchAll();
+
+      $atom = new stdClass;
+
+      $atom->base_id = $results[0]->fid;
+      $atom->type = 'image';
+      $atom->provider = 'scald_image';
+
+      scald_atom_save($atom);
+
+      // Fetch the latest scald entry and update the concurrent contact node
+
+      $result = db_query("select sid from {scald_atoms} where type='image' order by sid desc limit 1");
+
+      $results = $result->fetchAll();
+
+      $val->field_image_atom[LANGUAGE_NONE][0]['sid'] = $results[0]->sid;
+
+      node_save($val);
+    }
+
+    $i++;
+  }
+}
+*/

@@ -1,0 +1,7 @@
+7.x
+-------
+
+This feature provides the tieto admin views.
+
+10.01.2014 - Changed printing the link h2 to p
+Pull request number: #252

@@ -1,0 +1,134 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Permissions feature.
+ */
+
+include_once 'tieto_permissions.features.inc';
+
+/**
+ * Implements hook_permission().
+ */
+function tieto_permissions_permission() {
+  return array(
+    'edit all tieto topics' => array(
+      'title' => 'Bypass tieto topic editor access control',
+      'description' => 'View, edit and delete all sections regardless of topic restrictions.',
+      'restrict access' => TRUE,
+    ),
+    'administer tieto menu structure' => array(
+      'title' => 'Administer admin/structure/menu',
+      'description' => 'Administer menus at admin/structure/menu.',
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu_alter().
+ */
+function tieto_permissions_menu_alter(&$items) {
+  foreach ($items as $path => $item) {
+    if (strpos($path, 'admin/structure/menu') === 0 && isset($item['access arguments']) && $item['access arguments'] == array('administer menu')) {
+      $items[$path]['access arguments'] = array('administer tieto menu structure');
+    }
+  }
+}
+
+/**
+ * Implements hook_node_access().
+ */
+function tieto_permissions_node_access($node, $op, $account) {
+  if (user_access('administer nodes', $account) || user_access('edit all tieto topics', $account)) {
+    // Superusers are not restricted.
+    return NODE_ACCESS_IGNORE;
+  }
+
+  $type = is_string($node) ? $node : $node->type;
+
+  if ($op == 'update') {
+    if ($type == 'tieto_landing_page') {
+      $topic_nid = $node->nid;
+    }
+    elseif (isset($node->field_landing_page[LANGUAGE_NONE][0]['target_id'])) {
+      $topic_nid = $node->field_landing_page[LANGUAGE_NONE][0]['target_id'];
+    }
+    else {
+      // no topic, no restrictions.
+      return NODE_ACCESS_IGNORE;
+    }
+
+    $user_topics = _tieto_permissions_get_user_topics($account);
+    return isset($user_topics['node'][$topic_nid]) ? NODE_ACCESS_ALLOW : NODE_ACCESS_DENY;
+  }
+
+  return NODE_ACCESS_IGNORE;
+}
+
+/**
+ * Implements hook_node_validate().
+ */
+function tieto_permissions_node_validate($node, $form, &$form_state) {
+  if (!user_access('administer nodes') && !user_access('edit all tieto topics')) {
+    $old_parent = FALSE;
+    if (!empty($form_state['node']->menu['mlid'])) {
+      $old_parent = $form_state['node']->menu['plid'];
+    }
+
+    $new_parent = FALSE;
+    if (!empty($node->menu['enabled'])) {
+      list( , $new_parent) = explode(':', $node->menu['parent']);
+    }
+
+    // When changing menu parent, we check that user has edit access to the new topic.
+    if ($new_parent !== $old_parent) {
+      $new_topic = NULL;
+      if ($new_parent && ($link = menu_link_load($new_parent)) && isset($link['link_path'])) {
+        $path = drupal_get_normal_path($link['link_path']);
+        $new_topic = menu_get_object('node', 1, $path);
+      }
+      if (!$new_topic || !node_access('update', $new_topic)) {
+        form_set_error('menu', 'Permission denied. You are not allowed to add content under this section. Contact Editor in Chief about permissions.');
+      }
+    }
+  }
+}
+
+/**
+ * Helper;
+ */
+function _tieto_permissions_get_user_topics($user) {
+  $cache = &drupal_static(__FUNCTION__, array());
+
+  if (!isset($cache[$user->uid])) {
+    $cache[$user->uid] = array();
+    $query = new EntityFieldQuery();
+    $query->entityCondition('entity_type', 'node')
+      ->entityCondition('bundle', 'tieto_landing_page')
+      ->fieldCondition('field_topic_editors', 'target_id', $user->uid);
+    $cache[$user->uid] = $query->execute();
+  }
+
+  return $cache[$user->uid];
+}
+
+#TIET-1386 - code to enable secure pages configuration and turning switch back to http option on
+function tieto_permissions_modules_enabled($modules){
+  if (in_array('securepages', $modules)) {
+    variable_set('https',1);
+    variable_set('securepages_enable',1);
+    variable_set('securepages_switch',true);
+    variable_set('securepages_pages', 'node/add*
+node/*/edit
+node/*/delete
+user
+user/*
+admin
+admin/*
+contact-us
+customer-area
+Kontakt
+Kontaktivorm
+Sazinaties_ar_mums
+Susisiekite');
+  }
+}

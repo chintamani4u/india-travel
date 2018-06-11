@@ -1,0 +1,12 @@
+<?php
+/**
+ * @file
+ * tieto_blogs.features.inc
+ */
+
+/**
+ * Implements hook_views_api().
+ */
+function tieto_blogs_views_api($module = NULL, $api = NULL) {
+  return array("api" => "3.0");
+}

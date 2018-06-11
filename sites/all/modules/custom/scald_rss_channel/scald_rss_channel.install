@@ -1,0 +1,50 @@
+<?php
+/**
+ * @file
+ * Scald RSS channel Installation
+ */
+
+/**
+ * Implements hook_install().
+ */
+function scald_rss_channel_install() {
+  scald_add_type('rss_channel', 'RSS Channel', 'Scald your RSS or ATOM feed');
+}
+
+function scald_rss_channel_enable() {
+  field_cache_clear();
+  field_associate_fields('scald_rss_channel');
+
+  // Check if our field is not already created.
+  if (!field_info_field('field_rss_items')) {
+    $field = array(
+      'field_name' => 'field_rss_items',
+      'type' => 'text',
+    );
+    field_create_field($field);
+
+    // Create the instance on the bundle.
+    $instance = array(
+      'field_name' => 'field_rss_items',
+      'entity_type' => 'scald_atom',
+      'label' => t('Number of items'),
+      'description' => t('Maximum number of Feed items to show in result-set.'),
+      'bundle' => 'rss_channel',
+      // If you don't set the "required" property then the field wont be required by default.
+      'required' => TRUE,
+      'settings' => array('text_processing' => 0),
+      'instance_settings' => array('text_processing' => 0),
+      'widget' => array(
+        'type' => 'text',
+        'weight' => '1',
+      ),
+    );
+    field_create_instance($instance);
+  }
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function scald_rss_channel_uninstall() {
+}

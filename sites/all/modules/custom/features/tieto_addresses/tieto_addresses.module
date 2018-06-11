@@ -1,0 +1,101 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Addresses feature.
+ */
+
+include_once 'tieto_addresses.features.inc';
+
+function tieto_addresses_form_alter(&$form, $form_state, $form_id) {
+  if ($form['#id'] == 'views-exposed-form-addresses-panel-pane-addresses') {
+    $form['country']['#options'] = _tieto_addresses_country_values();
+    $form['city'] = array(
+      '#type' => 'select',
+      '#options' => _tieto_addresses_city_values(),
+      '#default_value' => '',
+    );
+  }
+}
+
+function _tieto_addresses_country_values() {
+
+  $query = new entityFieldQuery();
+
+  $countries_with_office = array();
+
+  $available_countries = _addressfield_country_options_list();
+
+  $countries_with_office['All'] = t('All');
+
+  $result = $query->entityCondition('entity_type', 'node')
+    ->propertyCondition('type', 'tieto_addresses')
+    ->fieldCondition('field_office_address', 'country', 'null', '!=')
+    ->execute();
+
+  foreach (node_load_multiple(array_keys($result['node'])) as $val) {
+
+    if (!in_array($val->field_office_address[LANGUAGE_NONE][0]['country'], $countries_with_office)) {
+
+      $countries_with_office[$val->field_office_address[LANGUAGE_NONE][0]['country']] = t($available_countries[$val->field_office_address[LANGUAGE_NONE][0]['country']]);
+    }
+  }
+
+  asort($countries_with_office);
+
+  return $countries_with_office;
+}
+
+function _tieto_addresses_city_values() {
+  /*
+   * Take request_uri and parse the country to filter cities list
+   */
+  $url = parse_url(request_uri(), PHP_URL_QUERY);
+  parse_str($url, $output);
+  $country = $output['country'];
+  if (isset($output['country'])) {
+    $current_country = $output['country'];
+  }
+
+  $arr = array();
+  $query = db_select('field_data_field_office_address', 'oa');
+  $query->fields('oa', array('field_office_address_locality'));
+  /*
+  * Filter the cities by country
+  */
+  if (isset($country) && $country != t('All')) {
+    $query->condition('field_office_address_country', $current_country);
+  }
+  else {
+    $current_country = NULL;
+  }
+
+  $result = $query->execute();
+
+  while ($rec = $result->fetchAssoc()) {
+    /*
+    * Initial add empty value if no filters presents
+    */
+    $arr[''] = t(' - Select - ');
+    $arr[$rec['field_office_address_locality']] = $rec['field_office_address_locality'];
+  }
+
+  asort($arr);
+
+  return $arr;
+
+}
+
+/**
+ * Implementation of hook_page_build().
+ *
+ * Add necessary JS
+ * https://twitter.com/davereid/status/294554866649542657
+ */
+/*
+function tieto_addresses_page_build() {
+  $path = current_path();
+  if($path == "addresses") {
+    drupal_add_js(drupal_get_path('module', 'tieto_addresses') . '/jquery.masonry.min.js');
+  }
+}
+*/

@@ -1,0 +1,12 @@
+7.x-1.3
+-------
+
+This feature provides all content types and fields that make Tieto Times.
+
+PR#271 Recreated this feature to fit API:2
+
+12.03.2014 - Panels update made many features overridden #378
+
+15.04.2014 - Recreated this feature to go with chosen module update #438
+
+15.04.2014 - Recreated this feature to Header issue of margzine article pages TIET-2202

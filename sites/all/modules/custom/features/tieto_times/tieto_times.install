@@ -1,0 +1,27 @@
+<?php
+
+function tieto_times_update_7001() {
+
+  $ret = array();
+
+  $taxonomy1 = taxonomy_vocabulary_machine_name_load('magazine');
+
+  $taxonomy2 = taxonomy_vocabulary_machine_name_load('tieto_times_issue');
+
+  db_query("update taxonomy_term_data set vid = '" . $taxonomy1->vid . "' where vid = '" . $taxonomy2->vid . "'");
+
+  $taxonomy1->i18n_mode = 4;
+
+  taxonomy_vocabulary_save($taxonomy1);
+
+  $terms = taxonomy_term_load_multiple(array(), array('vid' => $taxonomy1->vid));
+
+  foreach($terms as $val) {
+
+    $val->language = 'fi';
+
+    taxonomy_term_save($val);
+  }
+
+  return $ret;
+}

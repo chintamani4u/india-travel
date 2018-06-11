@@ -1,0 +1,190 @@
+<?php
+/**
+ * @file
+ * Main hook implementations for the Marketo Munchkin module.
+ */
+
+/**
+* Implements hook_help().
+*/
+function marketo_munchkin_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#marketo_munchkin':
+      $output = '<p>This is a simple module for adding & managing the <a href="http://www.marketo.com/">Marketo Munchkin</a> tracking code and provides a method for utilizing the Marketo Munckin API to allow Lead submission to your Marketo account for your site\'s forms.</p><h2>Features</h2><p>The Marketo Munchkin module defines an API for Drupal 7.x developers to use for submitting Lead data from their site\'s forms using the Marketo Munchkin API. There are several hooks developers can use to modify Lead data prior to submission:</p><ul><li>Create a list of data to be associated with every Lead submission.</li><li>Create a list of data to be associated with Leads using a specific form.</li><li>Alter the list of data being associated with Leads using a specific form.</li><li>Add javascript embeds to allow Marketo to integrate with other services (like Salesforce).</li></ul><h2>Usage</h2><p>After installing the module, the next thing you should do is <a href="admin/config/search/marketo-munchkin">configure it</a>. At the very least you will need a tracking code obtained from <a href="marketo.com">Marketo.com</a> to utilize the cookie Marketo Munchkin creates for each user visiting your site. If you would like to submit lead data from your site\'s forms you will also need a secret private key which you select while enabling API tracking at Marketo.com. After you have configured the module it is ready to be used. If all you want is the Marketo Munchkin cookie then you are done. If you would like to submit lead data from your site\'s forms you have a couple more things to get setup:</p><ol><li>You first have to modify the forms to tell the Marketo Munchkin module that you want to submit some data and associate it with a lead.</li><li>When the form is submitted you need to provide some data to be associated with a lead. The only piece of data required is an email address but it is possible to include names, addresses, phone numbers, or any other data field including custom fields.</li><li>You must implement either hook_marketo_create_data() or hook_marketo_create_TYPE_data() to add the lead data to the $munchkin_data array. This is an associative array keyed with strings representing the field names and the value is the data being passed. Some examples:<ul><li>$munchkin_data[\'FirstName\'] = \'John\';</li><li>$munchkin_data[\'LastName\'] = \'Doe\';</li><li>$munchkin_data[\'Title\'] = \'Lead Buck\';</li></ul></li></ol><p>Example implementations for each marketo hook are included in the marketo_munchkin.examples.php file. You can also see hook related documentation in the marketo_munchkin.api.php file.</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implements hook_menu().
+ */
+function marketo_munchkin_menu() {
+  $items = array();
+
+  $items['admin/config/search/marketo-munchkin'] = array(
+    'title' => 'Marketo Munchkin',
+    'description' => "Configure Marketo Munchkin.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('marketo_munchkin_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'marketo_munchkin.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements template_preprocess_page().
+ */
+function marketo_munchkin_page_alter(&$page) {
+
+  global $language;
+
+  $munchkin_code = variable_get('munchkin_code_' . $language->language, '');
+  $munchkin_url = str_replace(array('http://', 'https://'), '', variable_get('munchkin_url_' . $language->language, 'munchkin.marketo.net/munchkin.js'));
+  $munchkin_secret_key = variable_get('munchkin_secret_key_' . $language->language, '');
+  
+  $sites = variable_get('munchkin_sites');
+
+  // Only proceed if the settings are available.
+  if (!empty($munchkin_code) && !empty($munchkin_url) && $sites[$language->language] != '0') {
+    // Build the output.
+    // Add the Munchkin cookie
+    $output = "mktoMunchkin(\"{$munchkin_code}\");\n";
+    
+    // If Lead submission is enabled
+    // Make sure the secret key is set in the configs before submitting any data.
+    if (!empty($munchkin_secret_key) && isset($_SESSION['marketo-munchkin-submit'])) {
+      $type = $_SESSION['marketo-munchkin-submit'];
+      $email = $_SESSION['marketo-munchkin-data-user_email'];
+      
+      // Add the minimum Lead data needed.
+      $munchkin_data = array(
+        'Email' => $email,
+      );
+      
+      // Give modules a few chances to modify the Lead data.
+      marketo_munchkin_module_invoke('create_data', $munchkin_data);
+      marketo_munchkin_module_invoke('create_' . $type . '_data', $munchkin_data);
+      drupal_alter('marketo_create_' . $type . '_data', $munchkin_data);
+      
+      $output .= _marketo_munchkin_format_munchkin_function($munchkin_data, $email);
+      
+      // Give modules a chance to add any needed javascript embeds to integrate
+      // with Marketo. Salesforce for instance....
+      _marketo_run_postscript();
+      
+      // Clean-up the session data.
+      unset($_SESSION['marketo-munchkin-submit']);
+      unset($_SESSION['marketo-munchkin-data-user_email']);
+    }
+    // If the secret key has not been defined, leave a message for the admin.
+    elseif (empty($munchkin_secret_key)) {
+      watchdog('Marketo Munchkin', "The Marketo Munchkin secret key has not been set, please configure the module in order for the module to work correctly.", array(), WATCHDOG_ERROR, l('Settings', 'admin/config/search/marketo-munchkin'));
+    }
+    // add the Marketo Munchkin JavaScript library
+
+    drupal_add_js("//{$munchkin_url}", array('type' => 'external', 'scope' => 'footer', 'weight' => 5));
+    // add the cookie and any data to be submitted
+    drupal_add_js($output, array('type' => 'inline', 'scope' => 'footer', 'weight' => 6));
+  }
+
+  // If the tracking code has not been defined, leave a message for the admin.
+  else {
+    watchdog('Marketo Munchkin', t("The Marketo Munchkin tracking code has not been set, please configure the module in order for the module to work correctly."), array(), WATCHDOG_ERROR, l(t('Settings'), 'admin/config/search/marketo-munchkin'));
+  }
+}
+
+/**
+* Invokes a marketo hook on every module.
+*
+* We cannot use module_invoke() for this, because the arguments need to
+* be passed by reference.
+*
+* @param string $type
+*   A text string that controls which user hook to invoke.  Valid choices are:
+*   - create_data: Invokes hook_marketo_create_data().
+*   - create_TYPE_data: Invokes hook_marketo_create_TYPE_data().
+*        EX: hook_marketo_create_user_login_data()
+*   - post_script: Invokes hook_marketo_post_script().
+* @param array $edit
+*   An associative array variable containing key => value pairs where the $key
+*   matches the field name for a Marketo database field and the $value is a
+*   data string to be stored.
+*/
+function marketo_munchkin_module_invoke($type, &$edit) {
+  foreach (module_implements('marketo_' . $type) as $module) {
+    $function = $module . '_marketo_' . $type;
+    $function($edit);
+  }
+}
+/**
+ * @Function
+ * Formats the Lead data as HTML and Javascript.
+ *
+ * Todo: Need a better function description.
+ *
+ * @param array $munchkin_data
+ *   An array of key => value pairs where the key is the data field's name and
+ *   the value is data being passed.
+ * @param string $email
+ *   A text string with the email address associated with the Lead data.
+ * @param string $lead_type
+ *   A text string representing the Lead type. Optional, defaults to
+ *   'associateLead'.
+ *
+ * @return string
+ *   A text string of HTML markup.
+ */
+function _marketo_munchkin_format_munchkin_function($munchkin_data, $email, $lead_type = 'associateLead') {
+  // Build the MunchkinFunction.
+  $munchkin_function = 'mktoMunchkinFunction(';
+  // Set the Lead type.
+  $munchkin_function .= "'" . $lead_type . "', ";
+  // Format the Lead data.
+  $munchkin_function .= json_encode($munchkin_data) . ", ";
+  // Add the sha1 encrypted secret key and email.
+
+  global $language;
+
+  $munchkin_function .= "'" . hash('sha1', variable_get('munchkin_secret_key_' . $language->language, '') . $email) . "'";
+  // Close the MunchkinFunction.
+  $munchkin_function .= ');';
+  
+  return $munchkin_function;
+}
+/**
+ * @Function
+ * Formats the external and inline javascript for insertion after
+ * the Munchkin function.
+ *
+ * Todo: Need a better function description.
+ *
+ */
+function _marketo_run_postscript()  {
+  // store any javascript which should be added after
+  // the munchkin function here; we can have external
+  // and inline scripts
+  $post_script = array(
+      'external' => array(),
+      'inline' => array(),
+  );
+  // allow modules to add their own postscripts
+  marketo_munchkin_module_invoke('post_script', $post_script);
+  // Format the output.
+  $wgt = 7;
+  // add the external javascript first
+  foreach ($post_script['external'] as $external_script) {
+    drupal_add_js($external_script, array('type' => 'external', 'scope' => 'footer', 'weight' => $wgt));
+    $wgt++;
+  }
+  // add the inline scripts in one bunch
+  $inline_output = '';
+  foreach ($post_script['inline'] as $internal_script) {
+    $inline_output .= $internal_script;
+  }
+  if($inline_output != '')  {
+    drupal_add_js($inline_output, array('type' => 'inline', 'scope' => 'footer', 'weight' => $wgt));
+  }
+}

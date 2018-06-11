@@ -1,0 +1,828 @@
+<?php
+
+/*
+ * @TODO Merge all mediasync functionality into scald_file and delete this
+ */
+
+function _debug_tieto_mediasync($o) {
+  // change this true to debug
+<<<<<<< HEAD
+  $isDebugMode = true;
+  if($isDebugMode)
+    dsm($o);		
+}
+
+function tieto_mediasync_file_presave($file)
+{
+  _debug_tieto_mediasync('tieto_mediasync_file_presave: enter file=');
+  _debug_tieto_mediasync($file);	
+}
+
+function tieto_mediasync_entity_presave($file, $type)
+{
+  _debug_tieto_mediasync('tieto_mediasync_entity_presave: enter type=' . $type);
+  _debug_tieto_mediasync($file);	
+}
+
+function tieto_mediasync_file_delete($file)
+{
+  _debug_tieto_mediasync('tieto_mediasync_hook_file_delete: enter file=');
+  _debug_tieto_mediasync($file);	
+}
+
+function tieto_mediasync_file_move($file, $source)
+{
+  _debug_tieto_mediasync('tieto_mediasync_file_move: enter file=');
+  _debug_tieto_mediasync($file);
+  _debug_tieto_mediasync('source=');
+  _debug_tieto_mediasync($source);
+=======
+  $isDebugMode = FALSE;
+  if ($isDebugMode) {
+    dsm($o);
+  }
+}
+
+function _tieto_mediasync_file_presave($file) {
+  _debug_tieto_mediasync('tieto_mediasync_file_presave: enter file=');
+  _debug_tieto_mediasync($file);
+}
+
+function _tieto_mediasync_entity_presave($file, $type) {
+  _debug_tieto_mediasync('tieto_mediasync_entity_presave: enter type=' . $type);
+  _debug_tieto_mediasync($file);
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+}
+
+function _tieto_mediasync_file_delete($file) {
+  _debug_tieto_mediasync('tieto_mediasync_hook_file_delete: enter file=');
+  _debug_tieto_mediasync($file);
+}
+
+<<<<<<< HEAD
+function tieto_mediasync_drupal_write_record($table, &$record, $primary_keys = array())
+{
+  _debug_tieto_mediasync('tieto_mediasync_drupal_write_record: enter');	
+}
+
+/**
+fix: because in creating Entity Drupal always creates with its own routine new Scald-entity. We must check if that exists and we are in insert-mode.
+If it exists, we destroy the existing and let Drupal to create new (duplicate) entity as it wants. Otherwise we would get duplicate records exception form database
+*/
+// todo tama ehka korvataan file_presavella. Ei korvata. Muuten scald:in luonnissa tulee tupla riveja ja virhe
+function tieto_mediasync_scald_atom_presave($atom)
+{
+=======
+function _tieto_mediasync_file_move($file, $source) {
+  _debug_tieto_mediasync('tieto_mediasync_file_move: enter file=');
+  _debug_tieto_mediasync($file);
+  _debug_tieto_mediasync('source=');
+  _debug_tieto_mediasync($source);
+}
+
+function _tieto_mediasync_drupal_write_record($table, &$record, $primary_keys = array()) {
+  _debug_tieto_mediasync('tieto_mediasync_drupal_write_record: enter');
+}
+
+/*
+ * fix: because in creating Entity Drupal always creates with its own routine new Scald-entity.
+ * We must check if that exists and we are in insert-mode.
+ * If it exists, we destroy the existing and let Drupal to create new (duplicate) entity as it wants.
+ * Otherwise we would get duplicate records exception form database
+ */
+// todo tama ehka korvataan file_presavella. Ei korvata. Muuten scald:in luonnissa tulee tupla riveja ja virhe
+function tieto_mediasync_scald_atom_presave($atom) {
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+  _debug_tieto_mediasync('tieto_mediasync_scald_atom_presave: enter');
+  _debug_tieto_mediasync($atom);
+  if (isset($atom->sid)) {
+    _debug_tieto_mediasync('update. ok. continue normally');
+    return;
+  }
+<<<<<<< HEAD
+  
+/*  if('Finish' != $atom->op)
+=======
+
+  /*  if('Finish' != $atom->op)
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+  {
+    _debug_tieto_mediasync('finish..');
+    return;
+  }*/
+<<<<<<< HEAD
+  
+  /*$is_scald_already = _tieto_mediasync_media_is_atom($atom->base_id);
+  _debug_tieto_mediasync($is_scald_already);
+  if(FALSE == $is_scald_already)
+    return;*/
+    
+  //$atom->op = 'update';
+
+=======
+
+  /*$is_scald_already = _tieto_mediasync_media_is_atom($atom->base_id);
+_debug_tieto_mediasync($is_scald_already);
+if(FALSE == $is_scald_already)
+  return;*/
+
+  //$atom->op = 'update';
+
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+  /*$num_affected = db_delete('scald_atoms')
+  ->condition('base_id', $atom->base_id)
+  ->execute();
+  
+  _debug_tieto_mediasync('num_affected=' . $num_affected);*/
+}
+
+
+<<<<<<< HEAD
+function _mista_kutsuttu()
+{
+=======
+function _mista_kutsuttu() {
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+  _debug_tieto_mediasync('_mista_kutsuttu: enter');
+  $a = debug_backtrace();
+  _debug_tieto_mediasync($a);
+}
+
+<<<<<<< HEAD
+// TODO tähän insert function tieto_mediasync_file_()
+// insertissä insertit ja updatessa updated
+function tieto_mediasync_file_insert($file)
+{
+  _debug_tieto_mediasync("tieto_mediasync_file_insert: enter");	
+  _debug_tieto_mediasync($file);
+  _mista_kutsuttu();
+  
+  
+  $file_managed_exists = _tieto_mediasyn_file_managed_exists($file->fid);
+  _debug_tieto_mediasync('file_managed_exists=');
+  _debug_tieto_mediasync($file_managed_exists);
+  
+  
+  $scald_atom = _tieto_mediasync_media_is_atom($file->fid);
+  _debug_tieto_mediasync('scald_atom=');
+  _debug_tieto_mediasync($scald_atom);
+  
+  
+  
+  // copy to file-to base atom
+  $atom = (array)$file;  
+  
+  $atom['base_id'] = $file->fid;
+  if(isset($file->uid))
+    $atom['publisher'] = $file->uid;
+    
+  // allways enable all Openly available actions: fetch, edit, videw, delete
+  $atom['actions'] = 15;
+  $atom['data'] = '';    
+  
+  $oAtom = (object)$atom;
+=======
+// TODO tï¿½hï¿½n insert function tieto_mediasync_file_()
+// insertissï¿½ insertit ja updatessa updated
+function tieto_mediasync_file_insert($file) {
+  _debug_tieto_mediasync("tieto_mediasync_file_insert: enter");
+  _debug_tieto_mediasync($file);
+  _mista_kutsuttu();
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+
+  _debug_tieto_mediasync('oAtom:');
+  _debug_tieto_mediasync($oAtom);  
+  $op = 'insert';
+  $sid = _tieto_mediasync_scald_atom_save($oAtom, $file, $op);
+  _debug_tieto_mediasync("sid=$sid");
+}
+
+<<<<<<< HEAD
+
+function tieto_mediasync_file_update($file)
+{
+  _debug_tieto_mediasync("tieto_mediasync_file_update: enter");	
+  _debug_tieto_mediasync($file);    
+=======
+  $file_managed_exists = _tieto_mediasync_file_managed_exists($file->fid);
+  _debug_tieto_mediasync('file_managed_exists=');
+  _debug_tieto_mediasync($file_managed_exists);
+
+
+  $scald_atom = _tieto_mediasync_media_is_atom($file->fid);
+  _debug_tieto_mediasync('scald_atom=');
+  _debug_tieto_mediasync($scald_atom);
+
+
+  // copy to file-to base atom
+  $atom = (array) $file;
+
+  $atom['base_id'] = $file->fid;
+  if (isset($file->uid)) {
+    $atom['publisher'] = $file->uid;
+  }
+
+  // allways enable all Openly available actions: fetch, edit, videw, delete
+  $atom['actions'] = 15;
+  $atom['data'] = '';
+
+  $oAtom = (object) $atom;
+
+  _debug_tieto_mediasync('oAtom:');
+  _debug_tieto_mediasync($oAtom);
+  $op = 'insert';
+  $sid = _tieto_mediasync_scald_atom_save($oAtom, $file, $op);
+  _debug_tieto_mediasync("sid=$sid");
+}
+
+
+function tieto_mediasync_file_update($file) {
+  _debug_tieto_mediasync("tieto_mediasync_file_update: enter");
+  _debug_tieto_mediasync($file);
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+
+  $scald_atom = _tieto_mediasync_media_is_atom($file->fid);
+  _debug_tieto_mediasync('scald_atom=');
+  _debug_tieto_mediasync($scald_atom);
+<<<<<<< HEAD
+  
+=======
+
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+  // copy to file-to base atom. After that update it
+  $atom = (array) $file;
+  /*
+  * Define the image scald atom
+  */
+  /*$atom = array(
+  //sid autoincrement
+  //'provider'  => 'scald_' . $file->type,
+  //'type'      => $file->type, // to here mapping from file's types to scald types	 
+  'base_id'   => $file->fid,
+  'publisher' => $file->uid,
+  'actions'   => '15', //view, edit, delete, fetch
+  'data'      => '', //array()  
+  );*/
+  $atom['base_id'] = $file->fid;
+<<<<<<< HEAD
+  if(isset($file->uid))
+    $atom['publisher'] = $file->uid;
+    
+  // allways enable all Openly available actions: fetch, edit, videw, delete
+  $atom['actions'] = 15;
+  $atom['data'] = '';  
+  
+=======
+  if (isset($file->uid)) {
+    $atom['publisher'] = $file->uid;
+  }
+
+  // allways enable all Openly available actions: fetch, edit, videw, delete
+  $atom['actions'] = 15;
+  $atom['data'] = '';
+
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+
+// map from File's type to scald type  
+  $scald_type = _from_file_type_to_scald_type($file->type);
+  $atom['provider'] = 'scald_' . $scald_type;
+  $atom['type'] = $scald_type;
+<<<<<<< HEAD
+  
+  $oAtom = (object)$atom;  
+=======
+
+  $oAtom = (object) $atom;
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+  /*
+  * If scald atom has base_id that is same as file_fid
+  * assume to update scald else insert
+  */
+
+  /*if ( $scald_atom && $scald_atom->base_id == $file->fid) {
+    $op = 'update';
+    $oAtom->sid = $scald_atom->sid;
+  } else {
+    $op = 'insert';
+  }*/
+<<<<<<< HEAD
+  
+=======
+
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+  $oAtom->sid = $scald_atom->sid;
+
+  _debug_tieto_mediasync('oAtom:');
+  _debug_tieto_mediasync($oAtom);
+  $op = 'update';
+  $sid = _tieto_mediasync_scald_atom_save($oAtom, $file, $op);
+  _debug_tieto_mediasync("sid=$sid");
+}
+
+
+function _from_scald_type_to_file_type($scald_type) {
+  $t = NULL;
+  switch ($scald_type) {
+    case  'file':
+      $t = 'document';
+      break;
+
+    default:
+      $t = $scald_type;
+  }
+  return $t;
+}
+
+
+function _from_file_type_to_scald_type($file_type) {
+  $t = NULL;
+  switch ($file_type) {
+    case  'document':
+      $t = 'file';
+      break;
+
+    default:
+      $t = $file_type;
+  }
+  return $t;
+}
+
+
+/*
+ * Update or create an scald atom on media entity update
+ * We will use only document and image
+ * This is called when file_entity is update. Not called when Scald entity update. For that is other hook
+ * */
+/*function tieto_mediasync_file_update($file) {
+  _debug_tieto_mediasync('tieto_mediasync_file_update: enter file');
+  _debug_tieto_mediasync($file);
+  
+  //_save_file($file);
+}*/
+<<<<<<< HEAD
+
+
+/* tries to remove scald's file
+*/
+function tieto_mediasync_scald_atom_delete($sid)
+=======
+
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+
+/* tries to remove scald's file
+*/
+function tieto_mediasync_scald_atom_delete($sid) {
+  _debug_tieto_mediasync('tieto_mediasync_scald_atom_delete enter sid');
+  _debug_tieto_mediasync($sid);
+  if (isset($sid->base_id)) {
+    file_delete_multiple(array($sid->base_id));
+  }
+}
+
+
+function tieto_mediasync_scald_atom_save(&$atom) {
+  _debug_tieto_mediasync('tieto_mediasync_scald_atom_save: enter NO OP');
+}
+
+function tieto_mediasync_atom_save(&$atom) {
+  _debug_tieto_mediasync('tieto_mediasync_atom_save: enter NO OP');
+}
+
+
+/*
+Copy atoms data to struct and then change right type and fields from file
+*/
+function _copy_atom_to_file(&$atom, &$file) {
+  $file_type = _from_scald_type_to_file_type($atom->type);
+  _debug_tieto_mediasync('_copy_atom_to_file: $file_type=' . $file_type);
+<<<<<<< HEAD
+    
+=======
+
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+  $file->fid = $file->base_id;
+  unset($file->base_id);
+
+  $file->type = $file_type;
+  // still same kind of copies..
+  if ('image' == $atom->type) {
+    $file->filename = $atom->title;
+  }
+  else {
+    if ('video' == $atom->type) {
+      $file->filename = $atom->title;
+    }
+    else {
+      $file->filename = $atom->title;
+    }
+  }
+
+  _debug_tieto_mediasync("copied file:");
+  _debug_tieto_mediasync($file);
+}
+
+
+<<<<<<< HEAD
+function _save_as_file_atom(&$atom)
+{
+  // clone atom and set base_id to fid
+  $file = clone $atom;
+  _copy_atom_to_file($atom, $file);
+  $file->fid = $atom->base_id;  
+
+  // to stdClass
+  $file = (array)$file;
+  $file = (object)$file;
+  
+  _debug_tieto_mediasync('file=');
+  _debug_tieto_mediasync($file);
+  
+  $w = file_save($file);
+  _debug_tieto_mediasync('w=');
+  _debug_tieto_mediasync($w);
+  
+
+  // ensure that file is displayed in Drupal
+  $status = array(
+  'status' => 1
+  );
+  
+=======
+function _save_as_file_atom(&$atom) {
+  // clone atom and set base_id to fid
+  $file = clone $atom;
+  _copy_atom_to_file($atom, $file);
+  $file->fid = $atom->base_id;
+
+  // to stdClass
+  $file = (array) $file;
+  $file = (object) $file;
+
+  _debug_tieto_mediasync('file=');
+  _debug_tieto_mediasync($file);
+
+  $w = file_save($file);
+  _debug_tieto_mediasync('w=');
+  _debug_tieto_mediasync($w);
+
+
+  // ensure that file is displayed in Drupal
+  $status = array(
+    'status' => 1
+  );
+
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+  $num_updated = db_update('file_managed')
+    ->fields($status)
+    ->condition('fid', $atom->base_id)
+    ->execute();
+}
+
+/**
+This is called when scald-is updated. Synchronizes file-entity.
+Without this when user edits scald there will be no change to possible file
+<<<<<<< HEAD
+*/
+=======
+ */
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+function tieto_mediasync_scald_atom_update($atom) {
+  _debug_tieto_mediasync('tieto_mediasync_scald_atom_update: enter');
+
+  _debug_tieto_mediasync($atom);
+  if (!isset($atom->base_id)) {
+    return;
+  }
+
+  $exists_file = file_load($atom->base_id);
+  if (NULL == $exists_file) {
+    _debug_tieto_mediasync('not found file. returning');
+    return;
+<<<<<<< HEAD
+  }  
+  
+  _debug_tieto_mediasync('exists_file');
+  _debug_tieto_mediasync($exists_file);	
+  
+  _save_as_file_atom($atom);  
+=======
+  }
+
+  _debug_tieto_mediasync('exists_file');
+  _debug_tieto_mediasync($exists_file);
+
+  _save_as_file_atom($atom);
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+}
+
+function tieto_mediasync_scald_atom_insert($atom) {
+  _debug_tieto_mediasync('tieto_mediasync_scald_atom_insert: enter');
+  _debug_tieto_mediasync($atom);
+
+//  _save_as_file_atom($atom);
+}
+
+
+/*
+When inserting scald-atoms which has file, we must also force file-record to be visible
+*/
+/*function tieto_mediasync_scald_atom_insert($atom) {
+  _debug_tieto_mediasync('tieto_mediasync_scald_atom_insert: enter');
+  _debug_tieto_mediasync($atom);
+  
+  return _save_as_file_atom($atom);    
+}*/
+
+
+function tieto_mediasync_save(&$atom) {
+  _debug_tieto_mediasync('tieto_mediasync_save: enter NO OP');
+}
+
+/*
+  this one saves scald from atom and file
+*/
+<<<<<<< HEAD
+function _tieto_mediasync_scald_atom_save(&$atom, &$file, &$op){
+
+  _debug_tieto_mediasync("_tieto_mediasync_scald_atom_save op=$op");
+  _debug_tieto_mediasync($atom);  
+=======
+function _tieto_mediasync_scald_atom_save(&$atom, &$file, &$op) {
+
+  _debug_tieto_mediasync("_tieto_mediasync_scald_atom_save op=$op");
+  _debug_tieto_mediasync($atom);
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+
+  $types = scald_types();
+  _debug_tieto_mediasync('scald_types=');
+  _debug_tieto_mediasync($types);
+
+  $atom->title = $file->filename;
+
+  /*
+  * Find by file_fid from scalds if its atomized all ready.
+  *
+  */
+  //_debug_tieto_mediasync('before _tieto_mediasync_media_is_atom');
+  //$existing_atom = _tieto_mediasync_media_is_atom($file->fid);
+  //_debug_tieto_mediasync('after _tieto_mediasync_media_is_atom existing_atom');
+  //_debug_tieto_mediasync($existing_atom);  
+
+  /*if(!isset($existing_atom) || !$existing_atom) {
+  $atom_sid = '';
+  }
+  else {
+  $atom_sid = $existing_atom->sid;
+  }*/
+
+
+  //_debug_tieto_mediasync("_tieto_mediasync_scald_atom_save 2 atom_sid=$atom_sid");
+
+  /*if ($op == 'update') {
+  $hook = 'scald_update_atom';
+  $atom_original = entity_load_unchanged('scald_atom', $atom_sid);
+  }
+  else {
+  $hook = 'scald_register_atom';
+  }*/
+
+  _debug_tieto_mediasync($atom);
+  field_attach_presave('scald_atom', $atom);
+
+  // Inform all modules before writing the atom in the database
+  //module_invoke_all('scald_atom_presave', $atom);
+  //module_invoke_all('entity_presave', $atom, 'scald_atom');
+  // Put the basic data in the Scald Atom Registry
+
+  $num_updated = NULL;
+  if ($op == 'update') {
+    // $written = drupal_write_record('scald_atoms', $atom, array('sid'));
+    //$written = db_update('scald_atoms', $atom, array('sid'));
+    _debug_tieto_mediasync('before db_update atom');
+    _debug_tieto_mediasync($atom);
+
+    // remove temporary sid-field for updating and restore it after that
+    //$sid = $atom->sid;
+    //unset($atom->sid);	
+    //_debug_tieto_mediasync($atom);
+
+    /*$num_updated = db_update('scald_atoms')
+    ->fields((array)$atom)
+    ->condition('sid', $sid)
+    ->execute();*/
+    //$num_updated = $scald_id = scald_atom_save($atom);
+    $num_updated = drupal_write_record('scald_atoms', $atom, 'sid');
+
+    //$atom->sid = $sid;
+  }
+  else {
+    //$written = drupal_write_record('scald_atoms', $atom);
+    _debug_tieto_mediasync('before db_insert atom');
+    _debug_tieto_mediasync($atom);
+
+    /*$num_updated = db_insert('scald_atoms')
+    ->fields((array)$atom)
+    ->execute();
+
+      $atom->sid = $num_updated; // this is new sid now
+      */
+    // TODO entity_save
+    $num_updated = drupal_write_record('scald_atoms', $atom);
+//unset($atom->sid);
+//    $scald_id = scald_atom_save($atom);  
+//$num_updated = $scald_id;    
+  }
+  _debug_tieto_mediasync('after db_insert atom->sid=' . $atom->sid);
+
+  if (FALSE == $num_updated) {
+    return FALSE;
+  }
+
+  $function = 'field_attach_' . $op;
+  $function('scald_atom', $atom);
+
+  // Notify all modules of our new atom.
+  /*	module_invoke_all('scald_atom_' . $op, $atom);
+  module_invoke_all('entity_' . $op, $atom, 'scald_atom');*/
+
+  // Clear the render cache
+  cache_clear_all($atom->sid . ':', 'cache_scald', TRUE);
+
+  // Clear the static caches
+  entity_get_controller('scald_atom')->resetCache(array($atom->sid));
+  _debug_tieto_mediasync('_tieto_mediasync_scald_atom_save 5');
+  return $atom->sid;
+}
+
+<<<<<<< HEAD
+function _tieto_mediasyn_file_managed_exists($fid)
+{
+  _debug_tieto_mediasync('_tieto_mediasyn_file_managed_exists fid=' . $fid);
+   // Argument validation
+=======
+function _tieto_mediasync_file_managed_exists($fid) {
+  _debug_tieto_mediasync('_tieto_mediasync_file_managed_exists fid=' . $fid);
+  // Argument validation
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+  if (!is_numeric($fid)) {
+    return FALSE;
+  }
+  $fid = (int) $fid;
+
+  // Build the Atom from the db
+  $registration_results = db_query(
+<<<<<<< HEAD
+  "SELECT *
+  FROM {file_managed}
+  WHERE fid = :fid",
+  array(':fid' => $fid)
+  );
+
+  //  _debug_tieto_mediasync('_tieto_mediasync_media_is_atom: 1');
+
+  if (!$registration_results) {
+  // Ensure that no Atoms linger improperly post-deletion
+  unset($scald_atoms[$fid]);
+    return FALSE;
+  }
+  $atom = $registration_results->fetchObject();
+  if (!empty($atom)) {
+    $atom->fetched = FALSE;
+  }
+  else {
+    return FALSE;
+  }
+
+  $scald_atoms[$fid] = $atom;  
+  //  _debug_tieto_mediasync('_tieto_mediasync_media_is_atom: returning');
+  // _debug_tieto_mediasync($scald_atoms[$fid]);
+  //return the whole atom by its fid
+  return $scald_atoms[$fid];
+}
+
+
+/**
+  tries to get scald by fid. If not found returns false otherwise returns array which key refers to scald
+*/
+=======
+    "SELECT *
+      FROM {file_managed}
+      WHERE fid = :fid",
+    array(':fid' => $fid)
+  );
+
+  //  _debug_tieto_mediasync('_tieto_mediasync_media_is_atom: 1');
+
+  if (!$registration_results) {
+    // Ensure that no Atoms linger improperly post-deletion
+    unset($scald_atoms[$fid]);
+    return FALSE;
+  }
+  $atom = $registration_results->fetchObject();
+  if (!empty($atom)) {
+    $atom->fetched = FALSE;
+  }
+  else {
+    return FALSE;
+  }
+
+  $scald_atoms[$fid] = $atom;
+  //  _debug_tieto_mediasync('_tieto_mediasync_media_is_atom: returning');
+  // _debug_tieto_mediasync($scald_atoms[$fid]);
+  //return the whole atom by its fid
+  return $scald_atoms[$fid];
+}
+
+
+/**
+tries to get scald by fid. If not found returns false otherwise returns array which key refers to scald
+ */
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+function _tieto_mediasync_media_is_atom($fid) {
+  //_debug_tieto_mediasync('_tieto_mediasync_media_is_atom: enter fid=$fid');
+  // Argument validation
+  if (!is_numeric($fid)) {
+    return FALSE;
+  }
+  $fid = (int) $fid;
+
+  // Build the Atom from the db
+  $registration_results = db_query(
+    "SELECT *
+      FROM {scald_atoms}
+      WHERE base_id = :fid",
+    array(':fid' => $fid)
+  );
+
+  //  _debug_tieto_mediasync('_tieto_mediasync_media_is_atom: 1');
+
+  if (!$registration_results) {
+    // Ensure that no Atoms linger improperly post-deletion
+    unset($scald_atoms[$fid]);
+    return FALSE;
+  }
+  $atom = $registration_results->fetchObject();
+  if (!empty($atom)) {
+    $atom->fetched = FALSE;
+  }
+  else {
+    return FALSE;
+  }
+
+  $scald_atoms[$fid] = $atom;
+  //  _debug_tieto_mediasync('_tieto_mediasync_media_is_atom: returning');
+  // _debug_tieto_mediasync($scald_atoms[$fid]);
+  //return the whole atom by its fid
+  return $scald_atoms[$fid];
+} // end _tieto_mediasync_media_is_atom()
+
+
+/* Update scald atom on media entity delete */
+function tieto_mediasync_file_delete($file) {
+  _debug_tieto_mediasync('tieto_mediasync_file_delete');
+  _debug_tieto_mediasync($file);
+
+  $scald_atom = _tieto_mediasync_media_is_atom($file->fid);
+  _debug_tieto_mediasync('scald_atom is ');
+  _debug_tieto_mediasync($scald_atom);
+  _debug_tieto_mediasync('scald_atom:');
+  _debug_tieto_mediasync($scald_atom);
+
+  //if( !$scald_atom)    return;
+
+  //$sid = $scald_atom->sid;
+  //_debug_tieto_mediasync("sid=$sid");
+
+  $num_affected = db_delete('scald_atoms')
+<<<<<<< HEAD
+  ->condition('base_id', $scald_atom->base_id)
+  ->execute();
+=======
+    ->condition('base_id', $scald_atom->base_id)
+    ->execute();
+>>>>>>> bdd6df910b596cd88aa4a722765ee93915912452
+
+  _debug_tieto_mediasync("num_affected=$num_affected");
+
+  // Delete all information associated with the file.
+  //db_delete('upload')->condition('fid', $file->fid)->execute();
+}
+
+/**
+ * Saves a file object to the database.
+ *
+ * If the $file->fid is not set a new record will be added.
+ *
+ * @param $file
+ *   A file object returned by file_load().
+ *
+ * @return
+ *   The updated file object.
+ *
+ * @see hook_file_insert()
+ * @see hook_file_update()
+ */
+function tieto_mediasync_file_save($file) {
+  _debug_tieto_mediasync('tieto_mediasync_file_save: enter');
+}
+

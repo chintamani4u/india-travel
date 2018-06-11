@@ -1,0 +1,152 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Key Topics feature.
+ */
+
+include_once 'tieto_key_topics.features.inc';
+
+function tieto_key_topics_preprocess_panels_pane(&$vars) {
+
+  $parent = node_load(arg(1));
+  if(!empty($parent->type)) {
+    if($parent->type == 'key_topics') {
+
+      if ($vars['pane']->subtype == 'key_topics_portfolio-panel_pane_1') {
+        /* $vars['title'] = t('Offerings'); */
+      }
+      // Add isotope javascript library.
+      drupal_add_js(drupal_get_path('module', 'tieto_key_topics') . '/isotope.pkgd.min.js');
+
+     /* #2627 removing  contact us from keyptoics 
+      if (is_array($vars['content'])) {
+        if ($vars['content']['#bundle'] == 'webform') {
+          $vars['title'] = t('Contact us');
+          $vars['title_prefix'] = "<a id='" . lowercase_url('Contact us') . "' name='" . lowercase_url('Contact us') . "'></a>";
+        }
+      }*/
+      if ($vars['pane']->subtype == 'key_topics_portfolio-panel_pane_3') {
+        $content = str_replace('Edit view', '', $vars['content']);
+   
+        $content = trim(strip_tags($content));
+
+        $vars['content'] = "<a id='" . lowercase_url($content) . "' name='" . lowercase_url($content) . "'></a>";
+        $vars['content'] = $vars['content'] . "<h2 class='pane-title'>" . $content . "</h2>";
+      }
+   
+  //This creates portfolio panel title created as a placeholder for offering & portfolio content 
+      if ($vars['pane']->type == 'fieldable_panels_pane' && $vars['pane']->subtype== 'uuid:08a70538-0ae5-4a27-ae68-88bd3db2537f') { 
+        $vars['title'] = t('Portfolio');
+        $vars['title_prefix'] = "<a id='" . lowercase_url('Portfolio') . "' name='" . lowercase_url('Portfolio') . "'></a>";
+       }
+      
+      if ($vars['pane']->subtype == 'key_topics_phases-panel_pane_2') {
+        $term = taxonomy_term_load($vars['pane']->configuration['arguments']['tid']);
+
+        $vars['title_prefix'] = "<a id='" . lowercase_url($term->name) . "' name='" . lowercase_url($term->name) . "'></a>";
+        $vars['title'] = t($term->name);
+      }
+    }
+  }
+}
+
+function lowercase_url($string) {
+
+  $string = strtolower(str_replace(' ', '-', t($string)));
+
+  return $string;
+}
+
+
+/**
+ * Implements hook_block_info().
+ */
+function tieto_key_topics_block_info(){
+  $blocks = array();
+    $blocks['key_topics_social_icons'] = array(
+     'info' => t('Key Topics Social Icons'),
+     'cache' => DRUPAL_NO_CACHE,
+    );
+  return $blocks;
+}
+
+function tieto_key_topics_ctools_block_info($module, $delta, &$info) {
+  if ($info['title'] == 'Key Topics Social Icons') {
+      $info['icon'] = 'icon_core_block_menu.png';
+      $info['category'] = t('some');
+  }
+}
+/**
+ * Implements hook_block_view().
+ */
+function tieto_key_topics_block_view($delta = ''){
+ $block = array();
+   switch ($delta){
+     case 'key_topics_social_icons':
+       $node = menu_get_item();
+       
+       $facebook_url = "";
+       $linkedin_url = "";
+       $twitter_url = "";
+       $youtube_url = "";
+       $slideshare_url = "";
+
+       if (isset($node['page_arguments'][0]->field_facebook_url['und'][0]['url'])) {
+        $facebook_url = $node['page_arguments'][0]->field_facebook_url['und'][0]['url'];
+       } 
+       
+       if (isset($node['page_arguments'][0]->field_linkedin_url['und'][0]['url'])) {
+        $linkedin_url = $node['page_arguments'][0]->field_linkedin_url['und'][0]['url'];
+       } 
+       
+       if (isset($node['page_arguments'][0]->field_twitter_url['und'][0]['url'])) {
+        $twitter_url = $node['page_arguments'][0]->field_twitter_url['und'][0]['url'];
+       } 
+       
+       if (isset($node['page_arguments'][0]->field_youtube_url['und'][0]['url'])) {
+        $youtube_url = $node['page_arguments'][0]->field_youtube_url['und'][0]['url'];
+       } 
+       
+       if (isset($node['page_arguments'][0]->field_slideshare_url['und'][0]['url'])) {
+        $slideshare_url = $node['page_arguments'][0]->field_slideshare_url['und'][0]['url'];
+       } 
+
+       $icons = "";
+       if (strlen($facebook_url)) {
+        $icons.="<a href=".$facebook_url." target='_blank'><i class='fa fa-facebook-square'></i></a>";
+       }           
+       
+       if (strlen($linkedin_url)) {
+        $icons.="<a href=".$linkedin_url." target='_blank'><i class='fa fa-linkedin-square'></i></a>";
+       }              
+       
+       if (strlen($twitter_url)) {
+        $icons.="<a href=".$twitter_url." target='_blank'><i class='fa fa-twitter'></i></a>";
+       }
+        
+       if (strlen($youtube_url)) {
+        $icons.="<a href=".$youtube_url." target='_blank'><i class='fa fa-youtube-play'></i></a>";
+       }
+       
+       if (strlen($slideshare_url)) {
+        $icons.="<a href=".$slideshare_url." target='_blank'><i class='fa fa-slideshare'></i></a>";
+       }
+       $block['subject'] = '';
+       $block['content'] = "<div class = 'key_topics_social_icons'>$icons</div>";
+     break;
+   }
+ return $block;
+}
+
+/* function tieto_key_topics_form_alter(&$form, &$form_state, $form_id) {
+
+  $parent = node_load(arg(1));
+
+  if($parent->type == 'key_topics' && substr_count($form['#form_id'], 'webform_client_form') != 0) {
+    $form['#node']->webform['components'][11]['value'] = $parent->field_contact_recipient[LANGUAGE_NONE][0]['value'];
+    $form['submitted']['hidden_email_field']['#default_value'] = $parent->field_contact_recipient[LANGUAGE_NONE][0]['value'];
+    return $form;
+  }
+}
+
+*/

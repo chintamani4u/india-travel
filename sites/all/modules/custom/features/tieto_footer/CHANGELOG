@@ -1,0 +1,12 @@
+7.x-1.0
+-----------
+
+TIET-1896 Feature showing as overridden. Recreated to make fit with api:2
+
+7.x-1.0-dev
+-----------
+
+Says dev now...feature is in a default state so no dev version, change to a stable release number
+
+#PR273 Changed footer title to 2014
+12.03.2014 - Panels update made many features overridden #378

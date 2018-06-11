@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * @file
+ * Install file for tieto_offcanvas_menu.
+ */
+
+/**
+ * Implements hook_enable().
+ */
+function tieto_offcanvas_menu_enable() {
+  $menus = menu_get_menus(FALSE);
+  $offcanvas_menus = array_filter(variable_get(TIETO_OFFCANVAS_MENU_ENABLED_MENUS_VARIABLE, array()));
+  $array = array_fill_keys(array_flip($menus), 0);
+  $offcanvas_menus = array_replace($array, $offcanvas_menus);
+
+  variable_set(TIETO_OFFCANVAS_MENU_ENABLED_MENUS_VARIABLE, $offcanvas_menus);
+
+  $links = variable_get(TIETO_OFFCANVAS_MENU_ENABLED_LINKS_VARIABLE, array());
+  variable_set(TIETO_OFFCANVAS_MENU_ENABLED_LINKS_VARIABLE, $links);
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function tieto_offcanvas_menu_uninstall() {
+  variable_del(TIETO_OFFCANVAS_MENU_ENABLED_MENUS_VARIABLE);
+  variable_del(TIETO_OFFCANVAS_MENU_ENABLED_LINKS_VARIABLE);
+}

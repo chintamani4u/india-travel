@@ -1,0 +1,10 @@
+7.x-1.0
+-------
+
+Someone add a smart description here
+
+7.x-1.1
+-------
+Added dependency for entitycache
+
+Added cache clear rules for entity cache

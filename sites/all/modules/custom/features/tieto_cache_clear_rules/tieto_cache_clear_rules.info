@@ -1,0 +1,13 @@
+name = Tieto Cache Clear Rules
+description = This Feature Provides Tieto Cache Clear Rules.
+core = 7.x
+package = Tieto.com
+version = 7.x-1.1
+project = tieto_cache_clear_rules
+dependencies[] = acquia_purge
+dependencies[] = cache_actions
+dependencies[] = entity
+dependencies[] = entitycache
+dependencies[] = rules
+features[features_api][] = api:2
+features[rules_config][] = rules_cache_clear

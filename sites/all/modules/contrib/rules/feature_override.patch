@@ -1,0 +1,12 @@
+--- modules/data.eval.inc	2014-07-31 19:00:38.610917300 +0530
++++ modules/data.eval.inc.new	2014-07-31 19:24:56.825204300 +0530
+@@ -137,6 +137,9 @@
+  */
+ function rules_data_list_info_alter(&$element_info, RulesAbstractPlugin $element) {
+   // Update the required type for the list item if it is known.
++  if (is_null($element->settings)) {
++   $element->settings = array();
++  }
+   $element->settings += array('list:select' => NULL);
+   if ($wrapper = $element->applyDataSelector($element->settings['list:select'])) {
+     if ($type = entity_property_list_extract_type($wrapper->type())) {

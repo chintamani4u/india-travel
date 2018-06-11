@@ -1,0 +1,14 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto industry hub page feature.
+ */
+
+include_once 'tieto_industry_hub_page.features.inc';
+
+function tieto_industry_hub_page_ctools_plugin_directory($owner, $plugin) {
+  if ($owner == 'ctools' && $plugin == 'content_types') {
+    return 'plugins/content_types';
+  }
+}
+

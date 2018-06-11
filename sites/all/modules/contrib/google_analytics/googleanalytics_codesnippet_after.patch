@@ -1,0 +1,21 @@
+diff --git a/googleanalytics.variable.inc b/googleanalytics.variable.inc
+index 36885de..7b17e84 100644
+--- a/googleanalytics.variable.inc
++++ b/googleanalytics.variable.inc
+@@ -20,6 +20,16 @@ function googleanalytics_variable_info($options) {
+     'validate callback' => 'googleanalytics_validate_googleanalytics_account',
+   );
+ 
++  $variables['googleanalytics_codesnippet_after'] = array(
++    'type' => 'string',
++    'title' => 'Code snippet (after)',
++    'default' => '',
++    'description' => 'This is custom snippet added after after _gaq.push([\'_trackPageview\'])',
++    'required' => FALSE,
++    'group' => 'googleanalytics',
++    'localize' => TRUE,
++    'validate callback' => '',
++  );
+   return $variables;
+ }
+ 

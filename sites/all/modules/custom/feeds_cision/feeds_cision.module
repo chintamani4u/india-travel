@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function feeds_cision_ctools_plugin_api($owner, $api) {
+  if ($owner == 'feeds' && $api == 'plugins') {
+    return array('version' => 1);
+  }
+}
+
+/**
+ * Implements hook_feeds_plugins().
+ */
+function feeds_cision_feeds_plugins() {
+  return array(
+    'FeedsCisionParser' => array(
+      'name' => t('Cision XML parser'),
+      'description' => t('Parse Cision XML.'),
+      'handler' => array(
+        'parent' => 'FeedsParser',
+        'class' => 'FeedsCisionParser',
+        'file' => 'FeedsCisionParser.inc',
+        'path' => drupal_get_path('module', 'feeds_cision'),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_hook_info().
+ */
+function feeds_cision_hook_info() {
+  $hooks = array(
+    'feeds_cision_sources_alter',
+    'feeds_cision_press_releases_alter',
+  );
+
+  return array_fill_keys($hooks, array('group' => 'feeds_cision'));
+}
+

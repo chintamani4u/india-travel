@@ -1,0 +1,149 @@
+/* Welcome to Compass. Use this file to write IE specific override styles.
+ * Import this file using the following HTML or equivalent:
+ * <!--[if IE]>
+ *   <link href="/stylesheets/ie.css" media="screen, projection" rel="stylesheet" type="text/css" />
+ * <![endif]--> */
+/*
+$icons-spacing: 20px;
+$icons-position: 50%;
+@import "icons/*.png";
+
+$large-spacing: 20px;
+$large-position: 50%;
+@import "icons/large/*.png";
+*/
+.node-type-tieto-campaign .pane-tieto-key-topics-key-topics-social-icons {
+  float: left;
+  display: inline-flex;
+  position: relative;
+  font-size: 1.8em;
+}
+.node-type-tieto-campaign .pane-tieto-key-topics-key-topics-social-icons a {
+  padding: 3px;
+}
+.node-type-tieto-campaign .pane-tieto-key-topics-key-topics-social-icons .key_topics_social_icons {
+  margin-left: 10px;
+}
+.node-type-tieto-campaign .pane-tieto-key-topics-key-topics-social-icons .pane-title {
+  font-size: 20px;
+}
+.node-type-tieto-campaign #block-menu-menu-customer-area {
+  display: none;
+}
+.node-type-tieto-campaign .region-footer {
+  background-color: #fff;
+}
+
+/* Career Subpages */
+/* All Open Jobs */
+.section-careers #header div.header-image {
+  background-position: center top;
+  background-size: cover;
+}
+@media all and (min-width: 1024px) {
+  .section-careers #header div.header-image {
+    background-position: center top;
+    background-size: 100% auto;
+  }
+}
+.section-careers.node-type-concept-page #header div.header-image {
+  position: relative;
+}
+
+/* All Open Jobs for .fi */
+.section-uramahdollisuudet #header div.header-image {
+  background-position: center top;
+  background-size: cover;
+}
+@media all and (min-width: 1024px) {
+  .section-uramahdollisuudet #header div.header-image {
+    background-position: center top;
+    background-size: 100% auto;
+  }
+}
+.section-uramahdollisuudet.node-type-concept-page #header div.header-image {
+  position: relative;
+}
+
+/* All Open Jobs for .se */
+.section-karriar #header div.header-image {
+  background-position: center top;
+  background-size: cover;
+}
+@media all and (min-width: 1024px) {
+  .section-karriar #header div.header-image {
+    background-position: center top;
+    background-size: 100% auto;
+  }
+}
+.section-karriar.node-type-concept-page #header div.header-image {
+  position: relative;
+}
+
+/* All Open Jobs for .ee*/
+.section-tieto-careers-open-jobs #header div.header-image {
+  background-position: center top;
+  background-size: cover;
+  position: relative;
+}
+@media all and (min-width: 1024px) {
+  .section-tieto-careers-open-jobs #header div.header-image {
+    background-position: center top;
+    background-size: 100% auto;
+  }
+}
+.section-tieto-careers-open-jobs.node-type-concept-page #header div.header-image {
+  position: relative;
+}
+
+.front .view-main-carousel {
+  clip-path: polygon(0 0, 100% 0, calc(100% + 80vh) 100%, 0 90%);
+}
+.front #header div.header-image {
+  background-color: white;
+}
+
+#page {
+  background-color: #62b3e5;
+}
+
+@media screen and (min-width: 992px) {
+  .color-slider {
+    background-color: transparent;
+  }
+
+  #block-tieto-offcanvas-menu-offcanvas-menu .menu__item span.button a, #block-tieto-offcanvas-menu-offcanvas-menu .menu__item span.button > span {
+    display: inline;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid transparent;
+    transition: border-color .2s;
+  }
+
+  #block-tieto-offcanvas-menu-offcanvas-menu .menu__item span.button a:hover, #block-tieto-offcanvas-menu-offcanvas-menu .menu__item span.button > span:hover {
+    border-bottom: 2px solid white;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+}
+@media all and (max-width: 760px) {
+  .key-topics-tiles-body img {
+    margin-left: 2px !important;
+    margin-right: 2px !important;
+  }
+}
+
+/* IE9- fixes */
+.lt-ie9 .node-type-key-topics .node-webform .webform-client-form .form-item label {
+  display: inline;
+  margin-bottom: 0.8em;
+}
+
+.msie.node-type-tieto-service-group-page .field-type-text-with-summary h2 {
+  clear: both;
+  display: block;
+}
+.msie.node-type-tieto-service-group-page .field-type-text-with-summary ul {
+  float: left;
+}

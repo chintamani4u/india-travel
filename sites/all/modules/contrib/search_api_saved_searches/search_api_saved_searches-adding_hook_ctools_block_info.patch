@@ -1,0 +1,23 @@
+diff --git a/search_api_saved_searches.module b/search_api_saved_searches.module
+index 4e0c242..d38fb59 100644
+--- a/search_api_saved_searches.module
++++ b/search_api_saved_searches.module
+@@ -479,6 +479,18 @@ function search_api_saved_searches_block_info() {
+ }
+ 
+ /**
++ * Implements hook_ctools_block_info().
++ *
++ * @see http://drupal.org/node/1669918
++ */
++function search_api_saved_searches_ctools_block_info($module, $delta, &$info) {
++  // Give the SAved Search blocks their own category.
++  $info['category'] = t('Search API Saved Searches');
++  // Allow blocks to be used before the search results in Panels.
++  $info['render last'] = TRUE;
++}
++
++/**
+  * Implements hook_block_configure().
+  */
+ function search_api_saved_searches_block_configure($delta = '') {

@@ -1,0 +1,17 @@
+NOTICE --- WHEN RECREATING THIS FEATURE, LINES 192-235 OF tieto_global_search.features.inc ARE CUSTOM. DONT REMOVE
+UNLESS YOU KNOW WHAT YOU'RE DOING!
+
+7.x-1.1
+-------
+
+Someone add a smart description here
+
+12.01.2014 -> recreated the feature in production
+
+26.02.2014 -> Added changes back to the feature.
+We have custom changes in tieto_global_search.features.inc lines 192-235 #pr 348
+
+TIET-1955 Recreated Global Search to allow Taxonomy category product development facet for tieto top stories,
+also this commit. This also includes the Panels update feature recreate.
+
+Pull request #379

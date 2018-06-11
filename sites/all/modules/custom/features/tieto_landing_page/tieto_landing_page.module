@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto landing page feature.
+ */
+
+include_once 'tieto_landing_page.features.inc';

@@ -1,0 +1,381 @@
+$primary_text_color:#505050;
+$link_color:#fff;
+$primary_background_color : #42A5F5;
+$primary_foreground_color : #fff;
+
+@mixin rect($width,$height, $background){
+		width: $width;
+		height: $height;
+		border: none;
+		background: $background;
+}
+@mixin thumbnail($dimension, $background){
+		@include rect($dimension, $dimension, $background);
+		border-radius: $dimension/2;
+}
+@function square-view-column($dimension){
+	 @return $dimension/4;
+}
+@mixin square-view-parent($dimension, $factor, $height){
+	$columns : square-view-column($dimension);
+	 width: $factor*$columns;
+	 height:0;
+	 padding-bottom:$factor * $columns * $height;
+	 @extend .blocks;
+	 text-align:center;
+	 margin:0;
+}
+@mixin square-view($dimension, $font-size){
+  width: $dimension;
+  height: 0;
+  padding-bottom:$dimension;
+  @extend .blocks;
+  margin:0;
+  font-size:$font-size;
+}
+.centre-align{
+  max-width:840px;
+  margin: 16px auto;
+}
+.blocks{
+  display: inline-block;
+  position: relative;
+  vertical-align: top;
+  margin-top: 10px; 
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+
+.col-3{
+ width:33%;
+ @extend .blocks;
+}
+
+.col-2{
+ width:48%;
+ @extend .blocks;
+}
+
+.col-1{
+	width:100%;
+	@extend .blocks;
+}
+
+
+#main{
+	max-width:100%;
+}
+.field-label{
+	display:none;
+}
+
+.career-container {
+
+	font-family: Arial, Helvetica, 'Nimbus Sans L', sans-serif;
+	.expand{
+		max-width:100%;
+	}
+	section{
+		@extend .centre-align;
+	}
+	
+    h2{
+		font-size: 32px;
+		padding:24px 0 0;
+		text-align:center;
+	}
+	
+	/* Job Suggestion View */
+	.job-section{
+		@extend .centre-align;
+		margin: 0 auto 16px auto;
+	}
+	.job_sugg{
+		background: #FFB74D;
+		width: 100%;
+		min-height: 440px;
+		color: #fff;
+		padding: 30px 0;
+		margin: 0;
+		box-sizing: border-box;
+		-webkit-box-sizing: border-box;
+		text-align:center;
+		
+		select{
+		/*background: #64B5F6;*/
+		color: #EF6C00;
+		border: 0;
+		}
+		
+		h2{
+		  margin-top:50px;
+		  font-size:2.6em;
+		}
+		
+		.views-widget{
+			padding: 10px 0;
+			font-size: 1.4em;
+			font-weight: 100;
+		}
+	}
+
+	.form-item {
+		margin-top: 20px;
+		margin-bottom: 20px;
+		display: inline-flex;
+	}
+	.job-list-section{
+		width:100%;
+		position:relative;
+		
+		h3{
+			margin:40% 0 0;
+			padding:0 16px;
+		}
+		.primary-parent{
+			@include square-view-parent(100%,1,2);
+		}
+		.secondary-parent{
+			@include square-view-parent(100%,2,1);
+		}
+		.primary{
+			@include square-view(100%,14px);
+		}
+		.secondary{
+			@include square-view(100%,24px);
+		}
+		a{
+			color:$link_color;
+		}
+	}
+	/* End of Job Suggestion View */
+	
+	/* Sub Menu CSS*/
+	.nav-menu{	
+		position: relative;
+		top: 470px;
+		width: 100%;
+		margin-top: -108px;
+	}
+	
+	.megamenu-block{
+	    display: block;
+		max-width: 100%;
+		margin: 8px auto;
+		height: 60px;
+		position: relative;
+		
+		.menu{
+		    width: 100%;
+			height: 100%;
+			position: relative;
+			text-align: center;
+		
+		}
+		
+		.menu__item{
+			    width: 130px;
+				height: 40px;
+				line-height: 40px;
+				
+				font-weight: 600;
+				text-align: center;
+				background: #0288D1;
+				display: inline-block;
+				font-size: 14px;
+				margin:1px;
+				
+				a{
+					color: $link_color;
+					text-transform: uppercase;
+				}
+		}
+	}
+	/* End of Sub Menu CSS*/
+	
+  .highlight-content{
+    @extend .centre-align;
+  }
+  
+  /* Team View CSS*/
+  .team-content{
+	
+	width: 70%;
+    display: block;
+    margin: 0 auto;
+	
+    .team-view{
+	  text-align:center;
+	  color:$primary_text_color; 
+	  
+		.title{
+			.text{
+				margin: 8px 0;
+				font-size:16px;
+			}
+			.desc{
+				font-size:14px;
+			}
+		}
+		.sub-title{
+			margin:16px 0;
+			.text{
+				font-size:14px;
+			}
+			.social-link{
+				display:inline-block;
+				margin:8px;
+				width:30px;
+				height:30px;
+				background:#B0BEC5;
+			}
+			
+		}
+	  .thumbnail{
+		@include thumbnail(100px, #607D8B);
+	  }
+	}
+  }
+  /* End of Team View CSS*/
+  
+  .highlight-view {
+		width: 100%;
+		min-height: 400px;
+		display: inline-block;
+		position: relative;
+		text-align: center;
+		 img{
+			width: 80%;
+			height: 350px;
+			vertical-align: bottom;
+			position: relative;
+			display: inline-block;
+			background: #42A5F5;
+			margin: 20px;
+		}
+    .h3 {
+	  margin:0;
+	  
+	  a{
+		  font-size: 14px;
+		  font-weight: 600;
+		  color: #000;
+		  margin: 0px;
+		  width: 100%; 
+		  font-size:18px;
+		color:#000;
+	  }
+	}
+  }
+  /* CSS For Cases */
+  .cases-content{
+  
+	.cases-view:nth-of-type(1){
+		margin-right:2%;
+	}
+	
+	h3{
+		margin:16px 0 32px 0;
+	}
+	span{
+		font-size:14px;
+	}
+	.large{
+		@include rect(100%, 250px,#E91E63);
+	}
+  }
+  /* End of CSS For Cases */
+  
+  /* CSS For Highlight List*/
+  .highlight-list {
+	width: 100%; 
+	margin-top: 30px;
+  
+	.thumbnail{
+		@include thumbnail(100px, #F57C00);
+	}
+	.image {
+		padding: 0 10px; 
+	}
+	
+	.content {
+		width: 40%; 
+		
+		span {
+		  font-size: 14px;
+		  font-weight: 200;
+		  color: #888; 
+		}
+	}
+	
+	.content h3{
+	  margin:0;
+	  a{
+		  font-size: 14px;
+		  font-weight: 600;
+		  color: #000;
+		  margin: 0px;
+		  width: 100%; 
+	  }
+	}
+	
+	.text-right {
+		text-align: right; 
+		@extend .blocks;
+	}
+  .text-left {
+    text-align: left; 
+	@extend .blocks;
+	}
+  .margin-right {
+    margin: 0 40% 0 0; 
+	@extend .blocks;
+	}
+   .margin-left {
+    margin: 0 0 0 40%; 
+	@extend .blocks;
+	}
+  }
+  /* End of CSS For Highlight List*/
+  
+}
+
+  
+  
+  
+.select-field{
+	display: inline-block;
+	vertical-align: top;
+	margin: 0 8px;
+	color:#0065a1;
+}
+.field-selector{
+	height: 40px;
+	overflow: hidden;
+	display: inline-block;
+	vertical-align: top;
+	z-index:1000;
+	cursor:pointer;
+	border-bottom:1px solid red;
+}
+.field-options{
+	height:40px;
+	display: block;
+	width:40px;
+	padding:16px;
+	background:#bbb;
+}
+.field-selected{
+	height:40px;
+	display: block;
+	width:auto;
+}
+.primary-button{
+	padding:8px 68px;
+	background: $primary_background_color;
+	color:$primary_foreground_color;
+	border:0;
+	display:block;
+	margin: 0 auto;
+}

@@ -1,0 +1,20 @@
+<?php
+
+function tieto_jobs_update_7003() {
+
+  $query = new entityFieldQuery();
+
+  $result = $query->entityCondition('entity_type', 'node')
+                  ->propertyCondition('type', 'tieto_jobs_vacancy')
+                  ->execute();
+
+  foreach(entity_load('node', array_keys($result['node'])) as $val) {
+
+    if(strtotime($val->field_jobs_date[LANGUAGE_NONE][0]['value2']) <= time()) {
+      $val->status = 0;
+
+      node_save($val);
+    }
+  }
+}
+

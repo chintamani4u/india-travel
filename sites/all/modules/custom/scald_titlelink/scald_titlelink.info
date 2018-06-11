@@ -1,0 +1,5 @@
+name = Scald Title + Link context
+description = Enables a display context to SCALD which presents atoms in title + link format.
+package = Scald
+core = 7.x
+dependencies[] = scald

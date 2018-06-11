@@ -1,0 +1,5 @@
+name = Scald Slideshare
+description = Provides Slideshare atoms linked to Slideshare Slideshows.
+package = Scald Providers
+core = 7.x
+dependencies[] = scald

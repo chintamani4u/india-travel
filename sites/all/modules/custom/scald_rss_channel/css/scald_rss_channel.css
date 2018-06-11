@@ -1,0 +1,9 @@
+.dnd-library-wrapper .editor-item .meta.type-rss {
+    background-image: url('../icons/rss.png');
+}
+.scald-menu .add-buttons .add-rss_channel {
+    background: url('../icons/rss.png') 50% 50% no-repeat;
+}
+.scald-menu .add-buttons .add-rss_channel:hover {
+    background-image: url('../icons/rss-color.png');
+}

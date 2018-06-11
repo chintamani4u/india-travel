@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Key Topics feature.
+ */
+
+include_once 'tieto_key_topics.features.inc';

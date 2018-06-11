@@ -1,0 +1,10 @@
+7.x-1.0
+-------
+
+This feature provides Tieto XML sitemaps.
+
+17.01.14 Recreated #PR 266
+
+12.03.2014 - Panels update made many features overridden #378
+
+Pull reuest #398 - recreated feature, as it got overriden after installing search 404 module

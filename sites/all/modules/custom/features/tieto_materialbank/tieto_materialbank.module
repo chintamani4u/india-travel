@@ -1,0 +1,112 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Materialbank feature.
+ */
+
+include_once 'tieto_materialbank.features.inc';
+
+/**
+ * Implements hook_file_default_types().
+ */
+/*
+function tieto_materialbank_file_default_types() {
+  return array(
+    'webpage' => (object) array(
+      'disabled' => FALSE,
+      'api_version' => 1,
+      'type' => 'webpage',
+      'label' => t('Webpage'),
+      'description' => t("An <em>Webpage</em> is a remote entity."),
+      'mimetypes' => array(
+        'text/html',
+      ),
+      'streams' => array(
+        'http',
+        'https',
+      ),
+    ),
+  );
+}*/
+
+/**
+ * Implements hook_preprocess_breadcrumb().
+ */
+function tieto_materialbank_preprocess_breadcrumb(&$vars) {
+  $page = page_manager_get_current_page();
+  if (isset($page['subtask']['name']) && $page['subtask']['name'] == 'material_bank') {
+    // Remove '[all items]' and whatever comes after.
+    $new = array();
+    $needle = '[' . t('all items') . ']';
+    foreach ($vars['breadcrumb'] as $key => $value) {
+      if (strpos($value, $needle) !== FALSE) {
+        break;
+      }
+      $new[$key] = $value;
+    }
+    $vars['breadcrumb'] = $new;
+  }
+}
+
+/**
+ * Extends hook_form_alter()
+ *
+ * Adding an extra validation for the scald_image provider; this is enough 
+ * currently as scald_image is the only provider that allows image files
+ */
+function tieto_materialbank_form_alter(&$form, &$form_state, $form_id){
+  if ($form_id == 'scald_atom_add_form_options' && ($form_state['scald']['atoms'][0]->provider == "scald_image" || $form_state['scald']['source'] == "scald_image")) {
+    $form['#validate'][] = 'tieto_materialbank_form_validate_2';
+  }
+}
+
+/**
+ * Extra validations for detecting broken images or cases when 
+ * the uploaded is file is not of the type suggested by the extension
+ *
+ * The extra validation is required because indexing breaks if the indexed
+ * entity includes a broken inline image
+ */
+function tieto_materialbank_form_validate_2($form, &$form_state){
+
+  // Load the file from the form state
+  $file = file_load($form_state['values']['atom0']['scald_thumbnail'][LANGUAGE_NONE][0]['fid']);
+
+  // Get the real path before applying any image or file operations
+  $wrapper = file_stream_wrapper_get_instance_by_uri($file->uri);
+  $path = $wrapper->getDirectoryPath() . "/" . file_uri_target($file->uri);
+
+  $orig_mime = mime_content_type($path);
+
+  $file_mime = $file->filemime;
+
+  // Set error if the file mimetype does not match
+  // NOTE: value returned by $file->filemime is not valid, it is not the real mimetype, file module grabs it from the extension
+  //       this is a bug which might get sorted soon; if it does, this function will need to be updated // Antti A, 28.11.2013
+  if ($orig_mime != $file_mime) {
+    form_set_error('asset_library', t('The file content does not match the extension, please choose another file'));
+  }
+  else {
+    
+    // If file mime matches the extension "detected" by drupal in the filemime, apply checks to make sure that the uploaded
+    // file is not broken; using imagecreate* for this, gd might be a better option in the future
+    if (substr_count($orig_mime, 'jpg') != 0 || substr_count($orig_mime, 'jpeg') != 0) {
+       $img = imagecreatefromjpeg($path);
+    }
+    else if (substr_count($orig_mime, 'png') != 0) {
+       $img = imagecreatefrompng($path);
+    }
+    else if (substr_count($orig_mime, 'gif') != 0) {
+       $img = imagecreatefromgif($path);
+    }
+    else {
+       $img = imagecreate($path);
+    }
+
+    // Set form error if the image create fails
+    if (!$img) {
+      form_set_error('asset_library', t('The uploaded file is broken. Please choose another file.'));
+    }
+  }
+}
+

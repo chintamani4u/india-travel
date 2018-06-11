@@ -1,0 +1,119 @@
+7.x-1.0-beta1
+-------------
+
+Says beta1 now...change to a stable release number
+
+7.x-1.1
+-------
+
+Converted the custom parser to comply with RSS, previously fetching was done from an XML feed.
+
+Rewrote the custom feeds importer and the taxonomy mapper presave hook in the same file,
+documented the code properly.
+
+All custom code involved in the feature can be found in the following locations:
+
+   tieto_jobs.feeds.inc                           -> presave and other alteration hooks (taxonomy mapper etc)
+   plugins/content_types/tieto_jobs_ireclinks.inc -> functions related to the adding and displaying the irec links
+   plugins/feeds/TietoJobsFetcher.inc             -> custom feeds importer for jobs
+   plugins/feeds/rss-test.xml                     -> test file for testing RSS import
+
+JIRA tasks involved in the update: TIET-1564 Change from XML to RSS feed for open jobs 
+Pull request: #184
+
+7.x-1.2
+-------
+
+Changed the order of fields and field settings in all open jobs view, removed organization and added job area instead.
+
+Fixed importer to import the description from under organization.
+
+Fixed importer to import multiple job locations for a vacancy.
+
+JIRA tasks:    TIET-1564 Change from XML to RSS feed for open jobs 
+               TIET-1605 Changes to what is displayed on All open jobs page
+               TIET-1627 On open jobs - add possibility to show multiple locations from RSS feed 
+Pull requests: #185, #188, #189, #202, #203
+
+7.x-1.3
+-------
+
+Added a function for removing jobs that have been removed from the RSS feed before their original expiration date.
+
+The function is located in tieto_jobs.module, tieto_cron().
+
+JIRA task:     TIET-1699 PROD: Remove jobs in tieto.com when they are removed from the RSS feed from iRecruitment 
+
+Pull request: #231
+
+06.12.2013 -> refactored the code, optimization and couple of checks added
+
+Pull request: #233
+
+14.01.2014 -> TIET-1706 added spaces infront pagers of Solr jobs view to kill translations on pagers this one view
+
+Pull request: #256
+
+15.01.2014 -> Changed variables in tieto_jobs.feed.inc to allow locations saving if not in the taxonomy TIET-1702
+Pull request: #257
+
+17.01.2014 -> Recreated the feature to match features api 2
+
+23.01.2014  
+TIET-1736 Change sorting and filtering of jobs on All open jobs page
+Added sorting on Published Date, Pull Request #273
+
+
+03.02.3014
+TIET-1827 Jobs: Saint-petersburg (capitalizing)
+Capitalized the city name, Pull Request #293
+
+7.x-1.4
+-------
+
+Added capability to import jobs with locations in multiple countries.
+
+TIET-1791 Get multiple countries into the jobs section
+
+Pull request #294
+
+7.x-1.5
+-------
+
+TIET-1755 Add job area + location "tag" filter
+
+Added templates for the job area and job location fields to make them into links, the templates are in the tietocom theme templates directory
+Pull request #305
+
+TIET-1838 - Checked a box in tieto jobs view to allow contextual filtering per country in tieto jobs carousel. Used on careers pages.
+Pull request #310
+
+TIET-1838 - Translations for "Job carousels" to work. There was a problem with recreating the feature and it using finnish words.
+Pull request #311
+
+TIET-1905 - Job location gone from the all open jobs (single job page)
+Pull request #330
+
+7.x-1.6
+-------
+
+TIET-1736 - Change sorting and filtering of jobs on All open jobs page 
+TIET-1753 - Add the country filter
+
+Added the default country filter for all countries except for the .com international. The idea is to by default filter the jobs by the country 
+when user comes to the "all open jobs" page. Implemented with hook_views_pre_view() in the tieto_jobs.module.
+
+TODO: Must make this compliant with the Ajaxified views if we choose to enable Ajax for the open jobs list.
+
+PR #340
+
+15.04.2014 - Recreated this feature to go with chosen module update #438
+
+7.x-1.7
+-------
+
+TIET-2335 - Autosubmit loading too early
+Added a JS file to replace the original on only these two pages.
+Autosubmit.js was loading too early and I modified it to work "on change".
+PR: #564
+

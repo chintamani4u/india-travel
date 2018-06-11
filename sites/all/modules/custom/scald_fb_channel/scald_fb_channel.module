@@ -1,0 +1,299 @@
+<?php
+/**
+* Implements hook_scald_atom_providers.
+* Tell Scald that we'll be providing some facebook atoms.
+*/
+function scald_fb_channel_scald_atom_providers() {
+  return array(
+    'fb_channel' => 'Facebook channel'
+  );
+}
+
+function scald_fb_channel_scald_add_form(&$form, &$form_state) {
+  $form['facebook_channel_identifier'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Facebook ID'),
+    '#description' => t('Example: 106682516063206'),
+    '#size' => 40,
+    '#maxlength' => 255,
+    '#default_value' => '',
+  );
+  $form['facebook_channel_num_items'] = array(
+    '#type' => 'select',
+    '#title' => t('Number of items'),
+    '#description' => t('Maximum number of Feed items to show in result-set.'),
+    '#options' => drupal_map_assoc(range(1, 100)),
+    '#default_value' => 1,
+  );
+}
+
+/**
+* Implements hook_scald_add_form_fill.
+*/
+
+//save values from the step 1 form to atom (so that can be used in step 2)
+function scald_fb_channel_scald_add_form_fill(&$atom, $form, $form_state) {
+  $identifier = scald_fb_channel_validate($form_state['values']['facebook_channel_identifier']);
+  $atom->base_id = $identifier;
+  $atom->data['facebook_channel_num_items'] = $form_state['values']['facebook_channel_num_items'];
+}
+
+#This is required so that values are saved when we edit the atom
+function scald_fb_channel_scald_update_atom($atom, $mode) {
+  $atom->data['facebook_channel_num_items'] = $atom->facebook_channel_num_items;
+}
+
+/*
+  * Implement hook_form_alter()
+  * This is step 2 form or edit
+  */
+function scald_fb_channel_form_alter(&$form, &$form_state, $form_id){
+  if ($form_id == 'scald_atom_add_form_options' && $form['atom0']['#bundle'] == "fb_channel") {
+    $wid = $form_state['scald']['atoms'][0]->base_id;
+    $numItems = $form_state['scald']['atoms'][0]->data['facebook_channel_num_items'];
+    
+    $form['base_id'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Facebook ID'),
+      '#description' => t('Example: 106682516063206'),
+      '#size' => 40,
+      '#maxlength' => 255,
+      '#default_value' => $wid,
+      '#required'     => TRUE,
+    );
+    $form['facebook_channel_num_items'] = array(
+      '#type' => 'select',
+      '#title' => t('Number of items'),
+      '#description' => t('Maximum number of Feed items to show in result-set.'),
+      '#options' => drupal_map_assoc(range(1, 100)),
+      '#default_value' => $numItems ,
+    );
+  }
+}
+
+function scald_fb_channel_validate($identifier){
+  return trim($identifier);
+}
+
+function scald_fb_channel_scald_prerender($atom, $context, $options, $mode) {
+  if ($mode == 'atom') {
+    if ($context != 'sdl_library_item') {
+      $query = $atom->data['facebook_channel_num_items'];
+      $items = scald_fb_channel_feed($atom,$query);
+      $atom->rendered->player =
+        theme('scald_fb_channel_player',
+          array('vars' =>
+            array('entries' => $items,)
+          ),
+        $atom->rendered->title = ''
+      );
+    }
+  }
+}
+
+
+
+/**
+ * Implements hook_scald_render().
+ */
+function scald_fb_channel_scald_render($atom, $context, $options = array()) {
+  //dsm($atom);
+  return $atom->rendered->player;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function scald_fb_channel_theme() {
+  return array(
+    'scald_fb_channel_player' => array(
+      'variables' => array('vars' => NULL),
+      'template' => 'scald_fb_channel_player'
+    ),
+  );
+}
+
+function scald_fb_channel_feed($atom,$num) {
+  $path = '';
+  $libName = "facebook-php-sdk";
+  libraries_load($libName);
+  if (($library = libraries_detect($libName)) && !empty($library['installed'])) { 
+    $fb = new facebook(array(
+      'appId' =>  '418317794929768', // get this info from the facebook developers page
+      'secret'=>  '4b0bed87a1cd077c0229fe1576371964' // by registering an app
+    ));
+
+    if(!empty($atom->base_id)) {
+      $path = $atom->base_id.'/feed';
+      $response = $fb->api($path,'GET');
+    }
+    $fb_data = array();
+    $i = 0;
+    if(!empty($response['data'])) {
+      foreach ($response['data'] as $entries) {
+        // this is maybe possible to limit in facebook api
+        if($i >= $num) {
+          break;
+        }
+        /*
+         * Facebook marks individual entries as pageid_postid so we
+         * will explode the value by '_' to get actual entry id
+         */
+        //TIET-1360 - Facebook feed objects give 404 
+        #$entryID = explode('_',$entries['id']);
+        $fb_data[$i]['id'] = $entries['id']; //entryID[1];
+        $fb_data[$i]['type'] = $entries['type'];
+        /*
+         * Status update is the default, but there might be cases when the latest status message is
+         * "User XXX likes their own link" with empty message.
+         */
+        $fb_data[$i]['title'] = $entries['message'] ? $entries['message'] : $entries['story'];
+        $fb_data[$i]['link'] = 'http://www.facebook.com/'.$entries['id'];
+        $fb_data[$i]['author'] = $entries['from']['name'];
+        $fb_data[$i]['publishedDate'] = $entries['created_time'];
+        $fb_data[$i]['contentSnippet'] = '';
+        //dsm($fb_data[$i]['type']);
+        if($fb_data[$i]['type'] != "status") {
+          $fb_data[$i]['link'] = 'http://www.facebook.com/'.$fb_data[$i]['id'];
+        }
+        try {
+          $postMore = $fb->api('/' . $fb_data[$i]['id'], 'GET', array('access_token' => $fb->getAccessToken()));
+          /* Override statusmessage */
+          switch ($fb_data[$i]['type']) {
+            case 'video':
+              $fb_data[$i]['title'] = $postMore['message'] ? $postMore['message'] : 'video' ;
+              //dsm($postMore);
+              break;
+            case 'link':
+              $fb_data[$i]['title'] = $postMore['name'] ? $postMore['name'] : 'link';
+              $fb_data[$i]['link'] = 'http://www.facebook.com/'.$postMore['id'];
+              //dsm($postMore);
+              break;
+
+            case 'event':
+              $fb_data[$i]['title'] = $postMore['name'] ? $postMore['name'] : 'event';
+              break;
+            case 'photo':
+              $fb_data[$i]['title'] = $postMore['name'] ? $postMore['message'] : 'photo';
+              $fb_data[$i]['link'] = $postMore['link'];
+              break;
+            case 'note':
+              $fb_data[$i]['title'] = $postMore['subject'] ? $postMore['subject'] : 'note';
+              break;
+            case 'offer':
+              $fb_data[$i]['title'] = $postMore['title'] ? $postMore['title'] : 'offer';
+              break;
+            default:
+              $fb_data[$i]['title'] = $postMore['message'];
+              break;
+          }
+      } catch (FacebookApiException $e) {
+          error_log($e->getType());
+          error_log($e->getMessage());
+        }
+        //TIET-1360 -  Show only status messages and Do not show comments
+        if( $fb_data[$i]['type'] == 'status' AND array_key_exists('story', $entries )  ){
+          unset($fb_data[$i]);
+        }
+        $i++;
+
+      }
+
+      $entries = $fb_data;
+
+    } else {
+      drupal_set_message('Facebook gives empty result. Check atom settings.');
+    }
+    if(!empty($entries)) {
+      $items = array();
+      foreach ($entries as $item) {
+        $items[] = scald_fb_channel_parse_item($item);
+      }
+    }
+    return $items;
+  }
+  else {
+    // Something went wrong while loading facebook library :(
+    $error = $library['error'];
+    $error_message = "Error: ".$error." ".$library['error message'];
+    drupal_set_message($error_message, 'error'); 
+  }
+}
+
+/**
+ * Analyze a feed item to extract interesting info.
+ * @param $item
+ *   An object of class DOMElement corresponding to an element of the feed.
+ * @return array
+ *   An abject containing various feed information.
+ */
+function scald_fb_channel_parse_item($item) {
+  /*
+   * Title
+   * Link
+   * Author
+   * PublishedDate
+   * ContentSnippet (teaser)
+   * Content (raw html)
+   * Categories (Array)
+   */
+  //dsm($item);
+  $info = new stdClass();
+  $info->title = $item['title'];
+  $info->link = $item['link'];
+  $info->author = $item['author'];
+  //make date timestamp
+  $info->publishedDate =  format_date(strtotime($item['publishedDate']),'tieto_date');
+  $info->contentSnippet = $item['contentSnippet'];
+  return $info;
+}
+
+
+
+/**
+ * Implements hook_scald_contexts(). Handles display of atoms
+ */
+function scald_fb_channel_scald_contexts() {
+  return array(
+    'fb_channel' => array(
+      'title' => t('Facebook channel'),
+      'description' => t('Provides a display context which shows feed in various ways'),
+      'render_language' => 'XHTML',
+      'parseable' => FALSE,
+      'formats' => array(
+        'fb_channel' => array(),
+      ),
+    )
+  );
+}
+
+/**
+ * Implementation of hook_entity_info_alter()
+ */
+function scald_fb_channel_entity_info_alter(&$entity_info) {
+  // Basic text
+  $entity_info['fieldable_panels_pane']['bundles']['fb_channel'] = array(
+    'label' => t('Add Facebook channel'),
+    'pane category' => t('Some'),
+    'pane top level' => TRUE,
+    'pane icon' => drupal_get_path('module', 'scald_fb_channel') . '/icons/facebook.png',
+    'admin' => array(
+      'path' => 'admin/structure/fieldable-panels-panes/manage/%fieldable_panels_panes_type',
+      'bundle argument' => 4,
+      'real path' => 'admin/structure/fieldable-panels-panes/manage/fb_channel',
+      'access arguments' => array('administer fieldable panels panes'),
+    ),
+  );
+}
+
+function scald_fb_channel_libraries_info(){
+   $libraries['facebook-php-sdk'] = array(
+    'name' => 'facebook-php-sdk',
+    'path' => 'src',
+    'files' => array(
+      'php' => array('facebook.php'),
+    ),
+    'version' => '3.0',
+  );
+  return $libraries;
+}

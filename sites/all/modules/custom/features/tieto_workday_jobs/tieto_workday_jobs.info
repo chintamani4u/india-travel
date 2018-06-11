@@ -1,0 +1,14 @@
+name = workday.com Tieto Jobs
+description = feeds importer to map workday xml to tieto_jobs_vacancy
+core = 7.x
+package = Features
+version = 7.x-1.0
+dependencies[] = ctools
+dependencies[] = feeds
+features[ctools][] = feeds:feeds_importer_default:1
+features[defaultconfig][] = user_default_permissions:clear workday_com_tieto_jobs feeds
+features[defaultconfig][] = user_default_permissions:import workday_com_tieto_jobs feeds
+features[defaultconfig][] = user_default_permissions:unlock workday_com_tieto_jobs feeds
+features[features_api][] = api:2
+features[feeds_importer][] = workday_com_tieto_jobs
+features_exclude[dependencies][defaultconfig] = defaultconfig

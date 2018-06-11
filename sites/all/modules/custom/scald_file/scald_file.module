@@ -1,0 +1,114 @@
+<?php
+
+/**
+ * @file
+ * Scald File is a Scald Atom Provider for Files.
+ */
+
+/*******************************************************************************
+ * SCALD HOOK IMPLEMENTATIONS
+ ******************************************************************************/
+
+/**
+ * Implements hook_scald_atom_providers.
+ */
+function scald_file_scald_atom_providers() {
+  return array(
+    'file' => 'File upload'
+  );
+}
+
+/**
+ * Implements hook_scald_add_form.
+ */
+function scald_file_scald_add_form(&$form, &$form_state) {
+  $form['file'] = array(
+    '#type' => 'managed_file',
+    '#title' => t('File'),
+    '#upload_validators' => array('file_validate_extensions' => array('pdf xls xlsx doc docx zip rar txt pps ppt pptx dsd eps')),
+    '#upload_location' => 'public://atoms/files/',
+  );
+}
+
+/*
+* Implement hook_form_alter()
+* This is step 2 or edit
+*/
+/*
+function scald_file_form_alter(&$form, &$form_state, $form_id){
+  if ($form_id == 'scald_atom_add_form_options' && ($form_state['#action'] == "/atom/add/file" || $form_state['storage']->atom->provider =="scald_file" )) {
+    array_unshift($form['#submit'], 'scald_file_form_submit');
+  }
+}
+*/
+
+/**
+ * Implements hook_scald_add_form_fill.
+ */
+function scald_file_scald_add_form_fill(&$atom, $form, $form_state) {
+  $file = file_load($form_state['values']['file']);
+  $atom->title = $file->filename;
+  $atom->base_id = $file->fid;
+  $atom->scald_file[LANGUAGE_NONE][0] = (array)$file;
+  $default_thumb = drupal_get_path('module', 'scald_file') . '/icons/document.png';
+  $atom->scald_tumbnail_source = $default_thumb;
+}
+
+/**
+ * Implements hook_scald_update_atom().
+ */
+function scald_file_scald_update_atom($atom, $mode) {
+  if ($mode == 'atom') {
+    if ($atom->scald_file){
+      $atom->base_id = $atom->scald_file[LANGUAGE_NONE][0]['fid'];
+    }
+  }
+}
+/**
+ * Implements hook_scald_fetch.
+ */
+function scald_file_scald_fetch($atom, $type) {
+  if ($type == 'atom') {
+    $file = file_load($atom->base_id);
+    $atom->base_entity = $file;
+    $atom->file_source = $file->uri;
+    if (!empty($atom->scald_thumbnail)) {
+      $atom->thumbnail_source = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+    }
+  }
+}
+
+
+/**
+ * Implements hook_scald_prerender().
+ */
+function scald_file_scald_prerender($atom, $context, $options, $mode) {
+  if ($mode == 'atom') {
+    if ($context != 'sdl_library_item') {
+      $vars = array(
+        'file_title' => $atom->title,
+        'file_url' => file_create_url($atom->scald_file[LANGUAGE_NONE][0]['uri']),
+      );
+      $atom->rendered->player = theme('scald_file_render', $vars);
+    }
+  }
+}
+
+
+/**
+ * Implements hook_theme.
+ */
+function scald_file_theme() {
+  return array(
+    'scald_file_render' => array(),
+  );
+}
+
+/**
+ * Render link to file
+ */
+
+function theme_scald_file_render($vars) {
+  $link = l($vars['file_title'], $vars['file_url'], array('attributes' => array('class' => 'scald_file'), 'html' => TRUE));
+  return "<p>" . $link . "</p>";
+}

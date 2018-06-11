@@ -1,0 +1,12 @@
+--- css/linkit_org.css	Wed Jan 28 14:24:02 2015
++++ css/linkit.css	Wed Jan 28 14:40:40 2015
+@@ -79,7 +79,9 @@
+   -moz-border-radius:5px;
+   -webkit-border-radius:5px;
+   border-radius:5px;
++  border: 1px solid #1f4a64;
+ }
++
+ 
+ .linkit-wrapper .ui-dialog-buttonpane {
+   display:none;

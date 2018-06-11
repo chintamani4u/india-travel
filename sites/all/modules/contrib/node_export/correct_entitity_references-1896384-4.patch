@@ -1,0 +1,143 @@
+diff --git a/node_export.module b/node_export.module
+index 8bdadb9..92e94f1 100755
+--- a/node_export.module
++++ b/node_export.module
+@@ -370,7 +370,6 @@ function node_export($nids, $format = NULL, $msg_t = 't') {
+   if (!empty($format_handlers[$format_handler]['#file']) && is_file($format_handlers[$format_handler]['#file'])) {
+     require_once $format_handlers[$format_handler]['#file'];
+   }
+-
+   $code_string = call_user_func(
+     $format_handlers[$format_handler]['#export_callback'],
+     $nodes,
+@@ -379,7 +378,6 @@ function node_export($nids, $format = NULL, $msg_t = 't') {
+ 
+   // Let modules modify the node code.
+   drupal_alter('node_export_encode', $code_string, $nodes, $format_handler);
+-
+   return array(
+     'success' => TRUE,
+     'output' => $code_string,
+@@ -439,6 +437,9 @@ function node_export_prepare_node(&$original_node) {
+   // Export file fields.
+   node_export_file_field_export($node, $original_node);
+ 
++  // Export taxonomy terms.
++  node_export_taxonomy_term_add_uuid($node, $original_node);
++
+   // Let other modules do special fixing up.
+   drupal_alter('node_export_node', $node, $original_node);
+ 
+@@ -566,7 +567,37 @@ function node_export_import($code_string, $msg_t = 't', $save = TRUE) {
+   drupal_alter('node_export_import', $nodes, $used_format, $save);
+   $new_nodes = array();
+   $messages = array();
++  if (module_exists('entityreference')) {
++    $entity_references = array();
++    $entity_original_uuids = array();
++  }
+   foreach ($nodes as $original_node) {
++    if (module_exists('entityreference') || module_exists('taxonomy')) {
++      $entity_references[$original_node->uuid] = array();
++      $field_list = field_info_instances("node",$original_node->type);
++      foreach ($field_list as $field_name => $info) {
++        $field_info = field_info_field($field_name);
++        $field_type = $field_info['type'];
++        // Compile list of entity references that need to be fixed later.
++        if ($field_type == 'entityreference') {
++          $entity_references[$original_node->uuid][$field_name] = $original_node->{$field_name};
++        }
++        // Fix taxonomy term references.
++        elseif ($field_type == 'taxonomy_term_reference') {
++          foreach($original_node->{$field_name} as $lang => $indexes) {
++            foreach ($indexes as $index => $value) {
++              if (isset($value['uuid'])) {
++                $tids = entity_get_id_by_uuid('taxonomy_term', array($value['uuid']));
++                if (!empty($tids[$value['uuid']])) {
++                  $original_node->{$field_name}[$lang][$index]['tid'] = $tids[$value['uuid']];
++                }
++              }
++            }
++          }
++        }
++        $entity_original_uuids[$original_node->nid] = $original_node->uuid;
++      }
++    }
+     $node = node_export_node_clone($original_node);
+ 
+     // Import file fields.
+@@ -598,6 +629,7 @@ function node_export_import($code_string, $msg_t = 't', $save = TRUE) {
+     if ($save) {
+       node_export_save($node);
+       $new_nodes[$node->nid] = $node;
++      $new_nids[$node->uuid] = $node->nid;
+       $messages[] = $msg_t("Imported node !nid: !node", array('!nid' => $node->nid, '!node' => l($node->title, 'node/' . $node->nid)));
+       $count++;
+     }
+@@ -607,6 +639,26 @@ function node_export_import($code_string, $msg_t = 't', $save = TRUE) {
+   }
+ 
+   if ($save) {
++    if (module_exists('entityreference')) {
++      foreach($entity_references as $uuid => $fields) {
++        $nid_to_update = $new_nids[$uuid];
++        foreach ($fields as $field_name => $field) {
++          foreach ($field as $lang => $indexes) {
++            foreach ($indexes as $index => $value) {
++              $old_id = $value['target_id']; // $entity_references[$uuid][$field_name][$lang][$index]['target_id'];
++              $new_uuid = $entity_original_uuids[$old_id];
++              if (isset($new_nids[$new_uuid])) {
++                $entity_references[$uuid][$field_name][$lang][$index]['target_id'] = $new_nids[$new_uuid];
++              }
++            }
++          }
++          $new_nodes[$nid_to_update]->{$field_name} = $entity_references[$uuid][$field_name];
++        }
++      }
++      foreach($new_nodes as $nid => $new_node) {
++        node_save($new_node);
++      }
++    }
+     drupal_alter('node_export_after_import', $new_nodes, $used_format, $save);
+     $messages[] = $msg_t("!count of !total nodes were imported.  Some values may have been reset depending on Node export's configuration.", array('!total' => $total, '!count' => $count));
+ 
+@@ -630,10 +682,8 @@ function node_export_import($code_string, $msg_t = 't', $save = TRUE) {
+       'format' => $used_format,
+     );
+   }
+-
+ }
+ 
+-
+ /**
+  * Save a node object into the database.
+  *
+@@ -967,6 +1017,28 @@ function node_export_format_handlers() {
+   return $format_handlers;
+ }
+ 
++/**
++ * Add UUIDs to taxonomy terms.
++ */
++function node_export_taxonomy_term_add_uuid(&$node, $original_node) {
++  $fields = field_info_instances('node', $node->type);
++  foreach($fields as $field_instance) {
++    // load field infos to check the type
++    $field = &$node->{$field_instance['field_name']};
++    $field_info = field_info_field($field_instance['field_name']);
++    $field_type = $field_info['type'];
++    if ($field_type == 'taxonomy_term_reference' && count($field)) {
++      foreach ($field as $lang => $indexes) {
++        foreach ($indexes as $index => $value) {
++          $tid = $value['tid'];
++          $uuid = uuid_get_uuid('taxonomy_term', 'tid', $tid);
++          $value['uuid'] = $uuid;
++          $field[$lang][$index] = $value;
++        }
++      }
++    }
++  }
++}
+ 
+ /**
+  * Handle exporting file fields.

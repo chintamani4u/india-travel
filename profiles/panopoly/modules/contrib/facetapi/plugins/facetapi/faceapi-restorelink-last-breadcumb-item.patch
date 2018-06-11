@@ -1,0 +1,29 @@
+--- url_processor_standard.inc	2014-06-13 14:45:47.383483500 +0530
++++ my.inc	2014-06-13 14:32:25.520219000 +0530
+@@ -94,6 +94,26 @@
+         $breadcrumb[] = l($value['#markup'], current_path(), array('query' => $query, 'html' => !empty($value['#html'])));
+       }
+     }
++
++    //restore link of last item of  breadcrumb before facet api modifies breadcrumb
++   
++    $menu_get_active_trail = menu_get_active_trail();
++    if (count($breadcrumb) > 2 ) {
++      
++      if ( !empty($menu_get_active_trail['1']['link_title'])) {
++      $breadcrumb[1] = l( $menu_get_active_trail['1']['link_title'], $menu_get_active_trail['1']['link_path'] );
++      } elseif ( !empty( $breadcrumb[1] ) ) {
++        $breadcrumb[1] = l( $breadcrumb[1], strtolower( $breadcrumb[1] ) );
++      }
++    }
++    
++    // fix for 3rd level breadcumb
++    if (count($breadcrumb) > 4 ) {
++      unset($breadcrumb[1]);
++      if ( !empty($menu_get_active_trail['1']['link_title'])) {
++        $breadcrumb[3] = l( $menu_get_active_trail['3']['link_title'], $menu_get_active_trail['3']['link_path'] );
++      } 
++    }
+     // Sets the breadcrumb trail with the keys and filters.
+     drupal_set_breadcrumb($breadcrumb);
+   }

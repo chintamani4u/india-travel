@@ -1,0 +1,6 @@
+name = Feeds Hugin Parser
+description = Parse a Hugin hexML file.
+package = Feeds
+dependencies[] = feeds
+files[] = FeedsHuginParser.inc
+core = 7.x

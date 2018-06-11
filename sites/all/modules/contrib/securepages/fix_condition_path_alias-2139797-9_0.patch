@@ -1,0 +1,26 @@
+From ca85a3a611717f102f4956b5894536b077eff9b3 Mon Sep 17 00:00:00 2001
+From: "[Freshbyte] Bogdan Negru" <bogdan.negru@freshbyte.ro>
+Date: Mon, 20 Jan 2014 13:12:24 +0200
+Subject: [PATCH] Fix condition which determines whether to call
+ drupal_get_path_alias or not.
+
+---
+ securepages.module | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/securepages.module b/securepages.module
+index 36cc329..dc35384 100644
+--- a/securepages.module
++++ b/securepages.module
+@@ -251,7 +251,7 @@ function securepages_match($path) {
+   if ($pages) {
+     $result = drupal_match_path($path, $pages);
+     if (!$result && function_exists('drupal_get_path_alias')) {
+-      $path_alias = isset($path_alias) ? drupal_get_path_alias($path) : $path_alias;
++      $path_alias = isset($path_alias) ? $path_alias : drupal_get_path_alias($path);
+       $result = drupal_match_path($path_alias, $pages);
+     }
+     if (!($secure xor $result)) {
+-- 
+1.8.4.msysgit.0
+

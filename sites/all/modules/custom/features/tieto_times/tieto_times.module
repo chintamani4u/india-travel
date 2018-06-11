@@ -1,0 +1,78 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Times feature.
+ */
+
+include_once 'tieto_times.features.inc';
+
+/**
+ * Implements hook_menu().
+ */
+function tieto_times_menu() {
+
+  $items = array();
+
+  // Set default value for tietotimes
+  $items['magazines/tietotimes'] = array(
+    'page callback' => array('tieto_times_tietotimes_default'),
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content'),
+  );
+  return $items;
+}
+
+/**
+ * Looks for the "lightest" weighted Tieto Times issue
+ * and redirects the user there.
+ */
+function tieto_times_tietotimes_default() {
+  // Get the vid of the tieto_times
+  $vocab = taxonomy_vocabulary_machine_name_load('magazines');
+  // Create a EFQ for getting the tid of the lightest term in tieto_times
+//fetch the taxonomy terms inside a particular vocabulary
+  $taxonomyQuery = new EntityFieldQuery();
+  $tid = db_query("SELECT t.tid FROM {taxonomy_term_data} t INNER JOIN {field_data_field_magazine_issue} i ON t.tid = i.field_magazine_issue_tid INNER JOIN {node} n ON i.entity_id = n.nid WHERE t.vid = :vid AND i.entity_type = 'node' AND i.bundle = 'magazine_article' AND n.status = 1 ORDER BY t.weight LIMIT 1", array(
+    ':vid' => $vocab->vid
+  ))->fetchObject();
+
+  // Make sure it's numeric
+  if (is_numeric($tid->tid)) {
+    drupal_goto('taxonomy/term/' . $tid->tid);
+  }
+}
+
+function tieto_times_form($form, &$form_state) {
+
+  $form = array();
+
+  global $base_url;
+
+  global $language;
+
+  $parent = taxonomy_get_parents(arg(2));
+
+  $terms = taxonomy_get_children(key($parent));
+
+  foreach($terms as $val) {
+
+    $path = taxonomy_term_uri($val);
+
+    if($val->language == $language->language) {
+
+      $options[$base_url . "/" . drupal_get_path_alias($path['path'])] = $val->name;
+    }
+  }
+
+  $arg = $base_url . "/" . drupal_get_path_alias(implode(arg(), '/'));
+
+  $form['select'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => $arg,
+    '#attributes' => array("id" => "edit-jump", "onchange" => "window.location.replace(jQuery(this).val());"),
+  );
+
+  return $form;
+}
+

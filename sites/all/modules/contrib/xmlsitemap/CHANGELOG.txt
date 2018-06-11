@@ -1,0 +1,5 @@
+
+XML Sitemap 7.x-2.x-dev
+-----------------------
+01June2016 : Module updated to 7.x-2.3 + xmlsitemap_language_change.patch added from previous module.
+

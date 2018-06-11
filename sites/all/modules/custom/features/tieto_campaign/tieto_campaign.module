@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto campaign feature.
+ */
+
+include_once 'tieto_campaign.features.inc';

@@ -1,0 +1,28 @@
+7.x-1.0-dev
+-----------
+
+Says dev now...feature is in a default state so no dev version, change to a stable release number
+
+7.x-1.1
+-----------
+
+Moved comma to fix TIET-1610. PR #193.
+Added rewrites to the highlight automatic view. Removed separator. If there's no address, there is no comma.
+
+
+7.x-1.2
+-----------
+
+Changed the rewrite in view: Highlights -> Event pane -> Address. Added a comma to fix one last comma issue.
+PR #194
+
+7.x-1.3
+-----------
+PR#262 Recreated to default in new features Api
+
+PR#393 Panels 3.4 update added new functionalities to views content panes and I removed the configuration related to this.
+This fixed the problems with /all links. TIET-1998
+
+PR#541 Allowed the user to have images in the manual carousel
+
+20.08.2014 -- Recreated feature to Add cross section Highlights #594 

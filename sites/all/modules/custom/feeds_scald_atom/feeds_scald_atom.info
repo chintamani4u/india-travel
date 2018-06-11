@@ -1,0 +1,9 @@
+name = Feed Scald Atom
+description = Create Scald atoms from feed
+package = Feeds
+dependencies[] = feeds
+dependencies[] = feeds_youtube
+dependencies[] = scald
+dependencies[] = scald_youtube
+files[] = FeedsScaldProcessor.inc
+core = 7.x

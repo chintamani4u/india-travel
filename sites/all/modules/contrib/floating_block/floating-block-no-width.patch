@@ -1,0 +1,24 @@
+diff --git a/floating_block.js b/floating_block.js
+index 2393f29..3c58340 100644
+--- a/floating_block.js
++++ b/floating_block.js
+@@ -71,6 +71,7 @@ Drupal.behaviors.blockFloat = {
+         // container. This ensures that when it's floated it will keep it's
+         // original width. There is no point using .css('width') as this will
+         // return the computed value so we might as well just set it.
++        $(block).width($(block).width());
+ 
+         // Add class to block to indicate that we're done and give
+         // Drupal.blockFloatTracker a certain way to identify the block.
+diff --git a/floating_block.js b/floating_block.js
+index 3c58340..2393f29 100644
+--- a/floating_block.js
++++ b/floating_block.js
+@@ -71,7 +71,6 @@ Drupal.behaviors.blockFloat = {
+         // container. This ensures that when it's floated it will keep it's
+         // original width. There is no point using .css('width') as this will
+         // return the computed value so we might as well just set it.
+-        $(block).width($(block).width());
+ 
+         // Add class to block to indicate that we're done and give
+         // Drupal.blockFloatTracker a certain way to identify the block.

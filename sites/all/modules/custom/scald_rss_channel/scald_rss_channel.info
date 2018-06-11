@@ -1,0 +1,16 @@
+name = Scald Rss  channel
+description = Scald your RSS and Atom feeds with Google Feeds API
+core = 7.x
+package = Tieto.com
+version = 7.x-0.1
+project = scald_rss_channel
+dependencies[] = atom_reference
+dependencies[] = ctools
+dependencies[] = features
+stylesheets[all][] = css/scald_rss_channel.css
+features[features_api][] = api:2
+features[field_base][] = field_rss_reference
+features[field_instance][] = fieldable_panels_pane-rss_channel-field_rss_reference
+files[] = scald_rss_channel.module
+files[] = scald_rss_channel.install
+files[] = scald_rss_channel.features.field.inc

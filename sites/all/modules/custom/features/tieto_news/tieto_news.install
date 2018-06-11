@@ -1,0 +1,25 @@
+<?php
+
+function tieto_news_install() {
+  variable_set('cision_subscription_unique_identifier', 'b199a0e9aa');
+  variable_set('cision_subscribe_url', 'http://publish.ne.cision.com/Subscription/Subscribe'); 
+  variable_set('nasdaq_subscribe_url', 'https://cns.omxgroup.com/cdsPublic/addDynamicSubscription.action');
+}
+
+function tieto_news_update_7104() {
+  $id = variable_get('subscriptionUniqueIdentifier', 0);
+  $cision_subscribe_url = variable_get('cision_subscribe_url', '');
+  $nasdaq_subscribe_url = variable_get('nasdaq_subscribe_url', '');
+
+  if ($id == 0) {
+    variable_set('cision_subscription_unique_identifier', 'b199a0e9aa');
+  }
+
+  if ($cision_subscribe_url == '') {
+    variable_set('cision_subscribe_url', 'http://publish.ne.cision.com/Subscription/Subscribe');
+  }
+
+  if ($nasdaq_subscribe_url == '') {
+    variable_set('nasdaq_subscribe_url', 'https://cns.omxgroup.com/cdsPublic/addDynamicSubscription.action');
+  }
+}

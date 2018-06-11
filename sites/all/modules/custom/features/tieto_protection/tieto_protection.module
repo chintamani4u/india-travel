@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the tieto_protection feature.
+ */
+
+include_once 'tieto_protection.features.inc';

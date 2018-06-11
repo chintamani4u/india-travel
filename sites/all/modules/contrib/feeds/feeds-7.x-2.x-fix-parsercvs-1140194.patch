@@ -1,0 +1,13 @@
+diff --git a/sites/all/modules/feeds/libraries/ParserCSV.inc b/sites/all/modules/feeds/libraries/ParserCSV.inc
+index 1c13dfe..e8cec48 100644
+--- a/sites/all/modules/feeds/libraries/ParserCSV.inc
++++ b/sites/all/modules/feeds/libraries/ParserCSV.inc
+@@ -214,7 +214,7 @@ class ParserCSV {
+       $currentField = '';
+       $fields = array();
+ 
+-      while ($currentIndex <= strlen($line)) {
++      while ($currentIndex <= drupal_strlen($line)) {
+         if ($quoted) {
+           $nextQuoteIndex = strpos($line, '"', $currentIndex);
+ 

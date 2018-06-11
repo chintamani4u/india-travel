@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Teleport feature.
+ */
+
+include_once 'tieto_teleport.features.inc';

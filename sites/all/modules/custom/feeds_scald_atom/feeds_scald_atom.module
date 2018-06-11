@@ -1,0 +1,28 @@
+<?php
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function feeds_scald_atom_ctools_plugin_api($owner, $api) {
+  if ($owner == 'feeds' && $api == 'plugins') {
+    return array('version' => 1);
+  }
+}
+
+/**
+ * Implements hook_feeds_plugins().
+ */
+function feeds_scald_atom_feeds_plugins() {
+  return array(
+    'FeedsScaldProcessor' => array(
+      'name' => t('Feed Scald Atom Processor plugin'),
+      'description' => t('Create a Scald atom from feed'),
+      'handler' => array(
+        'parent' => 'FeedsProcessor',
+        'class' => 'FeedsScaldProcessor',
+        'file' => 'FeedsScaldProcessor.inc',
+        'path' => drupal_get_path('module', 'feeds_scald_atom'),
+      ),
+    ),
+  );
+}

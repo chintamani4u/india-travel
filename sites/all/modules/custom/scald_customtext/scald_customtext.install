@@ -1,0 +1,51 @@
+<?php
+
+/**
+ * @file
+ * Scald Files Installation
+ */
+
+
+/**
+ * Implementation of hook_install().
+ */
+function scald_customtext_install() {
+  scald_add_type('customtext', 'Custom HTML', 'Custom HTML text block');
+}
+
+
+function scald_customtext_enable() {
+  field_cache_clear();
+  field_associate_fields('scald_customtext');
+
+  // Check if our field is not already created.
+  if (!field_info_field('field_atom_customtext')) {
+    $field = array(
+      'field_name' => 'field_atom_customtext',
+      'type' => 'text_long',
+    );
+    field_create_field($field);
+
+    // Create the instance on the bundle.
+    $instance = array(
+      'field_name' => 'field_atom_customtext',
+      'entity_type' => 'scald_atom',
+      'label' => 'Custom HTML',
+      'bundle' => 'customtext',
+      // If you don't set the "required" property then the field wont be required by default.
+      'required' => TRUE,
+      'settings' => array('text_processing' => 1),
+      'instance_settings' => array('text_processing' => 1),
+      'widget' => array(
+        'type' => 'text_textarea',
+      ),
+    );
+    field_create_instance($instance);
+  }
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function scald_customtext_uninstall() {
+}

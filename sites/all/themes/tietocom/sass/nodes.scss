@@ -1,0 +1,420 @@
+/**
+ * @file
+ * Node Styling
+ *
+ * Style anything that isn't in the $content variable.
+ */
+
+@import "base";
+
+
+.node { /* Node wrapper */
+
+  .preview & { /* Preview of the content before submitting new or updated content */
+    /* background-color: #ffffea; */ /* Drupal core uses a #ffffea background */
+  }
+
+  .node-title { /* Node title */
+  }
+
+  .user-picture { /* The picture of the node author */
+  }
+
+  .submitted { /* The "posted by" information */
+  }
+
+  .content { /* Node's content wrapper */
+  }
+
+  ul.links { /* Node links. See also the ul.links declaration in the pages.css. */
+  }
+
+}
+
+.node-promoted { /* A node that has been promoted to the front page */
+}
+
+.node-sticky { /* A sticky node (displayed before others in a list) */
+}
+
+.node-by-viewer { /* A node created by the current user */
+}
+
+.node-teaser { /* A node displayed as teaser */
+}
+
+article.view-mode-full { /* A nofe displayed in a full page */
+  width: 75%;
+}
+
+/*
+ * All nodes are given a node-FOO class that describes the type of content that
+ * it is. If you create a new content type called "my-custom-type", it will
+ * receive a "node-my-custom-type" class.
+ */
+
+.node-page { /* Page content node */
+}
+
+.node-article { /* Article content node */
+}
+
+.node-tieto-jobs-vacancy {
+	max-width: 745px;
+}
+
+
+.node-unpublished { /* Unpublished nodes */
+  /* background-color: #fff4f4; */ /* Drupal core uses a #fff4f4 background */
+
+  p.unpublished { /* The word "Unpublished" displayed underneath the content. */
+    @include unpublished-div;
+  }
+}
+
+
+.node-type-contact,
+.node-type-tieto-news-article,
+.node-type-cision-stock-exchange-releases {
+  .region-header {
+    // Compensate for the missing title on news pages
+    padding-bottom: 4em;
+  }
+}
+
+.section-tieto-times-issue {
+  #header {
+    margin-bottom: .5em;
+    margin-bottom: 0;
+  }
+}
+.node-type-magazine-article,
+.section-tieto-times-issue,
+.section-magazines{
+  .field-content.magazineheader img {
+    position: absolute;
+    top: -160px;
+  }
+  .view-tieto-times .view-header img{
+    position: absolute;
+    top: -110px;
+  }
+  #header {
+    .block-search, .block-menu, .block-menu-block, .block-tieto-megamenus {
+      //visibility: hidden;
+      display: none;
+    }
+    .region-header {
+      // Let's mimic the h1 title on other pages, Commented out for views implementation
+      height: $banner-font-size;
+      padding: 20px 59px 20px 0;
+      clear: both;
+    }
+    @include respond-to(handheld) {
+      .header-inner {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+      .region-header {
+        position: relative;
+      }
+    }
+  }
+  .breadcrumb {
+    display: none;
+  }
+  #main {
+    position: relative;
+  }
+}
+// Add a padding for all atom images
+.dnd-atom-wrapper.type-image {
+  padding: 10px;
+}
+/* JS adds a class to the last visible pane per column, use this class to make the rows appear equal height */
+.node-type-industry-hub-page {
+  .industryhub-column {
+    min-height: 0;
+    .panel-pane {
+      min-height: 1px;
+      .pane-content {
+        @include after-clearfix();
+      }
+    }
+  }
+  @include respond-to(narrow) {
+    .industryhub-container {
+      overflow: hidden;
+      .tieto-panel-styles-region, .tieto-pane-wrapper {
+        overflow: visible;
+      }
+      .panel-panel-inner {
+        position: relative;
+        .panel-pane {
+          margin-top: 4px;
+          margin-bottom: 0;
+          overflow: visible;
+          position: relative;
+        }
+      }
+    }
+  }
+}
+
+
+.newsroom-search ,#views-exposed-form-tieto-news-room-search-panel-pane-1{
+margin:0px;
+z-index: 1003;
+}
+
+.newsroom-search #news_search{
+padding-left: 7px;
+border:1px solid #B8DCF0;
+height: 35px;
+width: 240px;
+
+}
+.newsroom-search .search-icon{
+  color: #38A7E4;
+  margin-left: -25px;
+}
+
+.newsroom-search input::-webkit-input-placeholder {
+   color: #505050;
+}
+
+.newsroom-search input:-moz-placeholder { /* Firefox 18- */
+   color: #505050;
+}
+
+.newsroom-search input::-moz-placeholder {  /* Firefox 19+ */
+   color:#505050;
+}
+
+.newsroom-search input:-ms-input-placeholder {
+   color: #505050;
+}
+.newsroom-listing #edit-search-api-views-fulltext {
+  float:left;
+  padding-left: 7px;
+  border:1px solid #B8DCF0;
+  height: 35px;
+  width: 240px;
+}
+
+#views-exposed-form-tieto-news-room-search-panel-pane-1{
+	margin: 0px;
+    z-index: 1003;
+    padding-bottom: 0px;
+    margin-bottom: 15px;
+}
+
+/*newsroom related css*/
+
+.newsroom-wrapper {
+  .ajax-progress-throbber {  display: none;}
+  .news-title {
+    clear:both;
+    float:left;
+  }
+  .newsroom-section-one{
+	  .one-a .news-tile-title a, .one-b .news-tile-title a, .two-a .news-tile-title a, .two-b .news-tile-title a,.views-field-title a{
+		color:white;
+		&:hover {
+		  padding-bottom: 1px;
+	    text-decoration: none;
+		  border-bottom: 1px solid #FFF;
+		  background-color: transparent;
+		}
+	  }
+	  .one-a, .one-b, .two-a, .two-b {
+		  background-color: #63B3E3;
+		  color: white;
+	  }
+	  .one-a .pager li a, .one-b .pager li a, .two-a .pager li a, .two-b .pager li a,.news-tile-more a,.news-tile-mgr-transactions a {
+		  color:white !important;
+	  }
+  }
+  .newsroom-section-two .news-tile {
+	  background-color: #F8F8F8;
+	}
+  .newsroom-row {
+	  width:100%;
+	  clear:both;
+    display: table;
+    box-sizing: border-box;
+	  .news-tile-title{
+		padding:5px;
+		font-size: 14px;
+		line-height: 1.66667em;
+		text-transform: uppercase;
+		padding-left: 0;
+		a{color: #5e5e5e;}
+		}
+
+	  .tile-col-1{
+		  margin: 1px 0px 1px 0px;
+	    padding: 10px;
+	    min-height: 190px;
+	    }
+	  .tile-col-2{
+		  margin: 1px 0px 1px 0px;
+		  padding: 10px;
+		  min-height: 190px;
+		}
+
+		@media  (min-width: 800px) {.news-tile{  width:46%;} .tile-col-1{float:left;min-height: 208px;}.tile-col-2{float:right;min-height: 208px;}
+		}
+
+		@media  (max-width: 760px) {
+		.flex-nav-container{float:none;}
+		.flexslider .flex-control-nav {
+			bottom: -10px;
+		}}
+
+		@media only screen
+		and (min-width: 768px)
+		and (max-width: 1024px)
+		and (-webkit-min-device-pixel-ratio: 1) {
+			.tile-col-1{float:left;min-height: 208px;}
+			.tile-col-2{float:right;min-height: 208px;}
+		}
+
+		.yt-tile, .fb-tile{ height:300px;}
+		.news-tile{
+      clear:both;
+      margin: 0;
+      position: relative;
+      box-sizing: border-box;
+      width: 50%;
+      border-top: 1px solid #fff;
+      border-left: 1px solid #fff;
+      height: 100%;
+      display: table-cell;
+      float: none;
+      .view{
+        .element-invisible{
+          display: none;
+        }
+      }
+		  .views-field-field-release-date{margin-top:10px;font-size: 12px;}
+		  .view-content,.views-field views-field-body, .views-field-text{min-height:110px; margin-bottom: 10px;}
+		  .views-field-title{min-height: 80px;margin-top:5px;}
+		  .views-field-timestamp{font-weight: normal;font-size: 100%;}			#flexslider_views_slideshow_tieto_blogs-newsroom_blog,#flexslider_views_slideshow_tweets-newsroomblock{min-height:130px;}
+		  #flexslider_views_slideshow_news_room_fb_block-block{min-height: 214px;}
+		  a.flex-prev,a.flex-next,.pager-first,.pager-previous,.pager-next,.pager-last{display:none;}
+		  .item-list {
+			margin:0px;width: 90px;float: left;
+			  ul.pager {
+			   width: 90px;
+			   text-align: left;
+			   vertical-align: baseline;
+			   font-size:12px;
+			   clear: both;
+			   margin:0px;
+			   float: left;
+			    li{
+				   border-right: 1px solid #FFFFFF;background-color: transparent;
+           float: left;
+				}
+			    li.pager-next,li.pager-last,li.pager-first,li.pager-previous{
+				  border-right: 0px solid #FFFFFF;
+				}
+			    li.pager-current{
+				  background-color: transparent;
+				  line-height: 3px;
+			      display: inline-block;
+				}
+			    a{
+				  display: block;
+				  line-height: 3px;
+				  background-color: transparent;
+				  color: $primary-blue;
+				  font-weight: 700;
+				  &:hover {
+				 	color: $primary-red;
+					background-color: transparent;
+				    }
+				}
+			  }
+			}
+
+      &:first-child{
+        border-left: 0;
+      }
+		}
+		.news-tile-more{
+		  position: absolute;
+		  font-size: 12px;
+      right: 10px;
+      margin: 0;
+		}
+    .news-tile-mgr-transactions{
+      position: absolute;
+      font-size: 12px;
+      right: 10px;
+      margin-top: -23px;
+      .see-more{
+        float:right;
+      }
+		}
+		&:first-child{
+      .news-tile{
+        border-top: 0;
+      }
+    }
+   }
+
+}
+
+.view-id-tieto_news_solr_search .view-filters form { display:none; }
+
+.g-recaptcha{
+float: left;
+clear: both;
+}
+fieldset.captcha {
+ border-width:0 0 0 0 !important;
+ float:left;
+ clear:both;
+}
+.captcha .fieldset-legend {
+ display:none;
+}
+.captcha .fieldset-wrapper .fieldset-description {
+ padding-bottom:10px;
+}
+.webform-component--he-she,
+.webform-component--his-her{
+display: none;
+}
+#webform-client-form-108086 .form-radios .form-item {
+display:inline;
+}
+
+.view-dom-id-433d96601e29cc16dd0c25b93dab714d .views-field.views-field-field-phone-number {
+    display: none;
+}
+@media (max-width: 760px){
+  .newsroom-wrapper{
+    .newsroom-row{
+      display: block;
+      margin: 0;
+      border-top: 0;
+      clear: none;
+
+      .news-tile{
+        display: block;
+        width: 100%;
+        height: auto;
+        border-left: 0;
+      }
+
+      &:first-child{
+        .news-tile{
+
+        }
+      }
+    }
+  }
+}

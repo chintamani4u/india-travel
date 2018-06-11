@@ -1,0 +1,562 @@
+<?php
+/**
+ * @file
+ * Code for the Scald RSS channel feature.
+ */
+
+/**
+ * Implements hook_scald_atom_providers().
+ * Tell Scald that we'll be providing some RSS atoms.
+ */
+function scald_rss_channel_scald_atom_providers() {
+  return array(
+    'rss_channel' => 'RSS Feed'
+  );
+  // This code will never be hit, but is necessary to mark the string
+  // for translation on localize.d.o
+  t('RSS Channel');
+}
+
+/**
+ * Implements hook_scald_add_form().
+ * Step 1
+ */
+function scald_rss_channel_scald_add_form(&$form, &$form_state) {
+  $form['rss_channel_identifier'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Facebook ID, RSS or ATOM address'),
+    '#description' => t('For Facebook feeds, give only facebook ID (example: 106682516063206) other cases you may add your feed address. We support RSS, RSS2 and ATOM formats. '),
+    '#size' => 40,
+    '#maxlength' => 255,
+    '#default_value' => '',
+  );
+  $form['rss_channel_num_items'] = array(
+    '#type' => 'select',
+    '#title' => t('Number of items'),
+    '#description' => t('Maximum number of Feed items to show in result-set.'),
+    '#options' => drupal_map_assoc(range(1, 100)),
+    '#default_value' => 1,
+  );
+  $form['is_facebook'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Is Facebook Feed?'),
+    '#description' => t('We need special handling for facebook'),
+    '#options' => drupal_map_assoc(range(0, 1)),
+    '#default_value' => 0,
+  );
+}
+/*
+  * Implement hook_form_alter()
+  * This is step 2 or edit
+  */
+function scald_rss_channel_form_alter(&$form, &$form_state, $form_id){
+  if ($form_id == 'scald_atom_add_form_options' && $form['atom0']['#bundle'] == "rss_channel") {
+
+    /*
+     * Check if we are updating existing one or
+     * creating a new atom. Good way knowing the status is to check if the atom is fetched
+     */
+    $operation = $form_state['scald']['atoms'][0]->fetched;
+    if ($operation) {
+      //Atom is existing so use it's entity baseID as wid
+      $wid = $form_state['scald']['atoms'][0]->base_id;
+      $fb= $form_state['scald']['atoms'][0]->data['is_facebook'];
+      $num = $form_state['scald']['atoms'][0]->data['rss_channel_num_items'];
+      //dsm($form_state);
+    } else {
+      //We are just creating the atom
+      //$wid = $form_state['storage']->atom->base_id;
+      $wid = $form_state['scald']['atoms'][0]->base_id;
+      $fb = $form_state['scald']['atoms'][0]->data['is_facebook'];
+      $num = $form_state['scald']['atoms'][0]->data['rss_channel_num_items'];
+    }
+
+    $form['base_id'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Facebook ID, RSS or ATOM address'),
+      '#description' => t('For Facebook feeds, give only facebook ID (example: 106682516063206) other cases you may add your feed address. We support RSS, RSS2 and ATOM formats. '),
+      '#size' => 40,
+      '#maxlength' => 255,
+      '#default_value' => $wid,
+      '#required'     => TRUE,
+    );
+    $form['rss_channel_num_items'] = array(
+      '#type' => 'select',
+      '#title' => t('Number of items'),
+      '#description' => t('Maximum number of Feed items to show in result-set.'),
+      '#options' => drupal_map_assoc(range(1, 100)),
+      '#default_value' => $num,
+    );
+    $form['is_facebook'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Is Facebook Feed?'),
+      '#description' => t('We need special handling for facebook'),
+      '#options' => drupal_map_assoc(range(0, 1)),
+      '#default_value' => $fb,
+    );
+
+  }
+}
+/**
+ * Implements hook_scald_update_atom().
+ */
+function scald_rss_channel_scald_update_atom($atom, $mode) {
+  $atom->data['rss_channel_num_items'] = $atom->rss_channel_num_items;
+  $atom->data['is_facebook'] = $atom->is_facebook;
+}
+/**
+ * Implements hook_scald_add_form_fill().
+ * Lets create a configurable Atom, so administrator can deside how
+ * many items will be displayed in feed.
+ * Default is 4 from Google's point of view, but
+ * we will make it 30 and configurable.
+ */
+function scald_rss_channel_scald_add_form_fill(&$atom, $form, $form_state) {
+  // Get the identifier
+  $identifier = scald_rss_channel_validate($form_state['values']['rss_channel_identifier'], TRUE);
+  // Get RSS channel information
+  //dsm($identifier);
+  $infos = scald_rss_channel_information($identifier);
+  //dsm($infos);
+
+  $atom->base_id = $identifier;
+  $atom->title = $infos->title;
+
+  //Save num items into data
+
+  $atom->data['rss_channel_num_items'] = $form_state['values']['rss_channel_num_items'];
+  //Save num items into data
+  $atom->data['is_facebook'] = $form_state['values']['is_facebook'];
+
+
+  // Prefill the author
+  $atom->scald_authors[LANGUAGE_NONE][0] = array(
+    'tid' => 0,
+    'taxonomy_term' => (object) (array('name' => $infos->author))
+  );
+
+  // Prefill tags
+  if (isset($infos->tags)) {
+    $i = 0;
+    $tag_array = explode(" ", $infos->tags);
+    foreach ($tag_array as $tag) {
+      $atom->scald_tags[LANGUAGE_NONE][$i] = array(
+        'tid' => $i, // Beware, this is not a real tid, it's just an index
+        'taxonomy_term' => (object) (array('name' => $tag))
+      );
+      $i++;
+    }
+  }
+
+  // Download a copy of the tweet thumbnail. This makes it possible
+  // to do interesting manipulation with image styles presets.
+  $thumb = drupal_http_request($infos->thumbnail['src']);
+  $dir = 'public://rss';
+  if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
+    $dest = $dir . '/' . $infos->id . '.jpg';
+    $file = file_save_data($thumb->data, $dest);
+
+    if ($file) {
+      // Set the file status to temporary
+      $query = db_update('file_managed')
+        ->condition('fid', $file->fid)
+        ->fields(array('status' => 0))
+        ->execute();
+
+      $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
+    }
+  }
+}
+
+
+/**
+ * Implements hook_scald_fetch().
+ */
+function scald_rss_scald_fetch($atom, $type) {
+  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+  if (file_exists($file)) {
+    $atom->file_source = $atom->thumbnail_source = $file;
+  }
+  $atom->omit_legend = TRUE;
+}
+
+
+/**
+ * Implements hook_scald_prerender().
+ */
+function scald_rss_channel_scald_prerender($atom, $context, $options, $mode) {
+  if ($mode == 'atom') {
+    if ($context != 'sdl_library_item') {
+      /*
+      * Whe have general info for the Feed Description, but not yet
+      * any feed entries. Let's get them before passing them to theme layer.
+      * we might be kind of late, but do we have other options?
+      */
+      $query = $atom->data['rss_channel_num_items'];
+      $items = scald_rss_channel_feed($atom,$query);
+      $atom->rendered->player =
+        theme('scald_rss_channel_player',
+          array('vars' =>
+            array('entries' => $items,)
+          ),
+        $atom->rendered->title = ''
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function scald_rss_channel_theme() {
+  return array(
+    'scald_rss_channel_player' => array(
+      'variables' => array('vars' => NULL),
+      'template' => 'scald_rss_channel_player'
+    ),
+  );
+}
+
+/*
+ * Analyse RSS or ATOM feed with the help of Google Feeds API
+ * returned JSON object is converted into php Array and passed
+ * the individual feed items to parse item function.
+ * @param $id
+ *  The urlencoded atom base_id passed to Google Feed API
+ *  https://developers.google.com/feed/v1/jsondevguide
+ * @return array
+ *  An object containing feed items
+ */
+function scald_rss_channel_feed($atom,$num) {
+  /*
+   * Add some extra parameters
+   * @TODO investigate if we need to add ipaddress to query
+   * $ip = ip_address(); //userip=192.168.0.1
+   * This argument supplies the IP address of the end-user on whose behalf the request is being made.
+   * Google is less likely to mistake requests for abuse when they include userip.
+   * In choosing to utilize this parameter, please be sure that you're in compliance with any local laws,
+   * including any laws relating to disclosure of personal information being sent.
+   */
+  // if facebook
+
+  if($atom->data['is_facebook']) {
+    $path = '';
+    require_once("sites/all/libraries/facebook-php-sdk/src/facebook.php");
+
+    $fb = new facebook(array(
+      'appId' =>  '418317794929768', // get this info from the facebook developers page
+      'secret'=>  '4b0bed87a1cd077c0229fe1576371964' // by registering an app
+    ));
+    
+    if(!empty($atom->base_id)) {
+      $path = $atom->base_id.'/feed';
+      $response = $fb->api($path,'GET');
+    }
+    $fb_data = array();
+    $i = 0;
+    //dpr($response['data']);
+    if(!empty($response['data'])) {
+      foreach ($response['data'] as $entries) {
+        // this is maybe possible to limit in facebook api
+        if($i >= $num) {
+          break;
+        }
+        /*
+         * Facebook marks individual entries as pageid_postid so we
+         * will explode the value by '_' to get actual entry id
+         */
+        //TIET-1360 - Facebook feed objects give 404 
+        #$entryID = explode('_',$entries['id']);
+        $fb_data[$i]['id'] = $entries['id']; //entryID[1];
+        $fb_data[$i]['type'] = $entries['type'];
+        /*
+         * Status update is the default, but there might be cases when the latest status message is
+         * "User XXX likes their own link" with empty message.
+         */
+        $fb_data[$i]['title'] = $entries['message'] ? $entries['message'] : $entries['story'];
+        $fb_data[$i]['link'] = 'http://www.facebook.com/'.$entries['id'];
+        $fb_data[$i]['author'] = $entries['from']['name'];
+        $fb_data[$i]['publishedDate'] = $entries['created_time'];
+        $fb_data[$i]['contentSnippet'] = '';
+        //dsm($fb_data[$i]['type']);
+        if($fb_data[$i]['type'] != "status") {
+          $fb_data[$i]['link'] = 'http://www.facebook.com/'.$fb_data[$i]['id'];
+        }
+          try {
+            $postMore = $fb->api('/' . $fb_data[$i]['id'], 'GET', array('access_token' => $fb->getAccessToken()));
+            /* Override statusmessage */
+
+            switch ($fb_data[$i]['type']) {
+              case 'video':
+                $fb_data[$i]['title'] = $postMore['message'] ? $postMore['message'] : 'video' ;
+                //dsm($postMore);
+                break;
+              case 'link':
+                $fb_data[$i]['title'] = $postMore['name'] ? $postMore['name'] : 'link';
+                $fb_data[$i]['link'] = 'http://www.facebook.com/'.$postMore['id'];
+                //dsm($postMore);
+                break;
+
+              case 'event':
+                $fb_data[$i]['title'] = $postMore['name'] ? $postMore['name'] : 'event';
+                break;
+              case 'photo':
+                $fb_data[$i]['title'] = $postMore['name'] ? $postMore['message'] : 'photo';
+                $fb_data[$i]['link'] = $postMore['link'];
+                break;
+              case 'note':
+                $fb_data[$i]['title'] = $postMore['subject'] ? $postMore['subject'] : 'note';
+                break;
+              case 'offer':
+                $fb_data[$i]['title'] = $postMore['title'] ? $postMore['title'] : 'offer';
+                break;
+              default:
+                $fb_data[$i]['title'] = $postMore['message'];
+                break;
+            }
+            //dsm($postMore);
+          } catch (FacebookApiException $e) {
+            error_log($e->getType());
+            error_log($e->getMessage());
+          }
+        //TIET-1360 -  Show only status messages and Do not show comments
+        if( $fb_data[$i]['type'] == 'status' AND array_key_exists('story', $entries )  ){
+          unset($fb_data[$i]);
+        }
+        $i++;
+      }
+
+      $entries = $fb_data;
+
+    } else {
+      drupal_set_message('Facebook gives empty result. Check atom settings.');
+    }
+  } else {
+    $id = $atom->base_id;
+    $num = ($num ? $num : 4); //num=100, num=-1 for unlimited, Default is 4
+    try {
+      $rss_embed = drupal_http_request("https://ajax.googleapis.com/ajax/services/feed/load?v=1.0&q=" . urlencode($id).'&num='.$num);
+    } catch (Exception $e) {
+      watchdog('scald_rss_channel', $e->getMessage());
+      return FALSE;
+    }
+    $feed = json_decode($rss_embed->data, TRUE); //Decode the JSON object to php array
+
+    $entries = $feed['responseData']['feed']['entries'];
+  }
+  
+  if(!empty($entries)) {
+    $items = array();
+    foreach ($entries as $item) {
+      $items[] = scald_rss_channel_parse_item($item);
+    }
+  }
+  return $items;
+}
+
+/**
+ * Analyze a feed item to extract interesting info.
+ * @param $item
+ *   An object of class DOMElement corresponding to an element of the feed.
+ * @return array
+ *   An abject containing various feed information.
+ */
+function scald_rss_channel_parse_item($item) {
+  /*
+   * Title
+   * Link
+   * Author
+   * PublishedDate
+   * ContentSnippet (teaser)
+   * Content (raw html)
+   * Categories (Array)
+   */
+  $info = new stdClass();
+  $info->title = $item['title'];
+  $info->link = $item['link'];
+  $info->author = $item['author'];
+  //make date timestamp
+  $info->publishedDate =  format_date(strtotime($item['publishedDate']),'tieto_date');
+  $info->contentSnippet = $item['contentSnippet'];
+  return $info;
+}
+
+/**
+ * Parse a RSS Feed and check we get correct code
+ *
+ */
+function scald_rss_channel_validate($string, $check) {
+  $id = FALSE;
+  $string = trim($string);
+
+  if (preg_match("/^http/", $string)) {
+    // This string is a URL, most likely a shortened one. (http://dai.ly, http://bit.ly, etc...)
+    $response = drupal_http_request($string);
+    if ($response->code == 200 && isset($response->redirect_code) && ($response->redirect_code == 301 || $response->redirect_code == 302)) {
+      return scald_rss_channel_validate($response->redirect_url, $check);
+    }
+    $id = $string;
+  }
+  //dsm($id);
+  return $id;
+}
+
+/**
+ * Creates an atom based on a RSS Feed
+ * containing the text information.
+ * @param $text
+ *   Unique identifier of the Feed URL
+ * @return integer
+ *   Unique identifier of the new atom
+ */
+function scald_rss_channel_register($rss) {
+  // Fetch the needed information from Rss
+  if (is_object($rss)) {
+    $infos = $rss;
+  }
+  else {
+    $infos = scald_rss_channel_information($rss);
+  }
+
+  // Check if the rss channel has already been imported to prevent duplicate
+  $old = scald_rss_channel_already_imported($infos->id);
+  if ($old) {
+    return FALSE;
+  }
+
+  // Download a copy of the rss feed thumbnail. This makes it possible
+  // to do interesting manipulation with image styles presets.
+  //$thumb = drupal_http_request($infos->thumbnail['src']);
+  //$dir = 'public://rss';
+  //if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
+  //  $dest = $dir . '/' . $infos->id . '.jpg';
+  //  $file = file_save_data($thumb->data, $dest);
+  //}
+
+  // Create an atom
+  $atom = new ScaldAtom('rss_channel', 'scald_rss_channel', array(
+    'base_id' => $infos->id,
+    'title' => $infos->title,
+  ));
+
+  // And save it
+  $atom_sid = scald_atom_save($atom);
+  // Finally, return this id
+  return $atom_sid;
+}
+
+/**
+ * Checks if an Feed has already been imported, based on its id.
+ * @param $id
+ *   The RSS URL
+ * @return mixed
+ *   FALSE if the RSS was never imported.
+ */
+function scald_rss_channel_already_imported($id) {
+  $query = array('provider' => 'scald_rss_channel', 'base_id' => $id);
+  return scald_search($query, FALSE, TRUE);
+}
+
+/**
+ * Form element validation handler for RSS URL
+ *
+ */
+function scald_rss_channel_check_duplicate($element, &$form_state) {
+  $id = scald_rss_channel_validate($form_state['values']['identifier'], TRUE);
+  if (!$id) {
+    form_error($element, t('Invalid RSS channel'));
+  }
+  elseif (scald_rss_channel_already_imported($id)) {
+    form_error($element, t('RSS Feed already scalded.'));
+  }
+}
+
+/*
+ * Get general information about RSS feed using Google Feeds API
+ * https://developers.google.com/feed/v1/
+ * @param $id
+ *   Unique identifier of the feed
+ * @return object
+ *   Object containing all necessary info.
+ */
+
+function scald_rss_channel_information($id) {
+  //TODO Check if facebook?
+  try {
+    $channel = drupal_http_request("https://ajax.googleapis.com/ajax/services/feed/load?v=1.0&q=" . urlencode($id));
+  } catch (Exception $e) {
+    watchdog('scald_rss_channel', $e->getMessage());
+    return FALSE;
+  }
+  //dsm($channel->data);
+  $channeldata = $channel->data; //JSON OBJECT
+  $feed = json_decode($channeldata, TRUE);
+
+
+  $info = new stdClass();
+  // ID
+  $info->id = $id;
+  // Title == Feed Description (@username)
+  $info->title = drupal_substr($feed['responseData']['feed']['description'], 0, 127);
+  // Author
+  $info->author = $feed['responseData']['feed']['author'];
+  // Thumbnail
+  /*if ($channel->profile_image_url_https) {
+    // Artwork is always 50x50
+    $info->thumbnail = array(
+      'src'    => $channel->profile_image_url_https,
+      'width'  => 50,
+      'height' => 50,
+    );
+  }*/
+  $info->thumbnail = '';
+  // Tags are not available for screen_name or search term
+  $info->tags = '';
+  // License
+  $info->license = 'SC';
+
+  return $info;
+}
+
+
+/**
+ * Implements hook_scald_contexts().
+ */
+function scald_rss_channel_scald_contexts() {
+  return array(
+    'rss_channel' => array(
+      'title' => t('RSS channel'),
+      'description' => t('Provides a display context which shows feed in various ways'),
+      'render_language' => 'XHTML',
+      'parseable' => FALSE,
+      'formats' => array(
+        'rss_channel' => array(),
+      ),
+    )
+  );
+}
+
+/**
+ * Implements hook_scald_render().
+ */
+function scald_rss_channel_scald_render($atom, $context, $options = array()) {
+  return $atom->rendered->player;
+}
+/**
+ * Implementation of hook_entity_info_alter()
+ */
+function scald_rss_channel_entity_info_alter(&$entity_info) {
+  // Basic text
+  $entity_info['fieldable_panels_pane']['bundles']['rss_channel'] = array(
+    'label' => t('Add RSS channel'),
+    'pane category' => t('Some'),
+    'pane top level' => TRUE,
+    'pane icon' => drupal_get_path('module', 'scald_rss_channel') . '/icons/rss.png',
+    'admin' => array(
+      'path' => 'admin/structure/fieldable-panels-panes/manage/%fieldable_panels_panes_type',
+      'bundle argument' => 4,
+      'real path' => 'admin/structure/fieldable-panels-panes/manage/rss_channel',
+      'access arguments' => array('administer fieldable panels panes'),
+    ),
+  );
+}

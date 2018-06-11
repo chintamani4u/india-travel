@@ -1,0 +1,6 @@
+name = Tieto Mediasync
+description = Keeps Media entities in sync with scald atoms.
+package = Tieto.com
+core = 7.x
+dependencies[] = scald
+dependencies[] = media

@@ -1,0 +1,6 @@
+name = Scald File
+description = Allows the creation and edition of Files.
+package = Scald
+core = 7.x
+dependencies[] = scald
+stylesheets[all][] = scald_file.css

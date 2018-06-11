@@ -1,0 +1,13 @@
+7.x-1.0
+-------
+
+This feature provides management CV pages and related views and nodequeues.
+
+#260 Changed styling of management pages to provide fluent grid
+
+#261 Recreated this feature completely.
+
+#278 Added Proposed New Members page. Cloned a view pane to Tieto CV pages to add another nodequeue for management
+pages. https://www.tieto.com/about-us/management-tieto/proposed-members-page. TIET-1785 Also added a nodequeue.
+
+12.03.2014 - Panels update made many features overridden #378

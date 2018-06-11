@@ -1,0 +1,27 @@
+From fb64d12825f85631b5ca97e097aa7f372f52300e Mon Sep 17 00:00:00 2001
+From: "sachin.wable@tieto.com" <sachin.wable@tieto.com>
+Date: Wed, 27 Jan 2016 15:31:32 +0530
+Subject: [PATCH] Sharable tile URL
+
+---
+ docroot/sites/all/modules/contrib/addtoany/addtoany.module | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/docroot/sites/all/modules/contrib/addtoany/addtoany.module b/docroot/sites/all/modules/contrib/addtoany/addtoany.module
+index 26b92d4..c48c859 100644
+--- a/docroot/sites/all/modules/contrib/addtoany/addtoany.module
++++ b/docroot/sites/all/modules/contrib/addtoany/addtoany.module
+@@ -319,10 +319,10 @@ function _addtoany_create_button($node=NULL, $values=NULL) {
+     $link_url = url(current_path(), array('absolute' => 1));
+   }
+ 
++  $is_tile = count($node->field_key_topics_sections[LANGUAGE_NONE]);
++  if($node->type!=="key_topics" && $is_tile) {
++      $link_url = url(current_path(), array('absolute' => 1))."?nid=".$node->nid;
++  }
+   
+   $javascript = _addtoany_create_script(  $_addtoany_num, $link_name, $link_url);
+ 
+-- 
+1.8.3.msysgit.0
+

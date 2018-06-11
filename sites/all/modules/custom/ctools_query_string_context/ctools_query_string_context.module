@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file ctools_query_string_context.module
+ * Contains only one hook to define the CTools plugin directory.
+ */
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function ctools_query_string_context_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools' && ($plugin_type == 'contexts' || $plugin_type == 'relationships')) {
+    return $plugin_type;
+  }
+}
+

@@ -1,0 +1,25 @@
+diff --git a/docroot/sites/all/modules/contrib/globalredirect/globalredirect.module b/docroot/sites/all/modules/contrib/globalredirect/globalredirect.module
+index 961c1ce9a70f1f0e7087928b88c2669a1917840d..2d1694bb58e28563748e6c307857dbd79f0f3ade 100644
+--- a/docroot/sites/all/modules/contrib/globalredirect/globalredirect.module
++++ b/docroot/sites/all/modules/contrib/globalredirect/globalredirect.module
+@@ -171,11 +171,17 @@ function globalredirect_init() {
+           foreach ($all_languages as $l => $lang) {
+             // Only test for languages other than the current one.
+             if ($lang->language != $language->language) {
+-              $alias = drupal_get_path_alias($current_path, $lang->language);
++              $args = array(
++                ':source' => $current_path,
++                ':language' => $lang->language
++              );
++              $alias = db_query("SELECT alias FROM {url_alias} WHERE source = :source AND language = :language", $args)->fetchField();
++
+               // There is a matching language for this alias
+-              if ($alias != $current_path) {
++              if (!empty($alias) && $alias != $current_path) {
+                 if (isset($lang->domain)) {
+-                  drupal_goto($lang->domain . '/' . $alias, $options, 301);
++                  $options['language'] = $lang;
++                  drupal_goto($alias, $options, 301);
+                 }
+                 break;
+               }

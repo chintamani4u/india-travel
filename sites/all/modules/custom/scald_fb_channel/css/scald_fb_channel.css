@@ -1,0 +1,10 @@
+.dnd-library-wrapper .editor-item .meta.type-fb_channel {
+    background-image: url('../icons/facebook.png');
+}
+.scald-menu .add-buttons .add-fb_channel {
+    background: url('../icons/facebook.png') 50% 50% no-repeat;
+}
+.scald-menu .add-buttons .add-fb_channel:hover {
+    background-image: url('../icons/facebook.png');
+}
+

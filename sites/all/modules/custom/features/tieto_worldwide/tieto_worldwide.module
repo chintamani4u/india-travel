@@ -1,0 +1,288 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Worldwide feature.
+ */
+
+include_once 'tieto_worldwide.features.inc';
+/**
+ * @file
+ *
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function tieto_worldwide_menu() {
+  return array(
+    'admin/config/development/tieto-url-convert' => array(
+      'title' => 'Tieto URL convert',
+      'description' => 'Convert local/dev/stage/prod urls.',
+      'access arguments' => array('administer site configuration'),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('tieto_worldwide_admin_url_convert_form'),
+      'file' => 'includes/url_convert.admin.inc',
+    ),
+  );
+}
+
+/**
+ * Implements hook_local_default_languages_alter().
+ */
+function tieto_worldwide_locale_default_languages_alter(&$languages) {
+  ctools_include('environment', 'tieto_worldwide');
+  $domains = tieto_worldwide_environment_get_domains();
+  foreach (array_keys($languages) as $language) {
+    if (isset($domains[$language])) {
+      $languages[$language]['domain'] = $domains[$language];
+    }
+  }
+}
+
+function _tieto_worldwide_dsm($o) {
+  $is_debug = FALSE;
+  if ($is_debug) {
+    dsm($o);
+  }
+}
+
+/**
+ * Implementation of hook_page_build().
+ *
+ * Add necessary JS
+ * https://twitter.com/davereid/status/294554866649542657
+ */
+function tieto_page_build() {
+  $path = current_path();
+  if (path_is_admin($path)) {
+    drupal_add_js(drupal_get_path('module', 'tieto_worldwide') . '/js/tieto_worldwide.admin.js');
+  } //drupal_add_css(drupal_get_path('module', 'tieto_worldwide') . '/tieto_worldwide.css');
+}
+
+// Lisays 21.2.2013
+/*
+ * Implements locale_languages_overview_form_submit($form, &$form_state)
+ */
+function tieto_worldwide_languages_overview_form_submit() {
+  tieto_worldwide_sync_taxonomy();
+}
+
+function tieto_worldwide_multilingual_settings_changed() {
+  tieto_worldwide_sync_taxonomy();
+}
+
+
+function &_tieto_worldwide_get_by_language(&$arr, $language) {
+  foreach ($arr as $l) {
+    if ($l->language == $language) {
+      return $l;
+    }
+  }
+  return NULL;
+}
+
+
+/*
+* Run only once (No dublicate entries generate)
+* Check that termID never changes
+* If new language / site added, add it's term data to vocabulary
+* If language is removed, do not disable it term data (no delete)
+*
+* Example: (languages)
+*  en (Object) stdClass
+
+   language (String, 2 characters ) en
+   name (String, 18 characters ) .com international
+   native (String, 7 characters ) English
+   direction (String, 1 characters ) 0
+   enabled (String, 1 characters ) 1
+   plurals (String, 1 characters ) 0
+   formula (String, 0 characters )
+   domain (String, 17 characters ) www.tieto.com
+   prefix (String, 0 characters )
+   weight (String, 3 characters ) -10
+   javascript (String, 0 characters )
+*
+* Save object > name to language taxonomy
+* Save object > domain to sites taxonomy
+*/
+/* Implement Enabled language sync into taxonomy */
+function tieto_worldwide_sync_taxonomy() {
+  $languages = language_list('enabled');
+  // Fetch the languages vocabulary ID
+  $language_vid = db_query("SELECT vid FROM {taxonomy_vocabulary} WHERE machine_name = 'language'")
+    ->fetchField();
+  // Fetch the domains from sites vocabulary ID
+  $sites_vid = db_query("SELECT vid FROM {taxonomy_vocabulary} WHERE machine_name = 'sites'")
+    ->fetchField();
+
+  // get all languges of taxonomy
+  $tids = array();
+  $conditions = array('vid' => $language_vid);
+  $taxonomy_languages = taxonomy_term_load_multiple($tids, $conditions);
+
+  // get all sites of taxonomy
+  $tids = array();
+  $conditions = array('vid' => $sites_vid);
+  $taxonomy_sites = taxonomy_term_load_multiple($tids, $conditions);
+
+  // Loop all enabled languages trough and save its "name" value as taxonomyterm
+  foreach ($languages[1] as $key => $value) {
+    $term_lang = _tieto_worldwide_get_by_language($taxonomy_languages, $value->language);
+
+    // Create the term for languages
+    $term_data_language = array(
+      'vid' => (int) $language_vid,
+      'name' => $value->name,
+      'language' => $value->language,
+      'description' => '',
+      'format' => 'plain_text',
+      'tid' => isset($term_lang) ? $term_lang->tid : NULL,
+    );
+
+    if (1 == $value->enabled) {
+      taxonomy_term_save((object) $term_data_language);
+    }
+    // if disabled check if it exists, has tid
+    else {
+      if (isset($term_lang->tid)) // is ok to delete term?
+      {
+        // taxonomy_term_delete($term_lang->tid); delete
+      }
+    }
+
+    $term_site = _tieto_worldwide_get_by_language($taxonomy_sites, $value->language);
+
+    // Create the term for languages
+    $term_data_site = array(
+      'vid' => (int) $sites_vid,
+      'name' => $value->domain,
+      'language' => $value->language,
+      'description' => '',
+      'format' => 'plain_text',
+      'tid' => isset($term_site) ? $term_site->tid : NULL,
+    );
+
+    // Create the term for sites
+    if (1 == $value->enabled) {
+      taxonomy_term_save((object) $term_data_site);
+    }
+    // if disabled check if it exists, has tid
+    else {
+      if (isset($term_site->tid)) // is ok to delete term?
+      {
+        taxonomy_term_delete($term_site->tid); // no delete
+      }
+    }
+  }
+  // Get the vocabulary ID.
+}
+/**
+ * Implementation of hook_node_presave().
+ *
+ *
+ */
+function tieto_worldwide_node_presave($node) {
+
+  // Include pathauto.inc to get pathauto_cleanstring working
+  module_load_include('inc', 'pathauto', 'pathauto');
+  // Check if custom URL alias field is empty
+  if(empty($node->field_url_title[LANGUAGE_NONE][0]['value'])) {
+    // Use primarily the meta title (window title) and secondarily the node title
+    $title = (isset($node->field_meta_title['und'][0]['safe_value'])) ? $node->field_meta_title['und'][0]['safe_value'] : $node->title;
+    // We will force the transliterated title here
+    $node->field_url_title[LANGUAGE_NONE][0]['value'] = pathauto_cleanstring($title);
+  }
+  else {
+    // Transliterate the given URL alias here.
+    $node->field_url_title[LANGUAGE_NONE][0]['value'] = pathauto_cleanstring($node->field_url_title[LANGUAGE_NONE][0]['value']);
+  }
+  // Check if the url title is actually different than the last part of the current alias
+  if(substr($node->path['alias'], (strrpos($node->path['alias'], '/')+1)) != $node->field_url_title[LANGUAGE_NONE][0]['value']) {
+    // If it is, let pathauto know that it needs to be regenerated
+    $node->path['pathauto'] = TRUE;
+  }
+}
+
+/*
+ * returns additional information about languages in use
+ */
+function tieto_worldwide_get_languages() {
+  return array(
+    'cs' => array('tieto.cz'),
+    'da' => array('tieto.dk'),
+    'de' => array('tieto.de'),
+    'de-at' => array('tieto.at'),
+    'en' => array('tieto.com'),
+    'en-in' => array('tieto.in'),
+    'et' => array('tieto.ee'),
+    'fi' => array('tieto.fi'),
+    'fil' => array('tieto.ph'),
+    'lt' => array('tieto.lt'),
+    'lv' => array('tieto.lv'),
+    'nl' => array('tieto.nl'),
+    'nn' => array('tieto.no'),
+    'pl' => array('tieto.pl'),
+    'ru' => array('tieto.ru'),
+    'sv' => array('tieto.se'),
+    'zh-hans' => array('tieto.cn'),
+  );
+}
+
+/**
+ * Implements hook_menu_link_alter().
+ */
+#TIET-1854 Add nofollow to the country selector links
+#save value of new checkbox no follow for the links
+function tieto_worldwide_menu_link_alter(&$item, $menu) {
+  if (isset($item['nofollow'])){
+    $item['options']['attributes']['rel'] = "nofollow";
+  }
+  else {
+    unset($item['options']['attributes']['rel']);
+  }
+}
+
+/**
+ * Implements hook_form_menu_edit_item_alter().
+ */
+#TIET-1854 Add nofollow to the country selector links
+#Add no follow checknbox to link edit form
+function tieto_worldwide_form_menu_edit_item_alter(&$form, $form_state) {
+  $no_follow_checked = false;
+  //check if form is being edited and no follow is already set
+  if($form['mlid']['#value'] != 0){
+    if(isset($form['options']['#value']['attributes']['rel']) && $form['options']['#value']['attributes']['rel'] == "nofollow" ) {
+      $no_follow_checked = true;
+    }
+
+  }
+  $form['nofollow'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('No Follow'),
+    '#description' => t("Enable this to set no follow attribute on this link, this will tell search engines not to follow this link. No follow will not be applied on front pages"),
+    '#default_value' => $no_follow_checked,
+  );
+}
+
+/**
+ * Implements hook_page_alter().
+ */
+#TIET-1854 Add nofollow to the country selector links
+#we dont want rel=nofollow on front pages, so unsetting it here
+function tieto_worldwide_page_alter(&$page){
+  $url = request_uri();
+  //Unset rel=nofollow only for front pages
+  if($url == "" || $url == "/"){
+    foreach($page['header']['menu_menu-tieto-worldwide'] as $menuKey => $menu){
+      if($menu['#title'] == "Tieto websites:"){
+        foreach($menu['#below'] as $linkKey => $link){
+          if(is_array($link)){
+            unset($page['header']['menu_menu-tieto-worldwide'][$menuKey]['#below'][$linkKey]['#localized_options']['attributes']['rel']);
+          }
+        }
+        break;
+      }
+    }
+  }
+}

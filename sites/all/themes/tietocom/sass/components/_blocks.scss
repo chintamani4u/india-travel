@@ -1,0 +1,288 @@
+/**
+ * @file
+ * Block Styling
+ */
+// This needs refactoring
+
+.block {
+  /* Block wrapper */
+  @include trailer();
+
+  &.first {
+    /* The first block in the region */
+  }
+
+  &.last {
+    /* The last block in the region */
+  }
+
+  &.odd {
+    /* Zebra striping for each block in the region */
+  }
+
+  &.even {
+    /* Zebra striping for each block in the region */
+  }
+
+  h2.block-title {
+    /* Block title */
+  }
+}
+
+#header {
+  .region-header-image, .region-header {
+    a {
+      color: $white;
+    }
+    .contextual-links-wrapper a {
+      color: inherit;
+    }
+  }
+}
+
+.header-mainmenu {
+  .block-menu-block {
+    &.contextual-links-region {
+      position: static;
+    }
+  }
+}
+
+
+.header-inner {
+  .block {
+    margin-bottom: 0;
+    //z-index: 40;
+  }
+
+  .logo {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-left: 14px;
+    width: 100%;
+    pointer-events: none;
+
+    a {
+      pointer-events: auto;
+      cursor: pointer;
+    }
+
+    img {
+      margin: 5px 0;
+    }
+
+    &::after {
+      transform: $tieto-logo-transform;
+      will-change: transform, width;
+
+      background: $primary-light-blue;
+      content: " ";
+      position: absolute;
+      display: block;
+      z-index: -1;
+
+      top: -84px;
+      left: -60px;
+
+      width: 200px;
+      height: 200px;
+    }
+
+    &.not-fixed {
+      z-index: 502;
+      @include respond-to(handheld) {
+        z-index: 501;
+      }
+
+      &::after {
+        transition: width .2s, transform .2s ease .2s;
+        transform: $tieto-logo-transform;
+      }
+    }
+
+    &.fixed {
+      z-index: 501;
+
+      &::after {
+        transition: transform .2s, width .2s ease .2s;
+        transform: rotate(0) skew(0) translate3d(60px, -40px, 0);
+        width: 100%;
+      }
+    }
+
+    // Make horizontal bar and logo smaller on mobile
+    @include respond-to(handheld) {
+      &::after {
+        top: -105px;
+      }
+      &.not-fixed {
+        &::after {
+          width: 100%;
+          transform: rotate(0) skew(0) translate3d(60px, -40px, 0);
+        }
+      }
+
+      img {
+        width: 80px;
+        height: 53px;
+        margin: 0;
+      }
+    }
+  }
+
+  #block-menu-menu-customer-area .show-header-block {
+    z-index: 50;
+    left: 33px;
+    @include respond-to(handheld) {
+      left: 21px;
+    }
+  }
+  .block-tieto-megamenus {
+    z-index: 30;
+  }
+}
+
+#block-tieto-megamenus-megamenu {
+  padding: 5px 0;
+
+  .length-1 li.megamenu-link.last:after,
+  .length-2 li.megamenu-link.last:after,
+  .megamenu-margin {
+    background-color: $white;
+    height: 1em;
+    position: absolute;
+  }
+
+  .length-1, .length-2 {
+    li.megamenu-link.last:after {
+      bottom: -6px;
+      content: "";
+    }
+  }
+  .length-1 li.megamenu-link.last:after {
+    width: 200%;
+  }
+
+  .length-2 li.megamenu-link.last:after {
+    width: 100%;
+  }
+
+  .megamenu-margin {
+    bottom: -1px;
+  }
+
+  .megamenu-left {
+    right: 5px;
+    margin-right: 100%;
+  }
+
+  .length-1 li.megamenu-link.last:after,
+  .length-2 li.megamenu-link.last:after,
+  .megamenu-right {
+    left: 5px;
+    margin-left: 100%;
+  }
+}
+
+body.search-block-active .header-image {
+  background-image: none;
+  .region {
+    visibility: hidden;
+  }
+}
+
+#block-search-form {
+  /* "Search form" block */
+  .header-block-content {
+    display: block;
+    top: 0;
+    padding: 1em;
+    .search-block-link {
+      a {
+        display: block;
+      }
+    }
+    form {
+      display: none;
+    }
+  }
+
+  @include respond-to(narrow) {
+    a.home-link {
+      display: none;
+    }
+  }
+}
+
+// Search block form that has been cloned in own element as an overlay
+#tieto-lightbox #search-block-form {
+  label {
+    // need to find why this label is marked "element-invisible"
+    clip: auto;
+    height: auto;
+    overflow: auto;
+    position: static !important;
+    // end element-invisible override
+
+    color: $header-font-color;
+    display: block;
+    font-weight: normal;
+    margin: 0.5em 0;
+  }
+
+  @include title-font();
+  @include adjust-font-size-to($banner-font-size);
+  margin: 64px 64px 64px 0;
+  position: relative;
+  @media all and (max-width: 560px) {
+    width: 100%;
+    margin: 0 64px 64px 0;
+  }
+
+  input.form-text {
+    border: 2px solid $primary-blue;
+    background: 0 none;
+    display: block;
+    height: 60px;
+    box-sizing: border-box;
+    @media all and (max-width: 560px) {
+      width: 78%;
+    }
+  }
+  .form-actions {
+    input.form-submit {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      border: 0 none;
+      width: 48px;
+      height: 60px;
+      text-indent: 999px;
+      background: transparent url("../images/search_48.png") no-repeat left center;
+      margin-right: -64px;
+      padding: 0;
+      @media all and (max-width: 560px) {
+        margin-right: 0;
+      }
+    }
+  }
+}
+// slider of careers page careers team
+#flexslider_views_slideshow_main_careers_team-block_1 {
+  .flexslider {
+    .slides{
+      li{
+        text-align: center;
+        img {
+          width: 100% !important;
+        }
+      }
+    }
+    .slide-item {
+      padding-left: 0%;
+      width: 33%;
+    }
+  }
+}

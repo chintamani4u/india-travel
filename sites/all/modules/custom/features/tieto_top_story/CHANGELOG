@@ -1,0 +1,20 @@
+7.x-1.0-beta2
+--------------
+
+Says beta2 now...change to a stable release number
+
+7.x-1.0
+-------------
+TIET 1620 - Change to local names on header titles for News, Events and Top Stories 
+Pull request #209 - Added t() to  tieto top story page display title
+
+PR#271 Recreated this feature to fit API:2
+
+12.03.2014 - Panels update made many features overridden #378
+
+12.03.2014 - Added facet config for additional taxonomy to top story content #380
+
+12.03.2014 - Added facet config for ordering of newly added taxonomy of top story content #384
+
+07.04.2014 - Changed the breadcrumb alter in the module file to work dynamically on all languages. It is now getting
+the url of the node and removing the last part of the url to make it work correctly. #422

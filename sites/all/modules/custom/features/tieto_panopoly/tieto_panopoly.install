@@ -1,0 +1,11 @@
+<?php
+
+/*
+ * Impelments hook_update
+ * TIET-1991 - Fixes this error 'Image resize threshold of 10 remote images has been reached. Please use fewer remote image'
+ * 
+ */
+function tieto_panopoly_update_7104() {
+  variable_set('image_resize_filter_threshold', 500);
+  
+}

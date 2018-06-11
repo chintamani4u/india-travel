@@ -1,0 +1,140 @@
+<form action="#" method="post" name="releases-subscribe-form" id="releases-subscribe-form">
+							<h1>Subscribe releases</h1>
+							<div class="content report">				
+								<div class="form-leave-comment">
+									<div>
+										<label for="f_name">Name *
+										<span class="error" id="nameMissing">You haven’t entered a name. Please tell us who we need to subscribe.</span></label>
+										<input type="text" title="First name and Last name" value="First name and Last name" name="f_name" id="f_name" class="hidableInfo">
+									</div>
+									
+									<div>
+										<label for="email">Email address *
+										<span class="error" id="emailMissing">You haven’t entered an email address. Please enter the email address subscription.</span>
+										<span class="error" id="emailAddresNotValid">The entered email address doesn’t seem to be valid. Please check the email address.</span>
+										</label>
+										<input type="text" title="Email address" value="Email address" name="email" id="email" class="hidableInfo">
+									</div>
+									
+									<div>
+										<label for="organization">Organization</label>
+										<input type="text" title="Company or Organization name" value="Company or Organization name" id="organization" class="filled hidableInfo">
+									</div>
+
+									<div class="form-selection">							
+										<label for="all-releases">Subscribe to *
+										<span class="error" id="languageMissing">You haven’t selected any option to subscribe. Please specify also in which language(s) you want to receive emails.</span></label>		
+										
+										<div class="selection-field-area field-area-selected">
+											<a class="eventcheck radio eventchecked" href="#" id="all-releases">
+												<input type="radio" checked="checked" value="press-and-stock" id="press-and-stock">Press releases
+											</a>
+											<div class="select-language">
+												<a class="eventcheck eng eventchecked" href="#"><input type="checkbox" value="all">Eng</a>
+												<a class="eventcheck fin" href="#"><input type="checkbox" value="all">Fin</a>
+												<a class="eventcheck swe" href="#"><input type="checkbox" value="all">Swe</a>
+											</div>
+										</div>
+
+										<div class="selection-field-area field-area-disabled">
+											<a class="eventcheck radio" href="#">
+												<input type="radio" value="stock-only" id="stock-only">Stock exchange releases
+											</a>								
+											<div class="select-language">
+												<select id="preferredLanguage" name="preferredLanguage">
+													<option class="eng" value="en" selected="selected">Eng</option>
+													<option class="fin" value="fi">Fin</option>													
+													<option class="swe" value="sv">Swe</option>
+												</select>
+											</div>
+										</div>
+
+										<div class="selection-field-area field-area-disabled">
+											<a class="eventcheck radio" href="#"><input type="radio" value="selected-industries" id="selected-industries">Only releases from selected industries</a>						
+
+											<div class="industries-selection">
+												<p>Select one or more industries and/or offerings to subscribe to. Also check in which language(s) you want to receive those emails.</p>
+		        									
+												<div class="dropdown-area">
+													<div class="select-industries">
+														<select id="dropdown-values" class="select-ind-off" disabled="">
+														
+															<option selected="selected" value="">Select...</option>
+															<option value="852684|852686|852642">Automotive</option>
+															<option value="852685|852687|852643">Energy utilities</option>
+															<option value="756975|756978|757180">Financial services</option>
+															<option value="756984|756985|757182">Forest</option>
+															<option value="852662|852671|852648">Healthcare and welfare</option>
+															<option value="852663|852672|852649">Logistics</option>
+															<option value="756995|756994|757201">Manufacturing</option>
+															<option value="852667|852673|852650">Media</option>
+															<option value="852668|852674|852651">Oil and gas</option>
+															<option value="756986|757013|757195">Public</option>
+															<option value="852669|852676|852660">Telecom</option>
+															<option value="852670|852677|852661">Trade</option>
+														</select>
+		            									
+														<select style="display:none;" id="dropdown-all-values" class="select-ind-off">
+														
+															<option selected="selected" value="">Select...</option>
+															<option value="852684|852686|852642">Automotive</option>
+															<option value="852685|852687|852643">Energy utilities</option>
+															<option value="756975|756978|757180">Financial services</option>
+															<option value="756984|756985|757182">Forest</option>
+															<option value="852662|852671|852648">Healthcare and welfare</option>
+															<option value="852663|852672|852649">Logistics</option>
+															<option value="756995|756994|757201">Manufacturing</option>
+															<option value="852667|852673|852650">Media</option>
+															<option value="852668|852674|852651">Oil and gas</option>
+															<option value="756986|757013|757195">Public</option>
+															<option value="852669|852676|852660">Telecom</option>
+															<option value="852670|852677|852661">Trade</option>
+														</select>
+											            
+														<div class="add-more"><a href="#">Add</a></div>
+													</div>
+
+													<div style="display:none;" class="select-industries">
+														<div class="select-language">
+															<a class="eventcheck eng" href="#"><input type="checkbox" value="" name="p_list_id">Eng</a>
+															<a class="eventcheck fin" href="#"><input type="checkbox" value="" name="p_list_id">Fin</a>
+															<a class="eventcheck swe" href="#"><input type="checkbox" value="" name="p_list_id">Swe</a>
+														</div>
+														<div id="remove" class="select-all">
+															<a class="eventcheck" href="#"><input type="checkbox" value="" name=""><input type="checkbox" value="" name=""></a>
+														</div>
+													</div>
+		        									
+												</div>
+											</div>
+										 </div>
+									</div>
+									<div>
+										<input type="submit" title="Subscribe" value="Subscribe" class="send" id="send-releases-subscription">
+									</div>
+									
+									<input type="hidden" value="eng" id="RootPageLanguage">
+									<input type="hidden" value="http://www.huginonline.com/plsql/try/user_sign_up3.subscribe" id="PressUrl">
+									<input type="hidden" value="https://cns.omxgroup.com/cdsPublic/addDynamicSubscription.action" id="StockUrl">
+
+									<div style="display:none;" id="pressHelpers">
+										<input type="hidden" value="3114" name="f_id">
+										<input type="hidden" value="5" name="lan">									
+										<input type="hidden" value="3114" name="p_firm_id">
+										<input type="hidden" value="1058" name="p_firm_id">
+										<input type="hidden" value="f_name" name="p_mandatory">
+										<input type="hidden" value="email" name="p_mandatory">
+										<input type="hidden" value="p_list_id" name="p_mandatory">
+										<input type="hidden" value="aspx?elepath=1,3795,9570,15702" name="p_file_ext">
+										<input type="hidden" value="http://www.tieto.com/" name="base_href">
+									</div>
+
+									<div style="display:none;" id="stockHelpers">
+										<input type="hidden" value="1057" name="disclosingPartyId">
+										<input type="hidden" value="6" name="infoTypes">
+										<input type="hidden" value="http://www.tieto.com/press/material-bank/subscribe-to-our-releases-email-list?result=success" name="successUrl">
+										<input type="hidden" value="http://www.tieto.com/press/material-bank/subscribe-to-our-releases-email-list?result=error" name="failureUrl">
+									</div>
+								</div>
+							</div>
+						</form>

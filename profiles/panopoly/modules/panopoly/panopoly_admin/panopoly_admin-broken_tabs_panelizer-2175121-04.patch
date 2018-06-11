@@ -1,0 +1,26 @@
+diff --git a/panopoly_admin.module b/panopoly_admin.module
+index e290e85..9190157
+--- a/panopoly_admin.module
++++ b/panopoly_admin.module
+@@ -100,21 +100,6 @@ function panopoly_admin_panels_pane_content_alter($content, $pane, $args, $conte
+  * Implementation of hook_ctools_content_subtype_alter()
+  */
+ function panopoly_admin_ctools_content_subtype_alter(&$subtype, &$plugin) {
+-
+-  // Figure out some things about each of the substypes
+-  $pane_label = $subtype['title'];
+-  $category_label  = (is_string($subtype['category'])) ? $subtype['category'] : $subtype['category'][0];
+-
+-  // If we are not using advanced plugins and this is an advanced plugin then disable the pane
+-  if (!variable_get('panopoly_admin_advanced_plugins', FALSE) && panopoly_admin_is_advanced_plugin($pane_label, $category_label)) {
+-    $subtype['required context'] = new ctools_context_required(t('Panopoly Null'), 'string');
+-    $plugin['all contexts'] = FALSE;
+-  }
+-
+-  // Switch the labeling of "Miscellaneous" to "Blocks"
+-  if ($category_label == 'Miscellaneous') {
+-    $subtype['category'] = 'Blocks';
+-  }
+ }
+ 
+ /**

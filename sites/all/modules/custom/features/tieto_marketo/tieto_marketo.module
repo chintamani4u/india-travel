@@ -1,0 +1,47 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto marketo feature.
+ */
+
+include_once 'tieto_marketo.features.inc';
+
+/**
+  * Implements hook_init()
+  */
+function tieto_marketo_init() {
+  // jquery.cookie plugin is not being loaded for anonymous users
+  drupal_add_library('system', 'jquery.cookie');
+}
+
+/**
+ * Implements hook_block_info().
+ */
+function tieto_marketo_block_info() {
+  $blocks['marketo_com_popup'] = array(
+    'info' => t('marketo tieto.com popup'),
+    'cache' => DRUPAL_NO_CACHE
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ */
+function tieto_marketo_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'marketo_com_popup':
+      $block['content'] = array(
+        '#attached' => array(
+          'js' => array(
+             drupal_get_path('module', 'tieto_marketo') . '/js/popup.js',
+             drupal_add_js('//app-e.marketo.com/js/forms2/js/forms2.min.js', 'external')
+          ),
+        ),
+      );
+    break;
+  }
+  return $block;
+}

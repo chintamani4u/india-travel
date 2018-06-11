@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the tieto env indicator feature.
+ */
+
+include_once 'tieto_env_indicator.features.inc';

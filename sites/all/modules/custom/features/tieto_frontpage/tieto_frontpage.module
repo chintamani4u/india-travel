@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Frontpage feature.
+ */
+
+include_once 'tieto_frontpage.features.inc';

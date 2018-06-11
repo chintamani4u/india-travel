@@ -1,0 +1,11 @@
+.dnd-library-wrapper .editor-item .meta.type-slideshow {
+  background-image: url('icons/slideshow.png');
+}
+
+.scald-menu .add-buttons .add-slideshow {
+  background: url('icons/slideshow-large-inverted.png') 50% 50% no-repeat;
+}
+
+.scald-menu .add-buttons .add-slideshow:hover {
+  background: url('icons/slideshow-large.png') 50% 50% no-repeat;
+}

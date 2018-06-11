@@ -1,0 +1,21 @@
+<?php
+/**
+ * @file
+ * Installation, update and uninstall hook implementations.
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function marketo_munchkin_install() {
+  // Nothing to do.
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function marketo_munchkin_uninstall() {
+  variable_del('munchkin_code');
+  variable_del('munchkin_url');
+  variable_del('munchkin_secret_key');
+}

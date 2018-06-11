@@ -1,0 +1,43 @@
+7.x-1.3
+-------------
+
+Added a linkit profile to make the new version of that module to work.
+Also changed some CSS paths for the editor to make the fonts work correctly with refactoring of CSS.
+PR#352
+
+
+7.x-1.2
+-------------
+Pull request #311
+
+This feature overrides the functionalities of Panopoly_wysiwyg feature.
+
+17.02.2014 - I recreated the feature from the original to allow Iframes. There is now a problem with saving the wysiwyg filter form,
+but iframes work.
+
+PR #327
+
+
+7.x-1.1
+-------------
+Changed buttons and locations in the editor
+
+This feature is used to override Panopoly_Wysiwyg
+
+Pull request #187
+-
+
+17.13.2013 Changed wysiwyg style Highlight to highlight section. Recreated feature to remove
+unnecessities. Overridden all changes made in PR #242
+
+Pull request #248
+-
+
+7.x-1.0-beta2
+-------------
+
+Says beta2 now...change to a stable release number
+
+7.x-1.4
+-------------
+TIET-1991 - Fixes this error 'Image resize threshold of 10 remote images has been reached. Please use fewer remote image'

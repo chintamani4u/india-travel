@@ -1,0 +1,50 @@
+
+%highlight-pane {
+  background-color: $gray-13;
+}
+
+// Panel panes on specific content types
+.frontpage-content,
+.industryhub-container {
+  .panel-pane {
+    @extend %highlight-pane;
+    margin: 2px;
+    @include respond-to(handheld) {
+      margin-left: 0;
+      margin-right: 0;
+    }
+  }
+  .column-pane-last-visible {
+    @include fake-element(after);
+    &:after {
+      @extend %highlight-pane;
+      top: auto;
+      height: 600px;
+    }
+  }
+}
+
+// Specific panel panes
+.pane-tieto-page-highlights-carousel {
+  @extend %highlight-pane;
+  @include after-clearfix();
+  .content-carousel {
+    @include after-clearfix();
+  }
+}
+
+// because sidebar twitter block content getting cut
+.whelan-column2 .tieto-panel-styles-region .panel-pane {
+  float: none;
+  width: inherit;
+  padding: $block-text-padding;
+  padding-right: 0;
+  @include after-clearfix();
+  .field-collection-view {
+    margin-right: 0;
+  }
+}
+
+.pane-node-field-sidebar-reference-content {
+  clear: both;
+}

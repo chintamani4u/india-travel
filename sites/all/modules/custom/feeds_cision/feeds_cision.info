@@ -1,0 +1,6 @@
+name = Feeds Cision Parser
+description = Parse a Cision XML file.
+package = Feeds
+dependencies[] = feeds
+files[] = FeedsCisionParser.inc
+core = 7.x

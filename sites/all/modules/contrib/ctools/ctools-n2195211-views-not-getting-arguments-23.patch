@@ -1,0 +1,32 @@
+diff --git a/docroot/sites/all/modules/contrib/ctools/views_content/plugins/content_types/views.inc b/docroot/sites/all/modules/contrib/ctools/views_content/plugins/content_types/views.inc
+index 93f14c6..262d81d 100644
+--- a/docroot/sites/all/modules/contrib/ctools/views_content/plugins/content_types/views.inc
++++ b/docroot/sites/all/modules/contrib/ctools/views_content/plugins/content_types/views.inc
+@@ -145,12 +145,12 @@ function views_content_views_content_type_render($subtype, $conf, $panel_args, $
+       }
+       if (!empty($contexts[$cid])) {
+         $arg = ctools_context_convert_context($contexts[$cid], $converter, array('sanitize' => FALSE));
++        array_splice($args, $count, 0, array($arg));
+       }
+       else {
+         // Make sure we put an argument in even if it was not there.
+         $arg = NULL;
+       }
+-      array_splice($args, $count, 0, array($arg));
+     }
+   }
+ 
+diff --git a/docroot/sites/all/modules/contrib/ctools/views_content/plugins/content_types/views_panes.inc b/docroot/sites/all/modules/contrib/ctools/views_content/plugins/content_types/views_panes.inc
+index b77404e..de4f19c 100644
+--- a/docroot/sites/all/modules/contrib/ctools/views_content/plugins/content_types/views_panes.inc
++++ b/docroot/sites/all/modules/contrib/ctools/views_content/plugins/content_types/views_panes.inc
+@@ -162,9 +162,6 @@ function views_content_views_panes_content_type_render($subtype, $conf, $panel_a
+             $args[] = $contexts[$key]->argument;
+           }
+         }
+-        else {
+-          $args[] = isset($arguments[$id]['exception']['value']) ? $arguments[$id]['exception']['value'] : 'all';
+-        }
+         break;
+ 
+       case 'fixed':

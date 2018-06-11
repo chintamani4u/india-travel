@@ -1,0 +1,140 @@
+
+/* Forms */
+.content.report h4 {font-size:12px;}
+.content.report .form-leave-comment {width:290px;}
+.content.report .form-leave-comment label {font-size:12px;}
+.content.report .form-leave-comment input {width:277px; font-size:12px;}
+.content.report .form-leave-comment select {color: #5E5E5E;width:281px; background:#FFFF99; border:1px solid #0080C7; }
+.content.report .form-leave-comment input.post-code {width:70px; float:left;}
+.content.report .form-leave-comment .post-address {padding:2px 0; height:1%;}
+.content.report .form-leave-comment .post-address:after {content: "."; display: block; clear: both; visibility: hidden; line-height: 0; height: 0;}
+.content.report .form-leave-comment input.city {float:left; width:203px;}
+.content.report .form-leave-comment textarea {color: #5E5E5E;width:277px; font-size:12px; }
+.content.report .form-selection {padding-bottom:10px;}
+.content.report .form-selection input { visibility:hidden; width:20px;}
+.content.report .form-selection .error span {font-size:11px; font-weight:normal; color:#FF3C3C !important; padding-top:4px; text-transform:none !important; display:block;}
+.content.report .form-selection span.error{display:none;}
+.content.report .dropdown-area {padding:4px 0 4px 4px; height:1%;}
+.content.report .dropdown-area:after {content: "."; display: block; clear: both; visibility: hidden; line-height: 0; height: 0;}
+.content.report .dropdown-area select {width:150px !important; background:#fff; float:left;}
+.content.report .dropdown-area input {padding-left:4px; visibility:hidden;}
+.content.report .dropdown-area .form-selection {float:left; padding:0 0 0 10px;}
+.content.report .dropdown-area .form-selection input {width:12px !important; margin-top:0;}
+.content.report .dropdown-area .form-selection a { background-position: left center; margin:0 8px 0 0 !important; display:inline;}
+.content.report .select-language {margin-left:28px; height:1%;}
+.select-industries .select-language {float:left; margin-left:0 !important;}
+.select-industries .select-all {float:left;}
+.content.report .dropdown-area .select-industries {width:250px; margin-top:6px;}
+.content.report .dropdown-area .select-industries select {width:200px !important;}
+.content.report .industries-selection {margin-left:28px;}
+.content.report .industries-selection p {padding:4px 0 !important;}
+.content.report .select-language:after {content: "."; display: block; clear: both; visibility: hidden; line-height: 0; height: 0;}
+.content.report .select-language a {float:left;}
+.content.report .select-language select {width:200px !important; background:#fff; float:left;}
+.content.report .select-all {float:right; margin-right:8px;}
+.content.report .select-all a { background: url(../tieto-images/bg_x.gif) right center no-repeat; width:10px !important;}
+.selection-field-area.field-area-selected {background:#E6E6E6; padding:4px 8px;}
+.selection-field-area.field-area-disabled {background:#fff; padding:4px 8px;}
+.selection-field-area.field-area-disabled .select-language, .selection-field-area.field-area-disabled .industries-selection {display:none;}
+.selection-field-area.field-area-disabled .select-industries select {border:1px solid #ccc !important;}
+.content.report .selection-field-area .select-language .eventcheck {display:inline; width:75px !important;}
+.content.report .selection-field-area .select-language .eventchecked {background-color:transparent !important;}
+.content.report .add-more {margin:4px 8px 0 0; text-align:right;}
+.content.report .add-more a { color:#0080C7 !important; text-decoration:underline; font-size:11px;}
+.content.report .add-more a:hover { text-decoration:none;}
+.form-leave-comment .filled {background-color:#fff; }
+.form-leave-comment .error input {background:#FFBCBC;}
+.form-leave-comment input.error {background:#FFBCBC;}
+.form-leave-comment .error select {background:#FFBCBC !important;}
+.form-leave-comment .error textarea {background:#FFBCBC;}
+.form-leave-comment .error span {font-size:11px; font-weight:normal; color:#FF3C3C !important; padding-top:4px; text-transform:none !important; display:block;}
+.form-leave-comment span.error{font-size:11px; font-weight:normal; color:#FF3C3C !important; padding-top:4px; text-transform:none !important; display:none;}
+.help-text {color:#999 !important; width:300px;}
+.help-text a {color:#0080C7 !important; text-decoration:underline; }
+.help-text a:hover {text-decoration:none; }
+.help-text.email {width:460px;}
+.help-text.comment {margin:10px 0 0 180px;}
+.blogs .form-leave-comment input.send {width:170px !important; }
+.you-selected {padding:10px 0 0 0; font-size:11px;}
+.form-leave-comment textarea {background:#FFFF99; border:1px solid #0080C7; width:430px; height:80px; font-size:14px; margin-bottom:10px;}
+.form-leave-comment input.send { 
+	width:160px !important; 
+	float:left; 
+	border: none;
+	font-size: 13px !important;
+	font-weight:bold; 
+	color:#fff !important; 
+	background: #0080C7; 
+	line-height: 28px; 
+	height: 30px; 
+	text-align:center;
+	cursor: pointer; 
+	overflow:hidden;
+	margin-top:10px;
+	padding-bottom:2px;
+}
+.contact-me {margin-bottom:10px; height:1%;}
+.contact-me:after {content: "."; display: block; clear: both; visibility: hidden; line-height: 0; height: 0;}
+.contact-me img {float:left; padding-right:8px;}
+.contact-me a { text-decoration:underline;}
+.contact-me a:hover { text-decoration:none;}
+
+
+/* ELEVATION FORMS */
+.form-area {width:510px; margin-bottom:40px;}
+.form-area fieldset {border-width:0;}
+.form-area label {color:#5E5E5E; font-size:12px; font-weight:bold; display:block; padding-top:10px; }
+.form-area input, .form-area textarea, .form-area input, .form-area select {background:#FFFFFF; border:1px solid #0080C7; font-size:12px;}
+.form-area .xforms-minimal input {width:170px;}
+.form-area .xforms-compact input {width:340px;}
+.form-area .xforms-full input {width:480px;}
+.form-area select {width:340px;}
+.form-area p.xforms-hint { font-size:10px; display:block; padding: 0 0 0 0 !important; }
+
+.form-area .xforms-full ul {background:#E6E6E6; padding:4px 8px; width:325px !important; }
+.form-area .xforms-full ul li {overflow:hidden;padding:5px 0;}
+.form-area .xforms-full ul li input { float:left; width:14px; background:transparent; border:none; display:block;}
+.form-area .xforms-full ul li label {position:relative;top:-2px;padding:0; margin:0 0 0 22px;}
+.form-area input.xforms-trigger { 
+	width:auto !important; 
+	float:left; 
+	border: none;
+	font-size: 13px !important;
+	font-weight:bold; 
+	color:#fff !important; 
+	background: #0080C7; 
+	line-height: 28px; 
+	height: 30px; 
+	text-align:center;
+	cursor: pointer; 
+	overflow:hidden;
+	margin-top:20px;
+	margin-right:10px;
+	padding-bottom:2px;
+}
+.form-area .xforms-textarea-minimal textarea {width:170px;}
+.form-area .xforms-textarea-compact textarea {width:340px;}
+.form-area .xforms-textarea-full textarea {width:480px;}
+.form-area .xforms-invalid input, .form-area .xforms-invalid textarea, .form-area .xforms-invalid select, .form-area .xforms-invalid ul {background:#FFBCBC;}
+.form-area .missing-fields {font-size:11px; color:#FF3C3C !important;}
+
+.eventcheck {
+    text-decoration: none;
+    outline: none;
+    background:transparent url(../tieto-images/checkbox_empty.gif) left 5px no-repeat;
+    width: 280px;
+    display: block;
+    padding: 0;
+    margin-bottom:3px;
+    color: #666666;
+}
+.eventchecked {background:#E6E6E6 url(../tieto-images/checkbox_selected.gif) left 5px no-repeat;}
+.radio.eventcheck {background:#fff url(../tieto-images/radio_empty.gif) 1px 3px no-repeat;}
+.radio.eventchecked {background:#E6E6E6 url(../tieto-images/radio_selected.gif) 1px 3px no-repeat;}
+.field-area-selected .select-language .eventcheck {background:#E6E6E6 url(../tieto-images/checkbox_empty.gif) left 6px no-repeat;}
+.field-area-selected .select-language .eventchecked {background:#E6E6E6 url(../tieto-images/checkbox_selected.gif) left 6px no-repeat;}
+.content.report .form-selection #languages .eventcheck {background:#fff url(../tieto-images/checkbox_empty.gif) left 6px no-repeat;}
+.content.report .form-selection #languages .eventchecked {background:#E6E6E6 url(../tieto-images/checkbox_selected.gif) left 6px no-repeat;}
+.event-selection .eventcheck {background:#fff url(../tieto-images/checkbox_empty.gif) 4px 6px no-repeat;}
+.event-selection .eventchecked {background:#E6E6E6 url(../tieto-images/checkbox_selected.gif) 4px 6px no-repeat;}
+

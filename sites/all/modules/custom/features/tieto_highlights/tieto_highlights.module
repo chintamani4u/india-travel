@@ -1,0 +1,159 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Highlights feature.
+ */
+
+include_once 'tieto_highlights.features.inc';
+
+/**
+ * Implements hook_form_FORMID_alter().
+ *
+ * Convert textfield input to select for nodequeue selection in views_content_views_panes_content_type_edit_form.
+ */
+function tieto_highlights_form_views_content_views_panes_content_type_edit_form_alter(&$form, $form_state) {
+  $view = $form_state['view'];
+
+  if ($view->name != 'tieto_highlights') {
+    // Not our view.
+    return;
+  }
+
+  if (!isset($form['arguments']['name']) || !isset($view->display_handler->handlers['argument']['name'])) {
+    // Our name argument is not available.
+    return;
+  }
+
+  $argument = $view->display_handler->handlers['argument']['name'];
+  if (!isset($argument->table) || $argument->table != 'nodequeue_queue') {
+    // Name argument is for something else but nodequeue_queue.name.
+    watchdog('tieto_highlights', 'Nodequeue name argument not available for %subtype_name', array(
+      '%subtype_name' => $form_state['subtype_name'],
+    ), WATCHDOG_WARNING);
+    return;
+  }
+
+  $options = array();
+  foreach (nodequeue_load_queues(nodequeue_get_all_qids()) as $queue) {
+    $options[$queue->name] = $queue->title;
+  }
+  if (empty($options)) {
+    watchdog('tieto_highlights', 'Nodequeues not available for %subtype_name', array(
+      '%subtype_name' => $form_state['subtype_name'],
+    ), WATCHDOG_WARNING);
+    return;
+  }
+
+  $element = $form['arguments']['name'];
+  if (empty($element['#default_value']) || isset($options[$element['#default_value']])) {
+    $element['#type'] = 'select';
+    $element['#options'] = $options;
+  }
+  else {
+    $element['#description'] .= ' Available queue names: ' . implode(', ', array_keys($options));
+  }
+  $form['arguments']['name'] = $element;
+}
+
+function tieto_highlights_panels_pane_content_alter($content, $pane) {
+  if ($pane->type != 'views_panes' || strpos($pane->subtype, 'tieto_highlights-') !== 0) {
+    return;
+  }
+
+  if (!isset($pane->configuration['arguments']['name'])) {
+    return;
+  }
+
+  $conf = $pane->configuration;
+
+  // Quick and dirty hack to remove our argument from title link.
+  if (!empty($conf['link_to_view']) && !empty($conf['path']) && !empty($content->title_link)) {
+    $search = url($content->title_link);
+    $replace = url($conf['path']);
+    $content->title = str_replace($search, $replace, $content->title);
+  }
+
+  // Add admin links to manipulate the nodequeue.
+  $nodequeue = nodequeue_load_queue_by_name($conf['arguments']['name']);
+  if (empty($nodequeue) || $nodequeue->owner != 'nodequeue') {
+    return;
+  }
+
+  if (nodequeue_queue_access($nodequeue)) {
+    if (!isset($content->admin_links)) {
+      $content->admin_links = array();
+    }
+
+    $content->admin_links[] = array(
+      'title' => 'Manage highlights',
+      'href' => "admin/structure/nodequeue/" . $nodequeue->qid,
+      'query' => drupal_get_destination(),
+    );
+  }
+}
+
+/**
+ * Helper; Extract language of nodequeue from its title.
+ */
+function _tieto_highlights_nodequeue_language($queue) {
+  $return = language_default('language');
+
+  $matches = NULL;
+  if (preg_match('/^.+\((.+)\)$/', $queue->title, $matches)) {
+    $languages = language_list('enabled');
+    foreach ($languages[1] as $language => $l) {
+      if ($l->name == $matches[1]) {
+        $return = $language;
+        break;
+      }
+    }
+  }
+
+  return $return;
+}
+
+/**
+ * Implements hook_nodequeue_alter().
+ */
+function tieto_highlights_nodequeue_alter(&$queues, $context) {
+  if ($context != 'load_queues') {
+    return;
+  }
+
+  if (!user_access('manipulate queues')) {
+    // no access at all to manipulate queues (anonymous).
+    return;
+  }
+
+  if (user_access('manipulate all queues')) {
+    // access all queues, changing roles has no effect (admins).
+    return;
+  }
+
+  if (user_access('administer nodequeue')) {
+    // all access to queues. (sysop)
+    return;
+  }
+
+  $current_language = $GLOBALS[LANGUAGE_TYPE_CONTENT]->language;
+  foreach ($queues as $index => $queue) {
+    if (empty($queue->roles)) {
+      // only admins can access this queue.
+      continue;
+    }
+
+    if ($queue->subqueues != 1 || $queue->owner != 'nodequeue') {
+      // not a simple queue - do nothing.
+      continue;
+    }
+
+    $queue_language = _tieto_highlights_nodequeue_language($queue);
+    if ($queue_language != $current_language) {
+      // Deny access to manipulate the queue.
+      //$queue->roles = array();
+      // Ah crap just make the queue disappear.
+      unset($queues[$index]);
+    }
+  }
+}
+/**/

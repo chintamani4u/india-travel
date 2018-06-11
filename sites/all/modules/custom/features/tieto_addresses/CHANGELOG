@@ -1,0 +1,34 @@
+7.x-1.0
+-------
+
+Tieto addresses handles the Address content type and getlocations module to bring the map at /addresses to life.
+
+7.x-1.1
+-------
+
+22.11.2013 -- Added hook_update_7108 to remove the leaflet map from the database. Also removed the module files.
+Pull request #210
+
+10.12.2013 -- Updated view to Sort Tieto office addresses into alphabetic order by country and city Jira ID  TIET-1616
+Pull Request ID #234
+
+10.12.2013 -- Added and configured an Administrative view for all addresses /admin/all-addresses. This can be
+copy/pasted straight into Excel with minimum effort.
+Pull request #236 - TIET-1629 Add/create Addresses Exporter function
+
+#PR 269 - Recreated this feature
+
+17.12.2013 Update getlocation module to new 7.x.1.11 version 
+updated feture for hidding extra fileds in address input filed
+
+Pull request #329 - TIET-1828 Update module Get Locations to version 7.x-1.11
+
+12.03.2014 - Panels update made many features overridden #378
+
+12.03.2014 - Panels update made many features overridden #378
+
+
+7.x-1.2
+-------
+
+#413 Updated the module and feature to go with it.

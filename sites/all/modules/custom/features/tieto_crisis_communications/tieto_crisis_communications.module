@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Crisis Communications feature.
+ */
+
+include_once 'tieto_crisis_communications.features.inc';

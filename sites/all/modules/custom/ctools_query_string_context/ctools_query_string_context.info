@@ -1,0 +1,7 @@
+name = CTools query string context
+description = A CTools context plugin that can extract arbitrary values from the query string.
+core = 7.x
+version = 7.x-1.x-dev
+package = Chaos tool suite
+dependencies[] = ctools
+

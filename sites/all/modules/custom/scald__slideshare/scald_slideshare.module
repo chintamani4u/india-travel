@@ -1,0 +1,557 @@
+<?php
+/**
+ * @file
+ * Defines a Slideshare provider for Scald.
+ */
+
+define('SCALD_SLIDESHARE_OEMBED', 'http://www.slideshare.net/api/oembed/2');
+define('SCALD_SLIDESHARE_RSS', 'https://www.slideshare.net/api/2');
+define('SCALD_SLIDESHARE_WEB', 'http://www.slideshare.net/slideshow/embed_code/');
+
+/**
+ * Implements hook_scald_wysiwyg_context_list_alter().
+ */
+function scald_slideshare_scald_wysiwyg_context_list_alter(&$contexts) {
+  drupal_add_css(drupal_get_path('module', 'scald_slideshare') . '/scald_slideshare.css', array('group' => CSS_DEFAULT));
+}
+
+/**
+ * Implements hook_scald_atom_providers().
+ */
+function scald_slideshare_scald_atom_providers() {
+  return array(
+    'slideshow' => 'Slideshow hosted on Slideshare',
+  );
+
+  // This code will never be hit, but is necessary to mark the string
+  // for translation on localize.d.o
+  t('Slideshow hosted on Slideshare');
+}
+
+/**
+ * Implements hook_scald_add_form().
+ */
+function scald_slideshare_scald_add_form(&$form, &$form_state) {
+  if (!variable_get('scald_slideshare_api_key') || !variable_get('scald_slideshare_shared_secret')) {
+    $form['#disabled'] = TRUE;
+    drupal_set_message(l(t('You must fill the API key'), 'admin/config/media/scald_slideshare', array('query' => array('destination' => 'atom/add/slideshow'))), 'warning');
+  }
+
+  $form['url'] = array(
+    '#attributes' => array('autofocus' => ''),
+    '#description' => t('Slideshare slideshow URL to retrieve embedding information for'),
+    '#element_validate' => array('scald_slideshare_validate_url'),
+    '#required' => TRUE,
+    '#title' => t('Slideshare slideshow URL'),
+    '#type' => 'textfield',
+  );
+}
+
+/**
+ * Implements hook_scald_add_form_fill().
+ */
+function scald_slideshare_scald_add_form_fill(&$atoms, $form, $form_state) {
+  $atom = is_array($atoms) ? reset($atoms) : $atoms;
+
+  // Get slideshow info.
+  $infos = scald_slideshare_slideshow($form_state['values']['url']);
+
+  $atom->base_id = $infos->id;
+  $atom->title = decode_entities($infos->title);
+
+  // Prefill the author.
+  $atom->scald_authors[LANGUAGE_NONE][0] = array(
+    'tid' => 0,
+    'taxonomy_term' => (object) (array('name' => $infos->author)),
+  );
+
+  // Prefill tags.
+  // Beware, this is not a real tid, it's just an index.
+  foreach ($infos->tags as $index => $tag) {
+    $atom->scald_tags[LANGUAGE_NONE][$index] = array(
+      'tid' => $index,
+      'taxonomy_term' => (object) (array('name' => $tag)),
+    );
+  }
+
+  // Save slideshow width and height.
+  if (!isset($atom->data)) {
+    $atom->data = array();
+  }
+
+  $atom->data['slideshow_width'] = $infos->width;
+  $atom->data['slideshow_height'] = $infos->height;
+  $atom->data['slideshow_total_slides'] = $infos->total_slides;
+
+  // Download a copy of the slideshow thumbnail. This makes it possible
+  // to do interesting manipulation with image styles presets.
+  $thumb_url = $infos->thumbnail['src'];
+  $thumb = drupal_http_request($thumb_url);
+  $dir = 'public://slideshare';
+
+  if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
+    $dest = $dir . '/' . $infos->id . '.jpg';
+    $file = file_save_data($thumb->data, $dest);
+
+    if ($file) {
+      // Set the file status to temporary.
+      $query = db_update('file_managed')
+        ->condition('fid', $file->fid)
+        ->fields(array('status' => 0))
+        ->execute();
+      $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
+    }
+  }
+}
+
+/**
+ * Implements hook_scald_fetch().
+ */
+function scald_slideshare_scald_fetch($atom, $mode) {
+  if (isset($atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'])) {
+    $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+    if (file_exists($file)) {
+      $atom->file_source = $atom->thumbnail_source = $file;
+    }
+  }
+}
+
+/**
+ * Implements hook_scald_prerender().
+ */
+function scald_slideshare_scald_prerender($atom, $context, $options, $mode) {
+  if ($mode == 'atom') {
+    if ($context == 'sdl_library_item') {
+      $atom->rendered->thumbnail_transcoded_url = file_create_url($atom->thumbnail_source);
+    }
+    else {
+      $atom->rendered->player = theme('scald_slideshare_player',
+        array(
+          'vars' => array(
+            'slideshow_url' => SCALD_SLIDESHARE_WEB . $atom->base_id,
+            'slideshow_width' => (isset($atom->data['slideshow_width']) ? $atom->data['slideshow_width'] : 480),
+            'slideshow_height' => (isset($atom->data['slideshow_height']) ? $atom->data['slideshow_height'] : 365),
+            'slideshow_total_slides' => $atom->data['slideshow_total_slides'],
+            'thumbnail' => $atom->rendered->thumbnail_source_url,
+            'title' => check_plain($atom->title),
+          ),
+        )
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function scald_slideshare_theme($existing, $type, $theme, $path) {
+  return array(
+    'scald_slideshare_player' => array(
+      'variables' => array('vars' => NULL),
+      'template' => 'scald_slideshare_player',
+    ),
+    'scald_slideshare_imports_table' => array(
+      'render element' => 'form',
+      'file' => 'scald_slideshare.admin.inc',
+    ),
+  );
+}
+
+/**
+ * Implements hook_permission().
+ */
+function scald_slideshare_permission() {
+  return array(
+    'administer scald slideshare' => array(
+      'title' => t('Administer scald slideshare settings and imports'),
+      'description' => t('Add or remove scald slideshare feeds of slideshows that should be imported automatically.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function scald_slideshare_menu() {
+  return array(
+    'admin/config/media/scald_slideshare' => array(
+      'title' => 'Scald Slideshare Settings and Imports',
+      'page callback' => 'scald_slideshare_forms_callback',
+      'access arguments' => array('administer scald slideshare'),
+      'description' => 'Configure the slideshows that should be automatically imported from slideshare',
+      'file' => 'scald_slideshare.admin.inc',
+    ),
+  );
+}
+
+/**
+ * Implements hook_cron().
+ */
+function scald_slideshare_cron() {
+  scald_slideshare_imports(variable_get('scald_slideshare_imports', array()));
+}
+
+/**
+ * Import multiple slideshow.
+ *
+ * @param array $imports
+ *   Array with imports.
+ */
+function scald_slideshare_imports($imports) {
+  foreach ($imports as $import) {
+    $items = scald_slideshare_feed($import['type'], $import['value'], $import['limit']);
+
+    foreach ($items as $slideshow) {
+      scald_slideshare_import($slideshow);
+    }
+  }
+}
+
+/**
+ * Forms callback.
+ */
+function scald_slideshare_forms_callback() {
+  $form[] = drupal_get_form('scald_slideshare_form');
+  $form[] = drupal_get_form('scald_slideshare_imports_form');
+  $form[] = drupal_get_form('scald_slideshare_import_form_add');
+
+  return $form;
+}
+
+/**
+ * Creates an atom based on a Slideshare slideshow URL or ID.
+ *
+ * @param mixed $slideshow
+ *   Unique URL or ID of the slideshow on Slideshare or object
+ *   returned by scald_slideshare_slideshow.
+ *
+ * @return int
+ *   Unique identifier of the new atom
+ */
+function scald_slideshare_import($slideshow) {
+  // Fetch the needed informations from Slideshare.
+  if (is_object($slideshow)) {
+    $infos = $slideshow;
+  }
+  else {
+    $infos = scald_slideshare_slideshow($slideshow);
+  }
+
+  // Check if the slideshow has already been imported to prevent duplicate.
+  $old = scald_slideshare_already_imported($infos->id);
+  if ($old) {
+    return FALSE;
+  }
+
+  // Create an atom.
+  $atom = new ScaldAtom('slideshow', 'scald_slideshare', array(
+    'base_id' => $infos->id,
+    'title' => $infos->title,
+  ));
+
+  $scald_author_vocabulary = variable_get('scald_author_vocabulary', 'scald_authors');
+  $scald_authors = taxonomy_vocabulary_machine_name_load($scald_author_vocabulary);
+  // Create and link author term.
+  if ($term = scald_slideshare_taxonomy_get_create($infos->author, $scald_authors->vid)) {
+    $atom->scald_authors[LANGUAGE_NONE][] = array(
+      'tid' => $term->tid,
+    );
+  }
+
+  $scald_tags_vocabulary = variable_get('scald_tags_vocabulary', 'scald_tags');
+  $scald_tags = taxonomy_vocabulary_machine_name_load($scald_tags_vocabulary);
+  // Create and link tags terms.
+  foreach ($infos->tags as $tag) {
+    if ($term = scald_slideshare_taxonomy_get_create($tag, $scald_tags->vid)) {
+      $atom->scald_tags[LANGUAGE_NONE][] = array(
+        'tid' => $term->tid,
+      );
+    }
+  }
+
+  // Save slideshow width and height.
+  $atom->data['slideshow_width'] = $infos->width;
+  $atom->data['slideshow_height'] = $infos->height;
+  $atom->data['slideshow_total_slides'] = $infos->total_slides;
+
+  // Download a copy of the slideshow thumbnail. This makes it possible
+  // to do interesting manipulation with image styles presets.
+  $thumb_url = $infos->thumbnail['src'];
+  $thumb = drupal_http_request($thumb_url);
+  $dir = 'public://slideshare';
+
+  if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
+    $dest = $dir . '/' . $infos->id . '.jpg';
+    $file = file_save_data($thumb->data, $dest);
+
+    if ($file) {
+      // Set the file status to temporary.
+      $query = db_update('file_managed')
+        ->condition('fid', $file->fid)
+        ->fields(array('status' => 0))
+        ->execute();
+      $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
+    }
+  }
+
+  // And save it.
+  $atom_sid = scald_atom_save($atom);
+
+  // Finally, return this id.
+  return $atom_sid;
+}
+
+/**
+ * Get a taxonomy term by name from a given vocabulary.
+ *
+ * @param string $name
+ *   The name or the taxonomy term.
+ *
+ * @param int $vid
+ *   Vocabulary ID to search and create from/to.
+ *
+ * @return object
+ *   The taxonomy term.
+ */
+function scald_slideshare_taxonomy_get_create($name, $vid) {
+  // Remove extra white spaces.
+  $name = trim($name);
+
+  // Find existing term(s).
+  $terms = taxonomy_term_load_multiple(
+    array(),
+    array(
+      'name' => $name,
+      'vid' => $vid,
+    )
+  );
+
+  if (!count($terms)) {
+    // Create a new term.
+    $term = new stdClass();
+    $term->name = trim($name);
+    $term->vid = $vid;
+    taxonomy_term_save($term);
+  }
+  else {
+    // Get the first found term.
+    $term = reset($terms);
+  }
+
+  return $term;
+}
+
+/**
+ * Analyze a slideshare RSS feed to extract slideshows information.
+ *
+ * @param string $type
+ *   RSS Type of the feed : 'user', 'tag' or 'slideshow' (default).
+ *
+ * @param int $id
+ *   Identifier or string associated with the type.
+ *
+ * @return array
+ *   An array of object, each one containing an analyzed slideshow.
+ */
+function scald_slideshare_feed($type, $id, $limit = 10) {
+  // API Validation parameters.
+  $slideshare_hash = sha1(variable_get('scald_slideshare_shared_secret') . REQUEST_TIME);
+
+  if ($type == 'user') {
+    $url = SCALD_SLIDESHARE_RSS . '/get_slideshows_by_user?username_for=' . $id;
+  }
+  elseif ($type == 'slideshow') {
+    if (preg_match("/^http/", $id)) {
+      $url = SCALD_SLIDESHARE_RSS . '/get_slideshow?slideshow_url=' . $id;
+    }
+    else {
+      $url = SCALD_SLIDESHARE_RSS . '/get_slideshows?slideshow_id=' . $id;
+    }
+  }
+  elseif ($type == 'tag') {
+    $url = SCALD_SLIDESHARE_RSS . '/get_slideshows_by_tag?tag=' . $id;
+  }
+  else {
+    $url = SCALD_SLIDESHARE_RSS . '/get_slideshow?slideshow_id=' . $id;
+  }
+  // Detailed 1 for tags retrieving.
+  $url .= '&limit=' . $limit . '&detailed=1&api_key=' . variable_get('scald_slideshare_api_key') . '&hash=' . $slideshare_hash . '&ts=' . REQUEST_TIME;
+
+  $response = drupal_http_request($url);
+  $items = array();
+
+  if ($response->code >= 200 && $response->code < 400 && !empty($response->data)) {
+    $dom = new DOMDocument();
+
+    if ($dom->loadXML($response->data)) {
+      foreach ($dom->getElementsByTagName('Slideshow') as $item) {
+        $items[] = scald_slideshare_parse_item($item);
+      }
+    }
+  }
+  else {
+    watchdog('scald_slideshare', 'Error Feed retrieving at URL : @url - Response code : @error', array('@url' => $url, '@error' => $response->code));
+  }
+  return $items;
+}
+
+/**
+ * Get information on a specific slideshow.
+ *
+ * @param int $id
+ *   The Slideshow id
+ *
+ * @return object
+ *   An object containing the Slideshow informations. For information on
+ *   the object format, see @scald_slideshare_feed.
+ */
+function scald_slideshare_slideshow($id) {
+  $items = scald_slideshare_feed('slideshow', $id);
+  return $items[0];
+}
+
+/**
+ * Analyze a XML DOMElement item to extract interesting info.
+ *
+ * @param object $item
+ *   An object of classe DOMElement corresponding to an element of the feed.
+ *
+ * @return array
+ *   An abject containing various slideshow informations.
+ */
+function scald_slideshare_parse_item($item) {
+  $info = new stdClass();
+  // Fetch the slideshow ID.
+  $info->id = $item->getElementsByTagName('ID')->item(0)->nodeValue;
+
+  // Slideshow Title.
+  $info->title = $item->getElementsByTagName('Title')->item(0)->nodeValue;
+
+  // Slideshow dimensions.
+  // The slideshare API doesn't provide original slideshow dimensions.
+  $info->width = 480;
+  $info->height = 365;
+  // Now we try to get the dimensions from the OEmbed API instead.
+  if ($oembed = scald_slideshare_slideshow_oembed($item->getElementsByTagName('URL')->item(0)->nodeValue)) {
+    $info->width = ($oembed->width ? $oembed->width : $info->width);
+    $info->height = ($oembed->height ? $oembed->height : $info->height);
+    $info->total_slides = ($oembed->total_slides ? $oembed->total_slides : $info->total_slides);
+  }
+
+  // Thumbnail data.
+  $thumb = $item->getElementsByTagName('ThumbnailURL')->item(0)->nodeValue;
+  $info->thumbnail = array('src' => 'http:' . $thumb);
+
+  // Slideshow tags.
+  $info->tags = array();
+  $tags = $item->getElementsByTagName('Tag');
+  foreach ($tags as $tag) {
+    $info->tags[] = $tag->nodeValue;
+  }
+
+  // Author.
+  $info->author = $item->getElementsByTagName('Username')->item(0)->nodeValue;
+
+  return $info;
+}
+
+/**
+ * Get OEmbed information on a specific slideshow.
+ *
+ * @param string $url
+ *   The slideshow URL
+ *
+ * @return object
+ *   An object containing the slideshow informations.
+ * Note: OEmbed does not include tags but does include slideshow dimensions
+ */
+function scald_slideshare_slideshow_oembed($url) {
+  $info = FALSE;
+
+  $info = new stdClass();
+
+  $data = scald_slideshare_parse_url($url);
+
+  // ID.
+  $info->id = $data->slideshow_id;
+
+  // Title.
+  $info->title = $data->title;
+
+  // Author.
+  $info->author = $data->author_name;
+
+  // Slideshow dimensions.
+  $info->width = $data->width;
+  $info->height = $data->height;
+
+  // Thumbnail.
+  if ($data->thumbnail) {
+    $info->thumbnail = array(
+      'src'    => $data->thumbnail,
+      'width'  => $data->thumbnail_width,
+      'height' => $data->thumbnail_height,
+    );
+  }
+
+  // Version.
+  $info->version_no = $data->version_no;
+
+  // Tags.
+  $info->tags = array();
+
+  // Total slides.
+  $info->total_slides = $data->total_slides;
+
+  return $info;
+}
+
+/**
+ * Checks if a slideshow has already been imported, based on its slideshow id.
+ *
+ * @param int $id
+ *   The slideshow identifier
+ *
+ * @return mixed
+ *   FALSE if the slideshow was never imported, the scald identifier of
+ *   the slideshow otherwise.
+ */
+function scald_slideshare_already_imported($id) {
+  $query = array('provider' => 'scald_slideshare', 'base_id' => $id);
+  return scald_search($query, FALSE, TRUE);
+}
+
+/**
+ * Form element validation handler for Slideshare url.
+ */
+function scald_slideshare_validate_url($element, &$form_state) {
+  $data = scald_slideshare_parse_url($form_state['values']['url']);
+
+  if (!$data) {
+    form_error($element, t('Invalid Slideshare slideshow URL.'));
+  }
+  elseif (scald_slideshare_already_imported($data->slideshow_id)) {
+    form_error($element, t('Slideshare slideshow already imported.'));
+  }
+}
+
+/**
+ * Parse a Slideshare URL.
+ */
+function scald_slideshare_parse_url($url) {
+  $data = NULL;
+
+  // Build the full OEmbed URL.
+  // We use Json method.
+  $complete_url = SCALD_SLIDESHARE_OEMBED . '?url=' . $url . '&format=json';
+
+  $response = drupal_http_request($complete_url);
+  if (empty($response->error) && !empty($response->data)) {
+    $data = json_decode($response->data);
+  }
+  else {
+    $data = FALSE;
+  }
+
+  return $data;
+}

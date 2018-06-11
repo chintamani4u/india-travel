@@ -1,0 +1,141 @@
+<?php
+/**
+ * @file
+ *   Defines a Title + Link display context for Scald.
+ *
+ */
+
+/**
+ * Implements hook_scald_contexts().
+ */
+function scald_titlelink_scald_contexts() {
+  return array(
+    'titlelink' => array(
+      'title' => t('Title with link'),
+      'description' => t('Provides a display context which shows only title with a link to the actual file.'),
+      'render_language' => 'XHTML',
+      'provider' => 'scald_titlelink',
+      'parseable'       => FALSE,
+      'formats'    => array(
+      ),
+    ),
+    'download' => array(
+      'title' => t('Thumbnail with low resolution and high resolution download'),
+      'description' => t('Provides a display context which shows only title with a link to download low resolution and high resolution files.'),
+      'render_language' => 'XHTML',
+      'provider' => 'scald_titlelink',
+      'parseable'       => FALSE,
+      'formats'    => array(
+      ),
+    )
+  );
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ */
+function scald_titlelink_entity_info_alter(&$entity_info) {
+  $contexts = scald_contexts();
+  foreach ($contexts as $slug => $context) {
+    // Go to work only on non-hidden titlelink contexts
+    if ($context['provider'] == 'scald_titlelink' && !isset($context['hidden'])) {
+      $entity_info['scald_atom']['view modes'][$slug] = array(
+        'label' => $context['title'],
+        'custom settings' => FALSE,
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_scald_render().
+ */
+function scald_titlelink_scald_render($atom, $context, $options = array()) {
+
+  /*
+   * Enable a thumbnail image to be linked to lores version in "download" context.
+   * add both lores and hires versions
+   */
+
+  if ($context == 'download') {
+    //dsm($atom);
+    $title = $atom->title;
+    $thumbnail_uri = $atom->thumbnail_source;
+    $lores_uri = $atom->field_image_lores['und'][0]['uri'];
+    $hires_uri = $atom->field_image_hires['und'][0]['uri'];
+    //Render the thumbnail with links to lores and hires versions
+    $thumbnail = theme('image_style', array(
+      'attributes' => array('title' => $title),
+      'style_name' => 'thumbnail',
+      'path' => $thumbnail_uri
+    ));
+
+    if (!empty($lores_uri)) {
+      $thumbnail = l($thumbnail, file_create_url($lores_uri), array('html' => TRUE));
+      $loresLink = ' <span class="lores download">' . l(t('low resolution'), file_create_url($lores_uri), array(
+        'attributes' => array('title' => $title),
+        'html' => TRUE
+      )) . '</span> ';
+    }
+    if (!empty($hires_uri)) {
+
+      $hiresLink = ' <span class="hires download">' . l(t('high resolution'), file_create_url($hires_uri), array(
+        'attributes' => array('title' => $title),
+        'html' => TRUE
+      )) . '</span>';
+    }
+
+    return '<div class="s">' .
+      $thumbnail
+      . '<br />'
+      . $loresLink
+      . $hiresLink
+      . '</div>';
+
+  }
+  else {
+    // Hackish way to get the URL building for the link.
+    switch ($atom->type) {
+      case 'file':
+        /*
+        * atom->rendered->player is linking to empty, so we will create the link manually. Bulletproof?
+        */
+        $uri = file_create_url($atom->base_entity->uri);
+        $link_url = url($uri, array('absolute' => TRUE));
+        $link_url = file_create_url($atom->scald_file[LANGUAGE_NONE][0]['uri']);
+        break;
+
+      case 'webpage':
+        /*
+        * atom->rendered->player is ok
+        */
+        //$link_url = url($atom->base_id, array('absolute' => TRUE));
+        return $atom->rendered->player;
+        break;
+
+      case 'video':
+        //dsm($atom);
+        if ($atom->provider == 'scald_youtube') {
+          $link_url = 'http://youtu.be/' . $atom->base_id;
+        }
+        break;
+
+      case 'image':
+        $link_url = url($atom->rendered->file_source_url, array('absolute' => TRUE));
+        break;
+
+      case 'customtext':
+        //dsm($atom);
+        return $atom->rendered->player;
+        break;
+
+      default:
+        return $atom->rendered->title;
+        break;
+    }
+    return l($atom->rendered->title, $link_url, array(
+      'attributes' => array(),
+      'html' => TRUE,
+    ));
+  }
+}

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:job="http://jobs.tieto.com/rss/">
+    <channel>
+        <title>Tieto Jobs</title>
+        <description>Tieto jobs feed</description>
+        <link>http://testmytime1.tieto.com:8912/vacancies</link>
+        <item>
+            <title>Senior C++, SQL Developer 10</title>
+            <description>description
+            </description>
+            <pubDate>Thu, 15 Nov 2013 09:46:02 +0000</pubDate>
+            <link>http://testmytime1.tieto.com:8912/vacancies/14480/applications/new</link>
+            <guid isPermaLink="false">14490</guid>
+            <job:date_from>2013-11-08</job:date_from>
+            <job:date_to>2013-12-08</job:date_to>
+            <job:form_of_employment>Full time</job:form_of_employment>
+            <job:assignment>
+                <job:type>Permanent</job:type>
+                <job:date_from/>
+                <job:date_to/>
+            </job:assignment>
+            <job:job_area>ASM - application service management</job:job_area>
+            <job:job_area>Business Consulting</job:job_area>
+            <job:organization>
+                <job:name>Managed services and transformation - Application Management &amp; ASM Center of Excellence</job:name>
+                <job:description>Description here</job:description>
+            </job:organization>
+            <job:locations>
+                <job:location>
+                    <job:country>Finland</job:country>
+                    <job:cities>
+                        <job:city>Helsinki</job:city>
+                        <job:city>Lahti</job:city>
+                        <job:city>Location negotiable</job:city>
+                    </job:cities>
+                </job:location>
+                <job:location>
+                    <job:country>Latvia</job:country>
+                    <job:cities>
+                        <job:city>Riga</job:city>
+                    </job:cities>
+                </job:location>
+            </job:locations>
+			<job:location_list>Austria - Wien, Linz, Graz</job:location_list>
+            <job:apply_url>http://testmytime1.tieto.com:8912/vacancies/14480/applications/new</job:apply_url>
+            <job:contact_information>Best regards,
+                Tieto Corporation
+                Priyanka Dwivedi
+                priyanka.dwivedi@tieto.com</job:contact_information>
+        </item>
+        </channel>
+    </rss>

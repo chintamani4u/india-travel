@@ -1,0 +1,26 @@
+From 57305e69f5817784ae4e1c95f6a5114c892d79c2 Mon Sep 17 00:00:00 2001
+From: Thijs van den Anker <thijs@capitalv.nl>
+Date: Thu, 8 Aug 2013 09:19:08 +0200
+Subject: [PATCH] Warning message about deleting content when deleting a user
+
+---
+ views_bulk_operations.module | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/views_bulk_operations.module b/views_bulk_operations.module
+index 5340588..9221ae8 100644
+--- a/views_bulk_operations.module
++++ b/views_bulk_operations.module
+@@ -568,6 +568,9 @@ function views_bulk_operations_config_form_validate($form, &$form_state) {
+ function views_bulk_operations_confirm_form($form, &$form_state, $view, $output) {
+   $vbo = _views_bulk_operations_get_field($view);
+   $operation = $form_state['operation'];
++  if($operation->entityType == 'user' && $operation->operationId == 'action::views_bulk_operations_delete_item') {
++    drupal_set_message('Caution: Deleting a user deletes all it\'s content!', 'warning');
++  }
+   $rows = $form_state['selection'];
+   $query = drupal_get_query_parameters($_GET, array('q'));
+   $form = confirm_form($form,
+-- 
+1.8.3.4
+

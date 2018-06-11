@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Panopoly feature.
+ */
+
+include_once 'tieto_panopoly.features.inc';

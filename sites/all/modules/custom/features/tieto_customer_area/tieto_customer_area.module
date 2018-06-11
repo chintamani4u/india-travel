@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Customer Area feature.
+ */
+
+include_once 'tieto_customer_area.features.inc';

@@ -1,0 +1,5 @@
+name = Auto clone translate 
+description = Makes de-at clones from nodes
+package = Fields
+core = 7.x
+

@@ -1,0 +1,39 @@
++++ field_collection.module	2014-05-05 03:31:53.679161400 -0700
+@@ -1530,7 +1530,8 @@
+   $parents = $parent_element['#field_parents'];
+ 
+   $field_state = field_form_get_state($parents, $field_name, $langcode, $form_state);
+-
++  $_field_state = drupal_array_get_nested_value($form_state['field']['#parents'], $address);
++  
+   // Go ahead and renumber everything from our delta to the last
+   // item down one. This will overwrite the item being removed.
+   for ($i = $delta; $i <= $field_state['items_count']; $i++) {
+@@ -1551,9 +1552,11 @@
+     // Move the entity in our saved state.
+     if (isset($field_state['entity'][$i + 1])) {
+       $field_state['entity'][$i] = $field_state['entity'][$i + 1];
++	  $_field_state[$i] = $_field_state[$i + 1];
+     }
+     else {
+       unset($field_state['entity'][$i]);
++	  unset($_field_state[$i]);
+     }
+   }
+ 
+@@ -1588,8 +1591,14 @@
+       $input[$key]['_weight'] = $weight++;
+     }
+   }
+-
++  foreach ($field_state['entity'] as $i => $info) {
++    if (!$info->item_id) {
++      unset($field_state['entity'][$i]);
++      unset($_field_state['entity'][$i]);
++    }
++}
+   drupal_array_set_nested_value($form_state['input'], $address, $input);
++  drupal_array_set_nested_value($form_state['field']['#parents'], $address, $_field_state);
+   field_form_set_state($parents, $field_name, $langcode, $form_state, $field_state);
+ 
+   $form_state['rebuild'] = TRUE;

@@ -1,0 +1,37 @@
+7.x-1.0-beta5
+-------------
+
+Says beta5 now...change to a stable release number
+
+7.x-1.1
+-------
+
+Added validation function into the file field for image provider; intent of the validation function is to 
+prevent uploading broken images or images that don't match their extension. 
+
+The functions are available in tieto_materialbank.module. Please note that the validation currently resides 
+on the fact that file module does not detect the file mimetype correctly, instead it grabs it from the extension.
+
+This is subject to change, if it does change we will have to modify this function accordingly.
+
+    TIET-1458 Check image file extension vs content
+    TIET-1454 As administrator/editor I want to be sure every atom is correct before saving to database
+
+    PR #219
+
+	TIET-1539 & TIET-1644 : Remove migration related module & its dependency Pull request id #220
+	Removed  dependency of scald_migrate from tieto_materialbank
+
+7.x-1.2
+-------
+
+Added Image alt tag + title possibility to Atoms.
+TIET-1434 + PR#226
+
+PR #265 - Feature recreated to make features api happy api:2
+
+12.03.2014 - Panels update made many features overridden #378
+
+01.04.2014 - TIET-1857: Feature recreated to replace PDF page link to actual PDF links for material bank pages #409
+
+15.04.2014 - Recreated this feature to go with chosen module update #438

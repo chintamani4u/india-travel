@@ -1,0 +1,27 @@
+From 5b723544112147ca5cdba3b17ed318bb88715350 Mon Sep 17 00:00:00 2001
+From: "sachin.wable@tieto.com" <sachin.wable@tieto.com>
+Date: Wed, 9 Sep 2015 10:54:55 +0530
+Subject: [PATCH] Changing sequence of learn more and ok buttons and changing
+ learn more from button to link.
+
+---
+ .../eu_cookie_compliance/theme/eu-cookie-compliance-popup-info.tpl.php  | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/docroot/sites/all/modules/contrib/eu_cookie_compliance/theme/eu-cookie-compliance-popup-info.tpl.php b/docroot/sites/all/modules/contrib/eu_cookie_compliance/theme/eu-cookie-compliance-popup-info.tpl.php
+index 69e2668..226306a 100644
+--- a/docroot/sites/all/modules/contrib/eu_cookie_compliance/theme/eu-cookie-compliance-popup-info.tpl.php
++++ b/docroot/sites/all/modules/contrib/eu_cookie_compliance/theme/eu-cookie-compliance-popup-info.tpl.php
+@@ -22,8 +22,8 @@
+       <?php print $message ?>
+     </div>
+     <div id="popup-buttons">
++      <a href="#" class="find-more-button"><?php print $disagree_button; ?></a>
+       <button type="button" class="agree-button"><?php print $agree_button; ?></button>
+-      <button type="button" class="find-more-button"><?php print $disagree_button; ?></button>
+     </div>
+   </div>
+ </div>
+-- 
+1.8.3.msysgit.0
+

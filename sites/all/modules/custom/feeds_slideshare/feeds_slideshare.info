@@ -1,0 +1,7 @@
+name = Feeds: Slideshare
+description = Adds a Slideshare feed processor to the Feeds module
+core = 7.x
+dependencies[] = "feeds"
+package = Feeds
+files[] = FeedsSlideshareParser.inc
+

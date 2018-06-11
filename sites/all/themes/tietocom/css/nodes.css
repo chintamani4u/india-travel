@@ -1,0 +1,599 @@
+/**
+ * @file
+ * Node Styling
+ *
+ * Style anything that isn't in the $content variable.
+ */
+/*
+$icons-spacing: 20px;
+$icons-position: 50%;
+@import "icons/*.png";
+
+$large-spacing: 20px;
+$large-position: 50%;
+@import "icons/large/*.png";
+*/
+.node-type-tieto-campaign .pane-tieto-key-topics-key-topics-social-icons {
+  float: left;
+  display: inline-flex;
+  position: relative;
+  font-size: 1.8em;
+}
+.node-type-tieto-campaign .pane-tieto-key-topics-key-topics-social-icons a {
+  padding: 3px;
+}
+.node-type-tieto-campaign .pane-tieto-key-topics-key-topics-social-icons .key_topics_social_icons {
+  margin-left: 10px;
+}
+.node-type-tieto-campaign .pane-tieto-key-topics-key-topics-social-icons .pane-title {
+  font-size: 20px;
+}
+.node-type-tieto-campaign #block-menu-menu-customer-area {
+  display: none;
+}
+.node-type-tieto-campaign .region-footer {
+  background-color: #fff;
+}
+
+/* Career Subpages */
+/* All Open Jobs */
+.section-careers #header div.header-image {
+  background-position: center top;
+  background-size: cover;
+}
+@media all and (min-width: 1024px) {
+  .section-careers #header div.header-image {
+    background-position: center top;
+    background-size: 100% auto;
+  }
+}
+.section-careers.node-type-concept-page #header div.header-image {
+  position: relative;
+}
+
+/* All Open Jobs for .fi */
+.section-uramahdollisuudet #header div.header-image {
+  background-position: center top;
+  background-size: cover;
+}
+@media all and (min-width: 1024px) {
+  .section-uramahdollisuudet #header div.header-image {
+    background-position: center top;
+    background-size: 100% auto;
+  }
+}
+.section-uramahdollisuudet.node-type-concept-page #header div.header-image {
+  position: relative;
+}
+
+/* All Open Jobs for .se */
+.section-karriar #header div.header-image {
+  background-position: center top;
+  background-size: cover;
+}
+@media all and (min-width: 1024px) {
+  .section-karriar #header div.header-image {
+    background-position: center top;
+    background-size: 100% auto;
+  }
+}
+.section-karriar.node-type-concept-page #header div.header-image {
+  position: relative;
+}
+
+/* All Open Jobs for .ee*/
+.section-tieto-careers-open-jobs #header div.header-image {
+  background-position: center top;
+  background-size: cover;
+  position: relative;
+}
+@media all and (min-width: 1024px) {
+  .section-tieto-careers-open-jobs #header div.header-image {
+    background-position: center top;
+    background-size: 100% auto;
+  }
+}
+.section-tieto-careers-open-jobs.node-type-concept-page #header div.header-image {
+  position: relative;
+}
+
+.front .view-main-carousel {
+  clip-path: polygon(0 0, 100% 0, calc(100% + 80vh) 100%, 0 90%);
+}
+.front #header div.header-image {
+  background-color: white;
+}
+
+#page {
+  background-color: #62b3e5;
+}
+
+@media screen and (min-width: 992px) {
+  .color-slider {
+    background-color: transparent;
+  }
+
+  #block-tieto-offcanvas-menu-offcanvas-menu .menu__item span.button a, #block-tieto-offcanvas-menu-offcanvas-menu .menu__item span.button > span {
+    display: inline;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid transparent;
+    transition: border-color .2s;
+  }
+
+  #block-tieto-offcanvas-menu-offcanvas-menu .menu__item span.button a:hover, #block-tieto-offcanvas-menu-offcanvas-menu .menu__item span.button > span:hover {
+    border-bottom: 2px solid white;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+}
+.node {
+  /* Node wrapper */
+}
+.preview .node {
+  /* Preview of the content before submitting new or updated content */
+  /* background-color: #ffffea; */
+  /* Drupal core uses a #ffffea background */
+}
+.node .node-title {
+  /* Node title */
+}
+.node .user-picture {
+  /* The picture of the node author */
+}
+.node .submitted {
+  /* The "posted by" information */
+}
+.node .content {
+  /* Node's content wrapper */
+}
+.node ul.links {
+  /* Node links. See also the ul.links declaration in the pages.css. */
+}
+
+.node-promoted {
+  /* A node that has been promoted to the front page */
+}
+
+.node-sticky {
+  /* A sticky node (displayed before others in a list) */
+}
+
+.node-by-viewer {
+  /* A node created by the current user */
+}
+
+.node-teaser {
+  /* A node displayed as teaser */
+}
+
+article.view-mode-full {
+  /* A nofe displayed in a full page */
+  width: 75%;
+}
+
+/*
+ * All nodes are given a node-FOO class that describes the type of content that
+ * it is. If you create a new content type called "my-custom-type", it will
+ * receive a "node-my-custom-type" class.
+ */
+.node-page {
+  /* Page content node */
+}
+
+.node-article {
+  /* Article content node */
+}
+
+.node-tieto-jobs-vacancy {
+  max-width: 745px;
+}
+
+.node-unpublished {
+  /* Unpublished nodes */
+  /* background-color: #fff4f4; */
+  /* Drupal core uses a #fff4f4 background */
+}
+.node-unpublished p.unpublished {
+  /* The word "Unpublished" displayed underneath the content. */
+  height: 0;
+  overflow: visible;
+  color: #d8d8d8;
+  font-size: 75px;
+  line-height: 1;
+  font-family: Impact, "Arial Narrow", Helvetica, sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-align: center;
+  word-wrap: break-word;
+}
+
+.node-type-contact .region-header,
+.node-type-tieto-news-article .region-header,
+.node-type-cision-stock-exchange-releases .region-header {
+  padding-bottom: 4em;
+}
+
+.section-tieto-times-issue #header {
+  margin-bottom: .5em;
+  margin-bottom: 0;
+}
+
+.node-type-magazine-article .field-content.magazineheader img,
+.section-tieto-times-issue .field-content.magazineheader img,
+.section-magazines .field-content.magazineheader img {
+  position: absolute;
+  top: -160px;
+}
+.node-type-magazine-article .view-tieto-times .view-header img,
+.section-tieto-times-issue .view-tieto-times .view-header img,
+.section-magazines .view-tieto-times .view-header img {
+  position: absolute;
+  top: -110px;
+}
+.node-type-magazine-article #header .block-search, .node-type-magazine-article #header .block-menu, .node-type-magazine-article #header .block-menu-block, .node-type-magazine-article #header .block-tieto-megamenus,
+.section-tieto-times-issue #header .block-search,
+.section-tieto-times-issue #header .block-menu,
+.section-tieto-times-issue #header .block-menu-block,
+.section-tieto-times-issue #header .block-tieto-megamenus,
+.section-magazines #header .block-search,
+.section-magazines #header .block-menu,
+.section-magazines #header .block-menu-block,
+.section-magazines #header .block-tieto-megamenus {
+  display: none;
+}
+.node-type-magazine-article #header .region-header,
+.section-tieto-times-issue #header .region-header,
+.section-magazines #header .region-header {
+  height: 48px;
+  padding: 20px 59px 20px 0;
+  clear: both;
+}
+@media all and (max-width: 760px) {
+  .node-type-magazine-article #header .header-inner,
+  .section-tieto-times-issue #header .header-inner,
+  .section-magazines #header .header-inner {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+  .node-type-magazine-article #header .region-header,
+  .section-tieto-times-issue #header .region-header,
+  .section-magazines #header .region-header {
+    position: relative;
+  }
+}
+.node-type-magazine-article .breadcrumb,
+.section-tieto-times-issue .breadcrumb,
+.section-magazines .breadcrumb {
+  display: none;
+}
+.node-type-magazine-article #main,
+.section-tieto-times-issue #main,
+.section-magazines #main {
+  position: relative;
+}
+
+.dnd-atom-wrapper.type-image {
+  padding: 10px;
+}
+
+/* JS adds a class to the last visible pane per column, use this class to make the rows appear equal height */
+.node-type-industry-hub-page .industryhub-column {
+  min-height: 0;
+}
+.node-type-industry-hub-page .industryhub-column .panel-pane {
+  min-height: 1px;
+}
+.node-type-industry-hub-page .industryhub-column .panel-pane .pane-content:after {
+  content: ".";
+  visibility: hidden;
+  display: block;
+  height: 0;
+  clear: both;
+}
+@media all and (min-width: 761px) {
+  .node-type-industry-hub-page .industryhub-container {
+    overflow: hidden;
+  }
+  .node-type-industry-hub-page .industryhub-container .tieto-panel-styles-region, .node-type-industry-hub-page .industryhub-container .tieto-pane-wrapper {
+    overflow: visible;
+  }
+  .node-type-industry-hub-page .industryhub-container .panel-panel-inner {
+    position: relative;
+  }
+  .node-type-industry-hub-page .industryhub-container .panel-panel-inner .panel-pane {
+    margin-top: 4px;
+    margin-bottom: 0;
+    overflow: visible;
+    position: relative;
+  }
+}
+
+.newsroom-search, #views-exposed-form-tieto-news-room-search-panel-pane-1 {
+  margin: 0px;
+  z-index: 1003;
+}
+
+.newsroom-search #news_search {
+  padding-left: 7px;
+  border: 1px solid #B8DCF0;
+  height: 35px;
+  width: 240px;
+}
+
+.newsroom-search .search-icon {
+  color: #38A7E4;
+  margin-left: -25px;
+}
+
+.newsroom-search input::-webkit-input-placeholder {
+  color: #505050;
+}
+
+.newsroom-search input:-moz-placeholder {
+  /* Firefox 18- */
+  color: #505050;
+}
+
+.newsroom-search input::-moz-placeholder {
+  /* Firefox 19+ */
+  color: #505050;
+}
+
+.newsroom-search input:-ms-input-placeholder {
+  color: #505050;
+}
+
+.newsroom-listing #edit-search-api-views-fulltext {
+  float: left;
+  padding-left: 7px;
+  border: 1px solid #B8DCF0;
+  height: 35px;
+  width: 240px;
+}
+
+#views-exposed-form-tieto-news-room-search-panel-pane-1 {
+  margin: 0px;
+  z-index: 1003;
+  padding-bottom: 0px;
+  margin-bottom: 15px;
+}
+
+/*newsroom related css*/
+.newsroom-wrapper .ajax-progress-throbber {
+  display: none;
+}
+.newsroom-wrapper .news-title {
+  clear: both;
+  float: left;
+}
+.newsroom-wrapper .newsroom-section-one .one-a .news-tile-title a, .newsroom-wrapper .newsroom-section-one .one-b .news-tile-title a, .newsroom-wrapper .newsroom-section-one .two-a .news-tile-title a, .newsroom-wrapper .newsroom-section-one .two-b .news-tile-title a, .newsroom-wrapper .newsroom-section-one .views-field-title a {
+  color: white;
+}
+.newsroom-wrapper .newsroom-section-one .one-a .news-tile-title a:hover, .newsroom-wrapper .newsroom-section-one .one-b .news-tile-title a:hover, .newsroom-wrapper .newsroom-section-one .two-a .news-tile-title a:hover, .newsroom-wrapper .newsroom-section-one .two-b .news-tile-title a:hover, .newsroom-wrapper .newsroom-section-one .views-field-title a:hover {
+  padding-bottom: 1px;
+  text-decoration: none;
+  border-bottom: 1px solid #FFF;
+  background-color: transparent;
+}
+.newsroom-wrapper .newsroom-section-one .one-a, .newsroom-wrapper .newsroom-section-one .one-b, .newsroom-wrapper .newsroom-section-one .two-a, .newsroom-wrapper .newsroom-section-one .two-b {
+  background-color: #63B3E3;
+  color: white;
+}
+.newsroom-wrapper .newsroom-section-one .one-a .pager li a, .newsroom-wrapper .newsroom-section-one .one-b .pager li a, .newsroom-wrapper .newsroom-section-one .two-a .pager li a, .newsroom-wrapper .newsroom-section-one .two-b .pager li a, .newsroom-wrapper .newsroom-section-one .news-tile-more a, .newsroom-wrapper .newsroom-section-one .news-tile-mgr-transactions a {
+  color: white !important;
+}
+.newsroom-wrapper .newsroom-section-two .news-tile {
+  background-color: #F8F8F8;
+}
+.newsroom-wrapper .newsroom-row {
+  width: 100%;
+  clear: both;
+  display: table;
+  box-sizing: border-box;
+}
+.newsroom-wrapper .newsroom-row .news-tile-title {
+  padding: 5px;
+  font-size: 14px;
+  line-height: 1.66667em;
+  text-transform: uppercase;
+  padding-left: 0;
+}
+.newsroom-wrapper .newsroom-row .news-tile-title a {
+  color: #5e5e5e;
+}
+.newsroom-wrapper .newsroom-row .tile-col-1 {
+  margin: 1px 0px 1px 0px;
+  padding: 10px;
+  min-height: 190px;
+}
+.newsroom-wrapper .newsroom-row .tile-col-2 {
+  margin: 1px 0px 1px 0px;
+  padding: 10px;
+  min-height: 190px;
+}
+@media (min-width: 800px) {
+  .newsroom-wrapper .newsroom-row .news-tile {
+    width: 46%;
+  }
+  .newsroom-wrapper .newsroom-row .tile-col-1 {
+    float: left;
+    min-height: 208px;
+  }
+  .newsroom-wrapper .newsroom-row .tile-col-2 {
+    float: right;
+    min-height: 208px;
+  }
+}
+@media (max-width: 760px) {
+  .newsroom-wrapper .newsroom-row .flex-nav-container {
+    float: none;
+  }
+  .newsroom-wrapper .newsroom-row .flexslider .flex-control-nav {
+    bottom: -10px;
+  }
+}
+@media only screen and (min-width: 768px) and (max-width: 1024px) and (-webkit-min-device-pixel-ratio: 1) {
+  .newsroom-wrapper .newsroom-row .tile-col-1 {
+    float: left;
+    min-height: 208px;
+  }
+  .newsroom-wrapper .newsroom-row .tile-col-2 {
+    float: right;
+    min-height: 208px;
+  }
+}
+.newsroom-wrapper .newsroom-row .yt-tile, .newsroom-wrapper .newsroom-row .fb-tile {
+  height: 300px;
+}
+.newsroom-wrapper .newsroom-row .news-tile {
+  clear: both;
+  margin: 0;
+  position: relative;
+  box-sizing: border-box;
+  width: 50%;
+  border-top: 1px solid #fff;
+  border-left: 1px solid #fff;
+  height: 100%;
+  display: table-cell;
+  float: none;
+}
+.newsroom-wrapper .newsroom-row .news-tile .view .element-invisible {
+  display: none;
+}
+.newsroom-wrapper .newsroom-row .news-tile .views-field-field-release-date {
+  margin-top: 10px;
+  font-size: 12px;
+}
+.newsroom-wrapper .newsroom-row .news-tile .view-content, .newsroom-wrapper .newsroom-row .news-tile .views-field views-field-body, .newsroom-wrapper .newsroom-row .news-tile .views-field-text {
+  min-height: 110px;
+  margin-bottom: 10px;
+}
+.newsroom-wrapper .newsroom-row .news-tile .views-field-title {
+  min-height: 80px;
+  margin-top: 5px;
+}
+.newsroom-wrapper .newsroom-row .news-tile .views-field-timestamp {
+  font-weight: normal;
+  font-size: 100%;
+}
+.newsroom-wrapper .newsroom-row .news-tile #flexslider_views_slideshow_tieto_blogs-newsroom_blog, .newsroom-wrapper .newsroom-row .news-tile #flexslider_views_slideshow_tweets-newsroomblock {
+  min-height: 130px;
+}
+.newsroom-wrapper .newsroom-row .news-tile #flexslider_views_slideshow_news_room_fb_block-block {
+  min-height: 214px;
+}
+.newsroom-wrapper .newsroom-row .news-tile a.flex-prev, .newsroom-wrapper .newsroom-row .news-tile a.flex-next, .newsroom-wrapper .newsroom-row .news-tile .pager-first, .newsroom-wrapper .newsroom-row .news-tile .pager-previous, .newsroom-wrapper .newsroom-row .news-tile .pager-next, .newsroom-wrapper .newsroom-row .news-tile .pager-last {
+  display: none;
+}
+.newsroom-wrapper .newsroom-row .news-tile .item-list {
+  margin: 0px;
+  width: 90px;
+  float: left;
+}
+.newsroom-wrapper .newsroom-row .news-tile .item-list ul.pager {
+  width: 90px;
+  text-align: left;
+  vertical-align: baseline;
+  font-size: 12px;
+  clear: both;
+  margin: 0px;
+  float: left;
+}
+.newsroom-wrapper .newsroom-row .news-tile .item-list ul.pager li {
+  border-right: 1px solid #FFFFFF;
+  background-color: transparent;
+  float: left;
+}
+.newsroom-wrapper .newsroom-row .news-tile .item-list ul.pager li.pager-next, .newsroom-wrapper .newsroom-row .news-tile .item-list ul.pager li.pager-last, .newsroom-wrapper .newsroom-row .news-tile .item-list ul.pager li.pager-first, .newsroom-wrapper .newsroom-row .news-tile .item-list ul.pager li.pager-previous {
+  border-right: 0px solid #FFFFFF;
+}
+.newsroom-wrapper .newsroom-row .news-tile .item-list ul.pager li.pager-current {
+  background-color: transparent;
+  line-height: 3px;
+  display: inline-block;
+}
+.newsroom-wrapper .newsroom-row .news-tile .item-list ul.pager a {
+  display: block;
+  line-height: 3px;
+  background-color: transparent;
+  color: #0065a1;
+  font-weight: 700;
+}
+.newsroom-wrapper .newsroom-row .news-tile .item-list ul.pager a:hover {
+  color: #d51968;
+  background-color: transparent;
+}
+.newsroom-wrapper .newsroom-row .news-tile:first-child {
+  border-left: 0;
+}
+.newsroom-wrapper .newsroom-row .news-tile-more {
+  position: absolute;
+  font-size: 12px;
+  right: 10px;
+  margin: 0;
+}
+.newsroom-wrapper .newsroom-row .news-tile-mgr-transactions {
+  position: absolute;
+  font-size: 12px;
+  right: 10px;
+  margin-top: -23px;
+}
+.newsroom-wrapper .newsroom-row .news-tile-mgr-transactions .see-more {
+  float: right;
+}
+.newsroom-wrapper .newsroom-row:first-child .news-tile {
+  border-top: 0;
+}
+
+.view-id-tieto_news_solr_search .view-filters form {
+  display: none;
+}
+
+.g-recaptcha {
+  float: left;
+  clear: both;
+}
+
+fieldset.captcha {
+  border-width: 0 0 0 0 !important;
+  float: left;
+  clear: both;
+}
+
+.captcha .fieldset-legend {
+  display: none;
+}
+
+.captcha .fieldset-wrapper .fieldset-description {
+  padding-bottom: 10px;
+}
+
+.webform-component--he-she,
+.webform-component--his-her {
+  display: none;
+}
+
+#webform-client-form-108086 .form-radios .form-item {
+  display: inline;
+}
+
+.view-dom-id-433d96601e29cc16dd0c25b93dab714d .views-field.views-field-field-phone-number {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .newsroom-wrapper .newsroom-row {
+    display: block;
+    margin: 0;
+    border-top: 0;
+    clear: none;
+  }
+  .newsroom-wrapper .newsroom-row .news-tile {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-left: 0;
+  }
+}

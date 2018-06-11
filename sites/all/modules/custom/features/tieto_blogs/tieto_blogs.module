@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Blogs feature.
+ */
+
+include_once 'tieto_blogs.features.inc';

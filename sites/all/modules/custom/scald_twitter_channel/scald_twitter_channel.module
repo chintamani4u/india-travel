@@ -1,0 +1,434 @@
+<?php
+/**
+ * @file
+ * Code for the Scald Twitter channel feature.
+ */
+
+include_once 'scald_twitter_channel.features.inc';
+
+/**
+ * Implements hook_scald_atom_providers().
+ * Tell Scald that we'll be providing some twitter atoms.
+ */
+function scald_twitter_channel_scald_atom_providers() {
+  return array(
+    'twitter_channel' => 'Tweets hosted on twitter'
+  );
+  // This code will never be hit, but is necessary to mark the string
+  // for translation on localize.d.o
+  t('Twitter channel (username or search) hosted on Twitter');
+}
+
+/**
+ * Implements hook_scald_add_form().
+ */
+function scald_twitter_channel_scald_add_form(&$form, &$form_state) {
+  $form['twitter_channel_identifier'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Twitter Key'),
+    '#description' => t('Can be a username [prepended with @] a hashtag [prepended with #] or a search keyword [no prefix].'),
+    '#size' => 40,
+    '#maxlength' => 255,
+    '#default_value' => '',
+  );
+  $form['twitter_channel_num_items'] = array(
+    '#type' => 'select',
+    '#title' => t('Number of items'),
+    '#description' => t('Maximum number of tweets to pull from the Twitter result-set.'),
+    '#options' => drupal_map_assoc(range(1, 20)),
+    '#default_value' => 1,
+  );
+}
+
+/**
+ * Implements hook_scald_add_form_fill().
+ */
+function scald_twitter_channel_scald_add_form_fill(&$atom, $form, $form_state) {
+  // Get the identifier
+  $identifier = scald_twitter_channel_validate($form_state['values']['twitter_channel_identifier'], TRUE);
+  // Get tweet channel information
+  $infos = scald_twitter_channel_information($identifier);
+
+  $atom->base_id = $identifier;
+  $atom->title = $infos->title;
+
+  //Save num items into data
+
+  $atom->data['twitter_channel_num_items'] = $form_state['values']['twitter_channel_num_items'];
+
+  // Prefill the author
+  $atom->scald_authors[LANGUAGE_NONE][0] = array(
+    'tid' => 0,
+    'taxonomy_term' => (object) (array('name' => $infos->author))
+  );
+
+  // Prefill tags
+  if (isset($infos->tags)) {
+    $i = 0;
+    $tag_array = explode(" ", $infos->tags);
+    foreach ($tag_array as $tag) {
+      $atom->scald_tags[LANGUAGE_NONE][$i] = array(
+        'tid' => $i, // Beware, this is not a real tid, it's just an index
+        'taxonomy_term' => (object) (array('name' => $tag))
+      );
+      $i++;
+    }
+  }
+
+  // Download a copy of the tweet thumbnail. This makes it possible
+  // to do interesting manipulation with image styles presets.
+  $thumb = drupal_http_request($infos->thumbnail['src']);
+  $dir = 'public://twitter';
+  if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
+    $dest = $dir . '/' . $infos->id . '.jpg';
+    $file = file_save_data($thumb->data, $dest);
+
+    if ($file) {
+      // Set the file status to temporary
+      $query = db_update('file_managed')
+        ->condition('fid', $file->fid)
+        ->fields(array('status' => 0))
+        ->execute();
+
+      $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
+    }
+  }
+
+
+}
+
+/*
+  * Implement hook_form_alter()
+  * This is step 2 or edit
+  */
+function scald_twitter_channel_form_alter(&$form, &$form_state, $form_id) {
+  //dsm($form);
+  //dsm($form_state);
+  //dsm($form_id);
+  if ($form_id == 'scald_atom_add_form_options' &&
+    (
+      $form_state['#action'] == "/atom/add/twitter_channel" ||
+      $form_state['form_info']['path'] == 'atom/add/twitter_channel/nojs/%step'
+    )
+  ) {
+    array_unshift($form['#submit'], 'scald_twitter_channel_form_submit');
+
+    /*
+     * Check if we are updating existing one or
+     * creating a new atom. Good way knowing the status is to check if the atom is fetched
+     */
+    $operation = $form_state['scald']['atoms'][0]->fetched;
+    if ($operation) {
+      //Atom is existing so use it's entity baseID as wid
+      $wid = $form_state['scald']['atoms'][0]->base_id;
+      $num = $form_state['scald']['atoms'][0]->data['twitter_channel_num_items'];
+    }
+    else {
+
+      //We are just creating the atom
+      $wid = $form_state['scald']['atoms'][0]->base_id;
+      $num = $form_state['scald']['atoms'][0]->data['twitter_channel_num_items'];
+    }
+
+    $form['base_id'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Twitter Key'),
+      '#description' => t('Can be a username [prepended with @] a hashtag [prepended with #] or a search keyword [no prefix].'),
+      '#size' => 40,
+      '#maxlength' => 255,
+      '#default_value' => $wid,
+      '#required' => TRUE,
+    );
+    $form['twitter_channel_num_items'] = array(
+      '#type' => 'select',
+      '#title' => t('Number of items'),
+      '#description' => t('Maximum number of tweets to pull from the Twitter result-set.'),
+      '#options' => drupal_map_assoc(range(1, 20)),
+      '#default_value' => $num,
+    );
+  }
+}
+
+/**
+ * Implements hook_scald_update_atom().
+ */
+function scald_twitter_channel_scald_update_atom($atom, $mode) {
+  if ($mode == 'atom') {
+    //dsm($atom);
+    $atom->base_id = $atom->base_id;
+    $atom->data['twitter_channel_num_items'] = $atom->twitter_channel_num_items;
+  }
+}
+
+/*
+ * Implement form alter submit
+ */
+
+function scald_twitter_channel_form_submit(&$form, &$form_state) {
+  //dsm($form);
+  //dsm($form_state);
+  //$operation  = $form_state['storage']->atom->fetched;
+
+  //$sid        = $form_state['scald']['atom']->sid;
+  $base_id = $form_state['values']['base_id'];
+  $num_items = $form_state['values']['twitter_channel_num_items'];
+
+  $atom->base_id = $base_id;
+  $atom->data['twitter_channel_num_items'] = $num_items;
+
+  //TODO: Create here twitter channel save functionality
+  //scald_atom_save($atom);
+
+}
+
+/**
+ * Implements hook_scald_fetch().
+ */
+function scald_twitter_channel_scald_fetch($atom, $type) {
+  $file = $atom->scald_thumbnail[LANGUAGE_NONE][0]['uri'];
+  if (file_exists($file)) {
+    $atom->file_source = $atom->thumbnail_source = $file;
+  }
+  $atom->omit_legend = TRUE;
+}
+
+/**
+ * Implements hook_scald_prerender().
+ */
+function scald_twitter_channel_scald_prerender($atom, $context, $options, $mode) {
+  //@TODO add some other players too like Embedded timelines:
+  // https://dev.twitter.com/docs/embedded-timelines
+  $items = $atom->data['twitter_channel_num_items'] ? $atom->data['twitter_channel_num_items'] : 1;
+  if ($mode == 'atom') {
+    //dsm($atom);
+    if ($context != 'sdl_library_item') {
+      try {
+        $twitter_channel_embed = twitter_pull_render($atom->base_id, FALSE, $items);
+      } catch (Exception $e) {
+        watchdog('scald_twitter', $e->getMessage());
+        return FALSE;
+      }
+      $atom->rendered->player = $twitter_channel_embed;
+      $atom->rendered->title = '';
+    }
+  }
+}
+
+
+/**
+ * Creates an atom based on a twitter username id or an object
+ * containing the text information.
+ * @param $text
+ *   Unique identifier of the username on twitter
+ * @return integer
+ *   Unique identifier of the new atom
+ */
+function scald_twitter_channel_register($tweet) {
+  // Fetch the needed information from Tweeter
+  if (is_object($tweet)) {
+    $infos = $tweet;
+  }
+  else {
+    $infos = scald_twitter_channel_info($tweet);
+  }
+
+  // Check if the twitter username has already been imported to prevent duplicate
+  $old = scald_twitter_channel_already_imported($infos->id);
+  if ($old) {
+    return FALSE;
+  }
+
+  // Download a copy of the twitter thumbnail. This makes it possible
+  // to do interesting manipulation with image styles presets.
+  $thumb = drupal_http_request($infos->thumbnail['src']);
+  $dir = 'public://twitter';
+  if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
+    $dest = $dir . '/' . $infos->id . '.jpg';
+    $file = file_save_data($thumb->data, $dest);
+  }
+
+  // Create an atom
+  $atom = new ScaldAtom('twitter', 'scald_twitter_channel', array(
+    'base_id' => $infos->id,
+    'title' => $infos->title,
+  ));
+
+  // And save it
+  $atom_sid = scald_atom_save($atom);
+  // Finally, return this id
+  return $atom_sid;
+}
+
+/**
+ * Checks if an twitter username has already been imported, based on its id.
+ * @param $id
+ *   The twitter identifier
+ * @return mixed
+ *   FALSE if the tweet was never imported, the scald identifier of
+ *   the tweet otherwise.
+ */
+function scald_twitter_channel_already_imported($id) {
+  $query = array('provider' => 'scald_twitter_channel', 'base_id' => $id);
+  return scald_search($query, FALSE, TRUE);
+}
+
+/**
+ * Form element validation handler for twitter identifier
+ *
+ */
+function scald_twitter_channel_check_duplicate($element, &$form_state) {
+  $id = scald_twitter_channel_validate($form_state['values']['identifier'], TRUE);
+  if (!$id) {
+    form_error($element, t('Invalid twitter channel username'));
+  }
+  elseif (scald_twitter_channel_already_imported($id)) {
+    form_error($element, t('twitter username or search already scalded.'));
+  }
+}
+
+
+/**
+ * Parse a Twitter username and check validity
+ *
+ */
+function scald_twitter_channel_validate($string, $check) {
+  $id = FALSE;
+  $string = trim($string);
+
+  if (preg_match("/^http/", $string)) {
+    // This string is a URL, most likely a shortened one. (http://dai.ly, http://bit.ly, etc...)
+    $response = drupal_http_request($string);
+    if ($response->code == 200 && isset($response->redirect_code) && ($response->redirect_code == 301 || $response->redirect_code == 302)) {
+      return scald_twitter_channel_validate($response->redirect_url, $check);
+    }
+  }
+  else {
+    $id = $string;
+  }
+
+  return $id;
+}
+
+/*
+ * Get general information about twitter username
+ * Get all necessary on an given username using twitter API
+ * @param $id
+ *   Unique identifier of the username on twitter
+ * @return object
+ *   Object containing all necessary info.
+ */
+
+function scald_twitter_channel_information($id) {
+  /*
+  * Remove @ sign and # from the beginning only if there is.
+  */
+  $array = array('@', '#');
+  $id = str_replace($array, '', $id);
+
+  // check for twitter-api-php library
+  $lib = libraries_get_path('twitter-api-php');
+
+  require_once($lib . '/TwitterAPIExchange.php');
+
+  $settings = array(
+    'oauth_access_token' => variable_get('twitter_pull_oauth_access_token'),
+    'oauth_access_token_secret' => variable_get('twitter_pull_oauth_access_token_secret'),
+    'consumer_key' => variable_get('twitter_pull_consumer_key'),
+    'consumer_secret' => variable_get('twitter_pull_consumer_secret')
+  );
+
+  $url = 'https://api.twitter.com/1.1/blocks/create.json';
+  $requestMethod = 'POST';
+
+  $postfields = array(
+    'screen_name' => 'usernameToBlock',
+    'skip_status' => '1'
+  );
+
+  $url = 'https://api.twitter.com/1.1/users/show.json';
+  $getfield = '?screen_name=' . $id;
+  $requestMethod = 'GET';
+
+  $twitter = new TwitterAPIExchange($settings);
+  $channel = $twitter->setGetfield($getfield)
+    ->buildOauth($url, $requestMethod)
+    ->performRequest();
+
+  $channel = json_decode($channel);
+
+  if (array_key_exists('errors', $channel)) {
+
+    watchdog('scald_twitter_channel', $channel->errors[0]->message . ", code:" . $channel->errors[0]->code);
+    form_set_error('scald_twitter_channel', 'Invalid scald user id');
+    return FALSE;
+  }
+
+  $info = new stdClass();
+  // ID
+  $info->id = $id;
+  // Title == Name (@username)
+  $info->title = drupal_substr($channel->name . ' (' . $channel->screen_name . ')', 0, 127);
+  // Author
+  $info->author = $channel->name;
+  $info->screen_name = $channel->screen_name;
+  // Thumbnail
+  if ($channel->profile_image_url_https) {
+    // Artwork is always 50x50
+    $info->thumbnail = array(
+      'src' => $channel->profile_image_url_https,
+      'width' => 50,
+      'height' => 50,
+    );
+  }
+
+  // Tags are not available for screen_name or search term
+  $info->tags = '';
+  // License
+  $info->license = 'SC';
+  return $info;
+}
+
+
+/**
+ * Implements hook_scald_contexts().
+ */
+function scald_twitter_channel_scald_contexts() {
+  return array(
+    'twitter_channel' => array(
+      'title' => t('Twitter tweetbox'),
+      'description' => t('Provides a display context which shows tweet box in various ways'),
+      'render_language' => 'XHTML',
+      'parseable' => FALSE,
+      'formats' => array(
+        'twitter_channel' => array(),
+      ),
+    )
+  );
+}
+
+/**
+ * Implements hook_scald_render().
+ */
+function scald_twitter_channel_scald_render($atom, $context, $options = array()) {
+  //dsm($atom);
+  return $atom->rendered->player;
+}
+
+/**
+ * Implementation of hook_entity_info_alter()
+ */
+function scald_twitter_channel_entity_info_alter(&$entity_info) {
+  // Basic text
+  $entity_info['fieldable_panels_pane']['bundles']['twitter_channel'] = array(
+    'label' => t('Add Twitter channel'),
+    'pane category' => t('Some'),
+    'pane top level' => TRUE,
+    'pane icon' => drupal_get_path('module', 'scald_twitter_channel') . '/icons/twitter.png',
+    'admin' => array(
+      'path' => 'admin/structure/fieldable-panels-panes/manage/%fieldable_panels_panes_type',
+      'bundle argument' => 4,
+      'real path' => 'admin/structure/fieldable-panels-panes/manage/twitter_channel',
+      'access arguments' => array('administer fieldable panels panes'),
+    ),
+  );
+}

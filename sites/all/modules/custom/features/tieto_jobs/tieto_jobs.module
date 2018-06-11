@@ -1,0 +1,381 @@
+<?php
+
+/**
+ * @file
+ * Code for the Tieto Jobs feature.
+ */
+
+include_once 'tieto_jobs.features.inc';
+
+/**
+ * Implements hook_feeds_plugins().
+ */
+function tieto_jobs_feeds_plugins() {
+  $info = array();
+  $info['TietoJobsFetcher'] = array(
+    'name' => 'Tieto Jobs Fetcher',
+    'description' => 'Fetches jobs from jobs.tieto.com.',
+    'help' => 'Fetches jobs from jobs.tieto.com.',
+    'handler' => array(
+      'parent' => 'FeedsFetcher',
+      'class' => 'TietoJobsFetcher',
+      'file' => 'TietoJobsFetcher.inc',
+      'path' => drupal_get_path('module', 'tieto_jobs') . '/plugins/feeds',
+    ),
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function tieto_jobs_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools' && $plugin_type == 'content_types') {
+    return 'plugins/content_types';
+  }
+}
+
+/**
+ * Implements hook_preprocess_breadcrumb().
+ */
+function tieto_jobs_preprocess_breadcrumb(&$vars) {
+  $page = _tieto_jobs_context();
+
+  if (!empty($page['tieto_jobs_search'])) {
+    // Remove '[all items]' and whatever comes after.
+    $new = array();
+    foreach ($vars['breadcrumb'] as $key => $value) {
+      if (strpos($value, '[' . t('all items') . ']') !== FALSE) {
+        break;
+      }
+      $new[$key] = $value;
+    }
+    $vars['breadcrumb'] = $new;
+  }
+
+  // Append job title.
+  if (isset($page['tieto_jobs_node'])) {
+    array_pop($vars['breadcrumb']);
+    $vars['breadcrumb'][] = l(menu_get_active_title(), current_path());
+    $vars['breadcrumb'][] = check_plain($page['tieto_jobs_node']->title);
+  }
+}
+
+/**
+ * Hellper;
+ */
+function &_tieto_jobs_context() {
+  static $context = array();
+  return $context;
+}
+
+
+
+/**
+ * Implements hook_views_pre_render(). And adds js to the views to properly work autosubmit
+ */
+function tieto_jobs_views_pre_render(&$view) {
+  $page = &_tieto_jobs_context();
+  switch ($view->name) {
+    case 'tieto_jobs_solr_search':
+      /* Jira id - 2335 Search loading too fast */
+      drupal_add_js(drupal_get_path('module', 'tieto_jobs') . '/js/prevent-auto-submit.js', array('weight' => 10));
+      $page['tieto_jobs_search'] = TRUE;
+
+      /* Jira id - TIET-1455, Special page for job listings */
+      if (isset($_GET['viewmode'])) {
+        $view->field['title']->options['alter']['path'] .= '&viewmode=' . $_GET['viewmode'];
+        if ($_GET['viewmode'] == 'iframe') {
+          $view->field['title']->options['alter']['target'] = '_blank';
+        }
+      }
+
+      break;
+    case 'tieto_jobs_job':
+      /* Jira id - 2335 Search loading too fast */
+      drupal_add_js(drupal_get_path('module', 'tieto_jobs') . '/js/prevent-auto-submit.js', array('weight' => 10));
+      if ($view->current_display == 'view' && !empty($view->result[0]->nid)) {
+        $page['tieto_jobs_node'] = node_load($view->result[0]->nid);
+        /*
+         * Jira id - TIET-1375, setting page title variable for use in template.php
+         */
+        $pageTitle = check_plain($page['tieto_jobs_node']->title) . " | " . variable_get('site_name');
+        variable_set('view_open_job_title', $pageTitle);
+      }
+      break;
+    default:
+
+      break;
+  }
+}
+
+/*
+ * Override or insert variables into the views-view-field template
+ */
+function tieto_jobs_preprocess_views_view_field(&$vars) {
+
+  global $language;
+  $lang = $language->language;
+
+  $view = $vars['field']->view;
+
+  $field = $vars['field'];
+
+  $row = $vars['row'];
+
+  // Make location and job area fields as links on Jobs listing
+
+  if ($view->current_display == 'panel_pane_1') {
+
+    $field_name = $field->field;
+
+    if ($field->field == 'title') {
+
+      // This is added to fix TIET-2412, search cache related problems.
+
+      if (tieto_career_job_post_redirect_path($lang) != ""){
+        $field->options['alter']['path'] = tieto_career_job_post_redirect_path($lang) . "?job=[field_jobs_id]";
+      }
+
+    }
+
+    if ($field->field == 'field_jobs_location' ||
+
+      $field->field == 'field_jobs_jobareas') {
+
+      global $base_url;
+
+      $t = array();
+
+      $tids = (array)$row->_entity_properties['entity object']->$field_name;
+
+      foreach ($tids[LANGUAGE_NONE] as $val) {
+
+        $term = taxonomy_term_load($val['tid']);
+
+        $t[] = l($term->name, $base_url . "/" . request_path() . "?" .
+
+        $field_name . "[]=" . $val['tid']);
+
+      }
+
+      $vars['output'] =  implode($t, ', ');
+    }
+  }
+}
+
+/**
+ * implements hook_node_insert()
+ * Open Job position Node Redirect after job is posted
+ */
+function tieto_jobs_node_view($node, $view_mode, $langcode){
+
+   if($node->type=="tieto_jobs_vacancy" && $view_mode != "search_index"){
+
+	global $language;
+	$lang=$language->language;
+	$redirection_path=tieto_career_job_post_redirect_path($lang);
+//	drupal_goto(url($redirection_path, array('query' => array('job'=>$node->field_jobs_id['und'][0]['value'])) ));
+   }
+ }
+
+/** 
+ * Implements hook_preprocess_html()
+ */
+function tieto_jobs_preprocess_html(&$vars) {
+  global $language;
+  $lang=$language->language;
+  $path=tieto_career_job_post_redirect_path($lang);
+
+  $request_uri = drupal_parse_url($_SERVER['REQUEST_URI']);
+  if ('/' . $path == $request_uri['path']) {
+    $vars['classes_array'][] = 'search-open-jobs';
+  }
+}
+
+ /**
+ * Implements hook_views_pre_render().
+   return the redirection path to all job position page
+ */
+function tieto_career_job_post_redirect_path($lang){
+
+ $redirection_path=array('en'=>'node/4140',
+						 'fi'=>'node/20111',
+ 						 'sv'=>'node/20113',
+ 						 'de-at'=>'node/4140',
+						 'et'=>'node/20131',
+						 'zh-hans'=>'node/20679',
+						 'cs'=>'node/20116',
+						 'da'=>'', 
+						 'de'=>'node/4140',
+						 'ee'=>'node/20131',
+						 'en-in'=>'node/4140',
+						 'lv'=>'node/20135',
+						 'de-DE'=>'',
+						 'lt'=>'node/20157',
+						 'nl'=>'',
+						 'nn'=>'node/20170',
+						 'fil'=>'', 
+						 'no'=>'node/20170',
+						 'pl'=>'node/20177',
+						 'ru'=>'node/20186',
+						 'cz'=>'node/20116',
+						 'se'=>'node/20113',
+						 'cn'=>'node/20679');
+
+	return  $redirection_path[$lang];
+
+	}
+ 
+/**
+ * Implements hook_cron().
+ */
+function tieto_jobs_cron() {
+
+  // Fetch the feeds importer config, no need to change the base_url for the RSS in this code every time
+  $importer = feeds_importer_load('tieto_jobs_import')->getConfig();
+
+  // Create a new cURL resource
+  $ch = curl_init($importer['fetcher']['config']['base_url']);
+
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+  curl_exec($ch);
+
+  // Get info of the transfer
+  $data = curl_getinfo($ch);
+
+  curl_close($ch);
+
+  // Check that the source actually existed (not down, changed url etc)
+  if ($data['http_code'] == '200') {
+
+    $xmlstring = file_get_contents($importer['fetcher']['config']['base_url']);
+ 
+    $xml = simplexml_load_string($xmlstring);
+
+    $result = $xml->xpath('/rss/channel/item/guid');
+
+    // Make sure that xpath didn't return empty
+    if (count($result) != 0) {
+
+      $ids = array();
+
+      // Parse the results into an array
+      while (list( , $id) = each($result)) {
+        $ids[] = (string)$id;
+      }
+      // Get term information for workday jobs
+      $terms = taxonomy_get_term_by_name("workday");
+      $workday_term = current($terms);
+      $workday_tid = $workday_term->tid;
+      // Get all job vacancies and their ids from the database
+      $sql = "select a.nid, b.field_jobs_id_value from node a
+                         left join field_data_field_jobs_id b on
+                         a.nid=b.entity_id where a.type='tieto_jobs_vacancy'";
+      if (!empty($workday_tid)) {
+        $sql .= " and a.nid NOT IN (select entity_id from field_data_field_jobs_from where field_jobs_from_tid = ". $workday_tid .")";
+      }
+
+      $query = db_query($sql);
+
+      $result = $query->fetchAllKeyed();
+
+      $diff = array_diff($result, $ids);
+
+      // delete the obsolete job nodes
+      while (list($key , $val) = each($diff)) {
+        node_delete($key);
+      }
+    }
+  }
+
+  // Add a watchdog message
+  watchdog('tieto_jobs', t('Tieto jobs cron completed, removed ' . count($diff) . ' obselete tieto jobs nodes'), $variables = array(), $severity = WATCHDOG_INFO);
+}
+
+// TIET-1753 Change sorting and filtering of jobs on All open jobs page
+// Add the country filter
+// This menu link will be used for ajax call on all open jobs to set default country filter
+function tieto_jobs_menu() {
+  $items['get-current-country'] = array(
+    'page callback' => 'tieto_jobs_get_current_country_id', // Render HTML
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content'),
+  );
+  return $items;
+}
+
+function tieto_jobs_get_current_country_id() {
+  global $language;  
+  $langName = $language->name;
+  if($langName == ".com international"){
+     print json_encode(array('country_term_id' => 0));
+  }
+  else{
+    $terms = taxonomy_get_term_by_name($langName);
+    if (!empty($terms)) {
+      $first_term = array_shift($terms);
+      print json_encode(array('country_term_id' => $first_term->tid));
+    }
+  }
+}
+
+/**
+ * Implements hook_views_pre_view().
+ */
+function tieto_jobs_views_pre_view(&$view) {
+
+  global $language;
+
+  if ($language->language != 'en' && $view->name == 'tieto_jobs_solr_search' && !isset($_GET['search_api_views_fulltext']) && count($_GET['field_jobs_location']) == NULL && count($_GET['field_jobs_jobareas']) == NULL) {
+    $country = $language->name;
+    global $base_url;
+
+    $taxonomy = taxonomy_vocabulary_machine_name_load('tieto_jobs_locations');
+    $parent_term = taxonomy_get_term_by_name($country, 'tieto_jobs_locations');
+
+    $job_location = $base_url . '/' . drupal_lookup_path('alias',current_path()) . '?field_jobs_location[]=' . $parent_term[key($parent_term)]->tid;
+
+    header ('HTTP/1.1 301 Moved Permanently'); 
+    header('Location: ' . $job_location);
+  }
+}
+
+/**
+ * Implementation of hook_node_presave().
+ *
+ */
+function tieto_jobs_node_presave($node) {
+  if ($node->type=="tieto_jobs_vacancy") {
+    if (empty($node->field_jobs_location[LANGUAGE_NONE]) && !empty($node->field_job_location_text[LANGUAGE_NONE])) {
+      $location_arr = explode(",",$node->field_job_location_text[LANGUAGE_NONE][0]['value']);
+      $location_arr_count= array();
+      $final_location = array();
+      foreach ($location_arr as $key=>$value) {
+        if(in_array($value, $location_arr_count, true) == 0) {
+          array_push($location_arr_count, $value );
+          $terms_location = taxonomy_get_term_by_name($value, 'tieto_jobs_locations');
+          $location_term = current($terms_location);
+          if (!empty($location_term)) {
+            array_push($final_location, array('tid'=>$location_term->tid));
+          }
+        }
+      }
+      $node->field_jobs_location[LANGUAGE_NONE] = $final_location;
+   }
+   //Adding filler text for workday jobs.
+    $terms = taxonomy_get_term_by_name("workday");
+    $workday_term = current($terms);
+    $workday_tid = $workday_term->tid;
+    if (!empty($node->field_jobs_from['und'][0]['tid']) && $node->field_jobs_from['und'][0]['tid'] == $workday_tid) {
+      // Check multiple about us entries in workday jobs.
+      $pos = stripos($node->body['und'][0]['value'], "About Tieto");
+      if ($pos === false) {
+        $node->body['und'][0]['value'] .= '<h2>About Tieto</h2><div class="GWTCKEditor-Disabled"><p>At Tieto we are a team of professionals spread across many countries who are working on the frontline of a wide range of industries. We inspire, we engage and we deliver. We have global capabilities and a strong presence where our clients need it &ndash; in the Nordics or via local delivery centres across the globe.</p><p>Are you looking for a career with a company that both challenges and cares? Welcome to Tieto. We are committed to developing enterprises and society through information technology. We believe in openness, independent thinking, and in giving our people the freedom to be their exceptional selves. We are the largest Nordic IT services company providing full lifecycle services for both private and public sectors. Our work puts us at the frontline of a wide range of industries.</p><p>We offer you the chance to make a difference and be part of the forefront of emerging businesses and technology, exchanging ideas with the best professionals. You will cooperate with colleagues in an international and evolving working environment, and increase your knowledge in a variety of areas.</p><p>We offer you a challenging position with great opportunities for professional growth. With us you will have the opportunity to directly influence your career development. If you have a good idea, people will listen to you. We believe that trust fosters freedom and creativity. Our culture is built on transparency and active sharing &ndash; a truly open environment.</p><p>Interested? We look forward to receiving your application and the opportunity to discuss with you!</p></div>';
+      }
+
+    }
+  }
+}
+

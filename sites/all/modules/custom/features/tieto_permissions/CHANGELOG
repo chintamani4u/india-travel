@@ -1,0 +1,26 @@
+7.x-1.0
+-------
+
+Initial version of the feature. Contains the basic user roles and permissions for each role.
+
+7.x-1.1
+-------
+
+Updated the feature to include new user roles (CIR editor, Addresses editor) and updated the 
+permissions according to how they were revised with Kristin. 
+
+Jira issue TIET-1524 Reorganize some roles and permissions in production
+
+20.11.2013 -> Fetched latest permissions from production, no other changes
+
+03.12.2013 -> Fetched latest permissions from production, no other changes, PR #227
+
+17.01.2014 -> Fetched latest permissions from production, no other changes, PR #264
+
+25.03.2014 -> Added permissions search pi exclude, no other changes, PR #403
+
+7.x-1.2
+-------
+14.04.2014 -> Removed everything related to backup and migrate to go with TIET-1863, PR #434
+
+9.6.2014 -> Removed devel module dependancy, PR #527 TIET-2212

@@ -1,0 +1,7 @@
+7.x-1.0
+-------
+TIET 1603 - Add URL alias node field to Webforms 
+ - Created new feature for webform content type -Pull request #200
+ - Made url alias field mandatory for webform content type -Pull request #201
+
+PR#271 Recreated this feature to fit API:2

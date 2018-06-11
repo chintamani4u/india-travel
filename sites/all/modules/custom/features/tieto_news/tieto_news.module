@@ -1,0 +1,114 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto News feature.
+ */
+
+include_once 'tieto_news.features.inc';
+include_once 'tieto_news.subscribe.inc';
+include_once 'tieto_news.subscribe_new.inc';
+
+function tieto_news_apachesolr_query_alter(&$query) {
+  // add current language as custom filter
+  global $language ;
+  $lang_name = $language->language ;
+  $query->addFilter('ss_language', $lang_name);  // by title
+}
+
+/**
+ * Implements hook_hook_info().
+ */
+function tieto_news_hook_info() {
+  $hooks = array(
+    'tieto_news_hugin_defaults_alter',
+  );
+
+  return array_fill_keys($hooks, array('group' => 'tieto_news'));
+}
+
+/**
+ * Implements hook_menu_breadcrumb_alter().
+ */
+function tieto_news_menu_breadcrumb_alter(&$active_trail, $item) {
+  if (($node = menu_get_object()) && $node->type == 'tieto_news_article') {
+    $active_trail[1] = array(
+      'title' => t('News'),
+      'href' => dirname(url('node/'. $node->nid)),
+      'localized_options' => array(),
+    );
+  }
+}
+
+/**
+ * Implements hook_form_tieto_news_article_node_form_alter().
+ *
+ * - Show attachments if news type is stock exchange release.
+ */
+function tieto_news_form_tieto_news_article_node_form_alter(&$form, $form_state, $form_id) {
+  // Hide attachments if news type is not stock exchange release.
+  $value = NULL;
+  foreach ($form['field_news_type'][LANGUAGE_NONE]['#options'] as $key => $label) {
+    if (drupal_strtolower($label) == 'stock exchange release') {
+      $value = $key;
+      break;
+    }
+  }
+  if (isset($value)) {
+    $form['field_news_attachments']['#states']['visible'][':input[name="field_news_type[' . LANGUAGE_NONE . ']"]']['value'] = $value;
+  }
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function tieto_news_ctools_plugin_directory($owner, $plugin_type) {
+  if ($owner == 'ctools' && $plugin_type == 'content_types') {
+    return 'plugins/content_types';
+  }
+}
+
+/**
+ * Implements hook_feeds_presave().
+ */
+function tieto_news_feeds_presave(FeedsSource $source, $entity, $item) {
+  if (!in_array($source->importer->id, array('tieto_hugin_import', 'tieto_nasdaq_importer'))) {
+    // Not our importer, do nothing.
+    return;
+  }
+
+  if ($entity->feeds_item->entity_type == 'node' && empty($entity->feeds_item->entity_id)) {
+    // When importing news articles, skip items that have been imported by
+    // someone else (manually, migrate, other feeds).
+    $skip = FALSE;
+
+    if ($source->importer->id == 'tieto_nasdaq_importer') {
+      // check against language and nasdaq id
+      $language = $entity->language;
+      $nasdaq_id = $entity->field_nasdaq_id[LANGUAGE_NONE][0]['value'];
+
+      $query = new EntityFieldQuery();
+      $result = $query->entityCondition('entity_type', 'node')
+        ->propertyCondition('language', $language)
+        ->fieldCondition('field_nasdaq_id', 'value', $nasdaq_id)
+        ->range(0, 1)
+        ->execute();
+      $skip = !empty($result['node']);
+    }
+    elseif ($source->importer->id == 'tieto_hugin_import') {
+      // check against hugin id
+      $hugin_id = $entity->field_hugin_id[LANGUAGE_NONE][0]['value'];
+
+      $query = new EntityFieldQuery();
+      $result = $query->entityCondition('entity_type', 'node')
+        ->fieldCondition('field_hugin_id', 'value', $hugin_id)
+        ->range(0, 1)
+        ->execute();
+      $skip = !empty($result['node']);
+    }
+
+    if ($skip) {
+      // Tell feeds to skip saving this entity.
+      $entity->feeds_item->skip = TRUE;
+    }
+  }
+}

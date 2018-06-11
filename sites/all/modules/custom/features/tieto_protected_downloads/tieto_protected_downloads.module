@@ -1,0 +1,310 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Protected Downloads feature.
+ */
+
+include_once 'tieto_protected_downloads.features.inc';
+
+/*
+ * Implement hook_node_insert()
+ * Create some webform defaults and protected download defaults when content type "tieto_protected_downloads"
+ * is submitted
+ */
+function tieto_protected_downloads_node_insert($node) {
+  if ('tieto_protected_downloads' != $node->type) {
+    return;
+  }
+  tieto_protected_downloads_create_webform($node, 'insert');
+}
+
+/*
+ * Implement hook_node_delete()
+ * 
+ */
+function tieto_protected_downloads_node_delete($node) {
+  $url = '';
+  $wid = '';
+  $sid = '';
+  
+  if ('tieto_protected_downloads' != $node->type) {
+    return;
+  }
+  
+  $url = 'node/'. $node->nid;
+  $o_wid = scald_webpage_load_wid($url);
+  $wid = $o_wid->wid;
+  $sid = _tieto_protected_downloads_try_to_find_scald($wid);
+  if(!empty($sid)) {
+   scald_atom_delete($sid);
+  }
+}
+
+/*
+ * Implement hook_node_prepare()
+ * Run after node creation
+ * Create a Scald Webpage atom automatically when protected download node is submitted
+ */
+function tieto_protected_downloads_node_prepare($node) {
+  if ('tieto_protected_downloads' != $node->type) {
+    return;
+  }
+  tieto_protected_downloads_initAtom($node);
+  tieto_protected_downloads_attach_protection_to_files($node);
+}
+
+/*
+ * Initialise the Atom and check if it exists
+ */
+function tieto_protected_downloads_initAtom($node) {
+  if ('tieto_protected_downloads' != $node->type || !isset($node->nid)) {
+    return;
+  }
+
+  $alias = trim('node/' . $node->nid);
+  // Check if it's already saved earlier in scald
+  $old = db_query("SELECT s.url FROM {scald_webpages} s WHERE s.url = :base_id", array(":base_id" => $alias))->fetchField();
+
+  if (!$old) {
+    $atom = new stdClass();
+    $atom->type = 'webpage';
+    $atom->provider = 'scald_webpage';
+    $atom->base_id = $node->nid;
+    $atom->title = $node->title;
+    $metadata = 'Protected Download';
+    return tieto_protected_downloads_createAtom($atom->base_id, $atom->provider, $atom->type, $atom->title, $metadata);
+  }
+  else {
+    return FALSE;
+  }
+
+}
+
+
+// Returns sid of scald if found. Otherwise null
+function _tieto_protected_downloads_try_to_find_scald($base_id) {
+  $query = array('base_id' => $base_id);
+  $is_fuzzy = false;
+  $is_singular = true;
+
+  $sid = scald_search($query, $is_fuzzy, $is_singular);
+  return $sid;
+}
+
+
+// Create atom from a URL.
+function tieto_protected_downloads_createAtom($base_id, $provider, $type, $title, $metadata) {
+  $atom = new stdClass();
+  $atom->type = $type;
+  
+  $atom->provider = $provider;
+  // SCALD_WEBPAGE
+  $url = 'node/' . $base_id;
+  $iframe = 0;
+  $height = '100';
+  $width = '100';
+  $options = '';
+  $scald_url = scald_webpage_create($url,$iframe,$height,$width,$options);
+  // and get it's WID
+  $o_wid = scald_webpage_load_wid($scald_url);
+  $wid = $o_wid->wid;
+  
+  // and save WID to atom's base_id
+  $atom->base_id = $wid;  
+  
+  // try to find scald. If found load it
+  $sid = _tieto_protected_downloads_try_to_find_scald($atom->base_id);
+  if(!empty($sid))
+  {
+    $atom->sid = $sid;
+    $atom = scald_atom_load($atom->sid);
+  }  
+  
+  $atom->title = $title;
+  
+  return scald_atom_save($atom);
+  
+  // Finally, return this id
+  //$atom = scald_atom_load($atom_sid);
+
+  // Prefill tags
+  /*
+  if (isset($metadata)) {
+    $i = 0;
+    $tag_array = explode(',', $metadata);
+    foreach($tag_array as $tag) {
+      $atom->scald_tags[LANGUAGE_NONE][$i] = array(
+        'tid' => $i,  // Beware, this is not a real tid, it's just an index
+        'taxonomy_term' => (object)(array('name' => $tag))
+      );
+      $i++;
+    }
+  }*/
+  //_tieto_protected_downloads_dsm($atom);
+  //return scald_atom_save($atom);
+
+  //return $atom_sid;
+
+  //return scald_atom_save($atom);
+}
+
+/*
+ * Automatically fill some defaults when editor creates content
+ * of type "tieto_protected_downloads"
+ */
+function tieto_protected_downloads_get_nodes_fids(&$node) {
+  $fids = array();
+
+  foreach ($node->field_protected_download as $downloads) {
+    foreach ($downloads as $download) {
+      array_push($fids, (int) $download['fid']);
+    }
+  }
+  return $fids;
+}
+
+
+/**
+operation = insert / update
+ */
+function tieto_protected_downloads_create_webform($node, $operation) {
+  if ('tieto_protected_downloads' != $node->type) {
+    return;
+  }
+
+  $cid = '1';
+  $name_of_component = t('Your email address');
+
+  $component = array(
+    'cid' => $cid,
+    'pid' => 0, #(int)$pid,
+    'nid' => $node->nid,
+    'form_key' => $processed_name,
+    'name' => $name_of_component,
+    'type' => 'email',
+    'value' => '',
+    'extra' => array(),
+    'mandatory' => '1',
+    'weight' => 0,
+    'page_num' => 1,
+    'form_key' => 'email',
+    'value' => '',
+  );
+
+  $node->webform = array(
+    'confirmation' => t('Thank you for your interest. <strong>Please check your email</strong> for the links to access the requested files.'),
+    'confirmation_format' => 'panopoly_wysiwyg_text',
+    'redirect_url' => '<confirmation>',
+    'status' => '1',
+    'block' => '0',
+    'teaser' => '0',
+    'auto_save' => '0',
+    'submit_notice' => '0',
+    'submit_text' => t('Submit request'), // Users can only submit once how many kittens they want.
+    'submit_limit' => '-1',
+    'submit_interval' => '-1',
+    'total_submit_limit' => '-1',
+    'total_submit_interval' => '-1',
+    'record_exists' => 'update' == $operation, // is new webform?
+    'roles' => array(
+      0 => '1',
+      1 => '2',
+    ),
+    'emails' => array(),
+    'components' => array($component),
+  );
+
+  //print_r($n);
+
+
+  $config = array(
+    'nid' => $node->nid,
+    'mail_field_cid' => (int) $cid,
+    'mail_from' => '[current-user:mail]',
+    'mail_subject' => t('Download link for [site:url]'),
+
+    'mail_body' => t('Dear visitor,
+
+Thank you for your interest.
+Please use the following link to download the files: [protected-downloads:download-url]
+
+This link will be accessible until [protected-downloads:download-expires]. If you need access after the link expires, don\'t hesitate to revisit the download page on [site:url]'),
+
+    'text_download_access' => t('Thank you for your interest. Below you will find the requested files.'),
+    'text_download_access_format' => 'panopoly_wysiwyg_text',
+    'text_download_noaccess' => t('This link is not valid. If you think that this is an error, please contact the <a href="mailto:[site:mail]">site administrator</a>.'),
+    'text_download_noaccess_format' => 'panopoly_wysiwyg_text',
+    'access_type' => '0',
+    'expiration_download' => '604800',
+    'expiration_session' => '86400',
+    'retroactive' => '1',
+    'redirect' => '0',
+  );
+
+  /*
+   * Save node->nid and File->fid into wpd_protected_files
+   * Attached into node in $node>wpd>protected_downloads array
+   */
+  $fids = tieto_protected_downloads_get_nodes_fids($node);
+  $protected_downloads = array();
+  foreach ($fids as $fid) {
+    $file = new StdClass;
+    $file->fid = $fid;
+    array_push($protected_downloads, $file);
+  }
+  //Add files as protected downloads
+  $node->wpd = array(
+    'valid' => TRUE,
+    'config' => $config,
+  );
+
+  $node->wpd['protected_files'] = $protected_downloads;
+
+  if ('update' == $operation) {
+    webform_node_update($node);
+  }
+  else {
+    webform_node_insert($node);
+    //  this one saves Protected downloads mail confirmation's "Your email address"
+    webform_protected_downloads_node_insert($node);
+  }
+  drupal_set_message("Protected Download Form is now created! Now please check form settings and email messages", 'status');
+
+  $nids = array($node->nid);
+  $types = array($node->type);
+  webform_node_update($node);
+  drupal_goto("node/" . $node->nid . "/edit");
+
+}
+
+/*
+ * Please tell me why oh why I can't add these on the node save?
+ * @TODO Check why this can't be on hook_node_submit()
+*/
+function tieto_protected_downloads_attach_protection_to_files($node) {
+  if ('tieto_protected_downloads' != $node->type) {
+    return;
+  }
+
+  // check for webform enabled node types and programatically created nodes
+  // with a wpd configuration
+  if ($node->nid) {
+
+    $nid = $node->nid;
+    $fids = tieto_protected_downloads_get_nodes_fids($node);
+    /*
+    * Save node->nid and File->fid into wpd_protected_files
+    * Attached into node in $node>wpd>protected_downloads array
+    */
+    $protected_downloads = array();
+    foreach ($fids as $fid) {
+      $file = new StdClass;
+      $file->fid = $fid;
+      array_push($protected_downloads, $file);
+    }
+
+    webform_protected_downloads_file_set_protected($nid, $fid, TRUE);
+    return;
+  }
+
+}

@@ -1,0 +1,71 @@
+diff --git a/plugins/views_plugin_display.inc b/plugins/views_plugin_display.inc
+index 75a32c5..a068748 100644
+--- a/plugins/views_plugin_display.inc
++++ b/plugins/views_plugin_display.inc
+@@ -417,7 +417,7 @@ class views_plugin_display extends views_plugin {
+       'use_more' => array('use_more', 'use_more_always', 'use_more_text'),
+       'use_more_always' => array('use_more', 'use_more_always', 'use_more_text'),
+       'use_more_text' => array('use_more', 'use_more_always', 'use_more_text'),
+-      'link_display' => array('link_display', 'link_url'),
++      'link_display' => array('link_display', 'link_url', 'link_url_query'),
+ 
+       // Force these to cascade properly.
+       'style_plugin' => array('style_plugin', 'style_options', 'row_plugin', 'row_options'),
+@@ -487,6 +487,7 @@ class views_plugin_display extends views_plugin {
+ 
+           'link_display' => TRUE,
+           'link_url' => '',
++          'link_url_query' => '',
+           'group_by' => TRUE,
+ 
+           'style_plugin' => TRUE,
+@@ -573,6 +574,9 @@ class views_plugin_display extends views_plugin {
+       'link_url' => array(
+         'default' => '',
+       ),
++      'link_url_query' => array(
++        'default' => '',
++      ),
+       'group_by' => array(
+         'default' => FALSE,
+         'bool' => TRUE,
+@@ -1812,6 +1816,12 @@ class views_plugin_display extends views_plugin {
+           '#description' => t('A Drupal path or external URL the more link will point to. Note that this will override the link display setting above.') . $output,
+           '#dependency' => array('radio:link_display' => array('custom_url')),
+         );
++        $form['link_url_query'] = array(
++          '#type' => 'textfield',
++          '#title' => t('Custom query'),
++          '#default_value' => $this->get_option('link_url_query'),
++          '#description' => t('Custom key/value-pairs (without any URL-encoding) to append to the link. You must add it as param1=value1&amp;param2=value2.') . $output,
++        );
+         break;
+       case 'analyze-theme':
+         $form['#title'] .= t('Theming information');
+@@ -2345,6 +2355,7 @@ class views_plugin_display extends views_plugin {
+ 
+       case 'link_display':
+         $this->set_option('link_url', $form_state['values']['link_url']);
++        $this->set_option('link_url_query', $form_state['values']['link_url_query']);
+       case 'title':
+       case 'css_class':
+       case 'display_comment':
+@@ -2555,6 +2566,18 @@ class views_plugin_display extends views_plugin {
+         if (!empty($this->view->exposed_raw_input)) {
+           $url_options['query'] = $this->view->exposed_raw_input;
+         }
++        if($this->get_option('link_url_query')) {
++          // Parse custom query
++          $tokens = $this->get_arguments_tokens();
++          $link_url_query = strtr($this->get_option('link_url_query'), $tokens);
++          $link_url_query = drupal_get_query_array($link_url_query);
++          if(!isset($url_options['query'])) {
++            $url_options['query'] = $link_url_query;
++          }
++          else {
++            $url_options['query'] = array_merge($url_options['query'], $link_url_query);
++          }
++        }
+         $theme = views_theme_functions('views_more', $this->view, $this->display);
+         $path = check_url(url($path, $url_options));
+ 

@@ -1,0 +1,10 @@
+name = Scald Webpage
+description = Allows linking into webpages (internal/external).
+package = Scald
+core = 7.x
+dependencies[] = scald
+dependencies[] = transliteration
+stylesheets[all][] = scald_webpage.css
+files[] = Curler.class.php
+files[] = Cookie.class.php
+files[] = MetaParser.class.php

@@ -1,0 +1,15 @@
+name = Tieto Customer Area
+description = Provides Customer area menu and menu links.
+core = 7.x
+package = Tieto.com
+version = 7.x-1.1-dev
+project = tieto_customer_area
+dependencies[] = ctools
+dependencies[] = features
+dependencies[] = menu
+dependencies[] = strongarm
+dependencies[] = tieto_sitemap
+dependencies[] = uuid
+features[ctools][] = strongarm:strongarm:1
+features[features_api][] = api:2
+features[menu_custom][] = menu-customer-area

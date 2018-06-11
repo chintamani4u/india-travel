@@ -1,0 +1,27 @@
+--- a/i18n_access.module
++++ b/i18n_access.module
+@@ -103,7 +103,13 @@ function i18n_access_permission() {
+  * Implements hook_form_node_form_alter().
+  */
+ function i18n_access_form_node_form_alter(&$form, &$form_state, $form_id) {
++  
++  $form['#after_build'][] = '_i18n_access_form_node_form_alter';
+ 
++}
++
++function _i18n_access_form_node_form_alter($form, &$form_state) {
++  
+   if (isset($form['language']['#options'])) {
+   // Remove inaccessible languages from the select box
+     // don't do it for  admininstrators
+@@ -116,8 +122,9 @@ function i18n_access_form_node_form_alter(&$form, &$form_state, $form_id) {
+         }
+       }
+     }
+-    unset($form['#after_build']['0']);
+   }
++  
++  return $form;
+ }
+ 
+ /**

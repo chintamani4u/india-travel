@@ -1,0 +1,22 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Cross-section feature.
+ */
+
+include_once 'tieto_cross_section.features.inc';
+
+/**
+* Implements hook_menu_breadcrumb_alter().
+*/
+function tieto_cross_section_menu_breadcrumb_alter(&$active_trail, $item) {
+  if (($node = menu_get_object()) && $node->type == 'insights_and_opinions_page') {
+     $active_trail[1] = array(
+      'title' => t('Insights and opinions'),
+      'href' => dirname(url('node/'. $node->nid)),
+      'localized_options' => array(),
+     );
+  }
+}
+
+

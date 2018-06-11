@@ -1,0 +1,10 @@
+--- xmlsitemap.generate.inc.orign.inc	2014-07-30 11:29:04.796355900 +0530
++++ xmlsitemap.generate.inc	2014-07-30 11:46:00.883032600 +0530
+@@ -153,6 +153,7 @@ function xmlsitemap_generate_chunk(stdCl
+   $query->fields('x', array('loc', 'lastmod', 'changefreq', 'changecount', 'priority', 'language', 'access', 'status'));
+   $query->condition('x.access', 1);
+   $query->condition('x.status', 1);
++  $query->condition('x.language', $url_options['language']->language);
+   $query->orderBy('x.language', 'DESC');
+   $query->orderBy('x.loc');
+   $query->addTag('xmlsitemap_generate');

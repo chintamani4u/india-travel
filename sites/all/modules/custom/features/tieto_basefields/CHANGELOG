@@ -1,0 +1,18 @@
+7.x-1.0-beta8
+-------------
+Says beta8 now...change to a stable release number and add a description here
+
+
+7.x-1.0
+-------------
+TIET-1717 Changed the order fields on Product/service page.
+PR #251
+
+7.x-1.1
+-------------
+17.01.2013 -- Recreated feature to fit features api:2 standards #264
+12.03.2014 - Panels update made many features overridden #378
+15.04.2014 - Recreated this feature to go with chosen module update #438
+
+
+20.08.2014 -- Recreated feature to Add cross section side elements #594 

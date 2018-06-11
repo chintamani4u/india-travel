@@ -1,0 +1,195 @@
+<?php
+
+/**
+ * @file
+ * Scald Files Installation
+ */
+
+function scald_webpage_schema() {
+  $schema = array();
+  // Scald Webpages schema
+  $schema['scald_webpages'] = array(
+    'description' => 'Scald Webpage atoms and their instances',
+    'fields'      => array(
+      'wid'         => array(
+        'description' => 'The Webpage ID',
+        'type'        => 'serial',
+        'size'        => 'big',
+        'unsigned'    => TRUE,
+        'not null'    => TRUE,
+      ),
+      'url'         => array(
+        'description' => 'Absolute or relative url added as atom',
+        'type'        => 'varchar',
+        'length'      => 255,
+        'not null'    => TRUE,
+      ),
+      'language'         => array(
+        'description' => 'Language code for the relative links. The URLs from relative links are built using this language code',
+        'type'        => 'varchar',
+        'length'      => 12,
+        'default'     => 'und',
+        'not null'    => TRUE,
+      ),
+      'iframe'       => array(
+        'description' => 'Whether or not this url should be rendered as iFrame. 0=URL, 1=iFrame',
+        'type'        => 'int',
+        'size'        => 'small',
+        'not null'    => FALSE,
+        'default'     => 0,
+      ),
+      'height' => array(
+        'description' => 'The iframe height in px.',
+        'type'        => 'varchar',
+        'length'      => 10,
+        'not null'    => FALSE,
+        'default'     => '',
+      ),
+      'width' => array(
+        'description' => 'The iframe width in %.',
+        'type'        => 'varchar',
+        'length'      => 10,
+        'not null'    => FALSE,
+        'default'     => '',
+      ),
+      'options'         => array(
+        'description' => 'Other options for iframe',
+        'type'        => 'varchar',
+        'length'      => 255,
+        'not null'    => FALSE,
+      ),
+    ),
+    'primary key' => array('wid'),
+  );
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function scald_webpage_install() {
+  scald_add_type('webpage', 'Webpage', 'Linked webpage');
+}
+
+
+function scald_webpage_enable() { }
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function scald_webpage_uninstall() {
+  //db_drop_table('scald_webpages');
+}
+function scald_webpage_update_7100(&$sandbox){
+  $ret = array();
+  // If the scald_webpages table already exists, we don't need to run this
+  if(!db_table_exists("scald_webpages")) {
+
+    if(!isset($sandbox['progress'])){
+      $sandbox['progress'] = 0;
+      $sandbox['current'] = 0;
+      $sandbox['limit'] = 4;
+      $sandbox['max'] = db_query('SELECT COUNT(DISTINCT sid) FROM {scald_atoms} WHERE provider = :provider', array(':provider' => 'scald_webpage'))->fetchField() - 1;
+    }
+    /*
+     * Select all scald atoms by provider = scald_webpage
+     */
+    $q = db_select('scald_atoms', 'a')
+      ->fields('a', array('sid', 'base_id'))
+      ->condition('provider', 'scald_webpage', '=')
+      ->orderBy('sid', 'ASC')
+      ->execute();
+
+    /*
+     * Loop all atoms trough and insert them to scald_webpages
+     */
+    foreach ($q as $atom) {
+      $query = db_insert('scald_webpages')
+        ->fields(array('url'))
+        ->values(array($atom->base_id))
+        ->execute();
+        /*
+         * Catch the latest inserted wid
+         */
+          $query = db_query("SELECT wid FROM {scald_webpages} WHERE url = :wid", array(':wid' => $atom->base_id));
+          $webpage = $query->fetchObject();
+          $last_wid = $webpage->wid;
+
+        //$args = array();
+        //$last_wid = db_query($query, $args, array('return' => Database::RETURN_INSERT_ID));
+
+      /*
+       * Update the scald_atoms table with latest wid
+       */
+      db_update('scald_atoms')
+        ->fields(array('base_id' => $last_wid))
+        ->condition('base_id',$atom->base_id, '=')
+        ->execute();
+
+      $sandbox['progress']++;
+      $sandbox['current'] = $atom->sid;
+    }
+
+    $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
+  }
+  // To display a message to the user when the update is completed, return it.
+  return $ret;
+}
+
+/**
+ * Add language column.
+ */
+function scald_webpage_update_7101(&$sandbox){
+  if(!db_field_exists("scald_webpages", "language")) {
+    $spec = array(
+      'type' => 'varchar',
+      'description' => "Language",
+      'length' => 12,
+      'not null' => FALSE,
+      'default' => 'und',
+    );
+    db_add_field( 'scald_webpages', 'language', $spec);
+  }
+}
+
+/**
+ * Update scald_webpage storage. Rewrite internal links as
+ * relative paths.
+ */
+function scald_webpage_update_7102(&$sandbox){
+  // Get languages
+  $langs = language_list();
+  $lang_where;
+  $i = 1;
+  $c = count($langs);
+  // Scroll through the languages and add an OR-statement for each
+  foreach($langs as $lang) {
+    // use in dev
+    $domain = str_replace("tietolocal.dev", "tietostage.tieto.com", $lang->domain);
+    $languages[$domain] = $lang->language;
+    $lang_where .= "w.url LIKE '%//" . $domain . "%'";
+    $lang_where .= ($i < $c) ? " OR " : "";
+    $i++;
+  }
+
+  // Get all links currently stored
+  $result = db_query("SELECT w.wid, w.url FROM {scald_webpages} w WHERE " . $lang_where);
+
+  // Go through the links and pick up the language (from the domain)
+  // and find out the system link (or leave the link)
+  if($result) {
+    while($row = $result->fetchAssoc()) {
+      $comps = parse_url($row["url"]);
+      $lang_code = $languages[$comps["host"]];
+      // clean & convert
+      $path = urldecode(ltrim($comps["path"], "/"));
+      $syspath = drupal_get_normal_path($path, $lang_code);
+
+      if(substr($path, 0, 5) == 'node/' || $syspath != $path) {
+        $update = db_update('scald_webpages')
+          ->condition('wid', $row["wid"], "=")
+          ->fields(array("url" => $syspath, "language" => $lang_code))->execute();
+      }
+    }
+  }
+}

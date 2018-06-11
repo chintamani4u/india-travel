@@ -1,0 +1,1 @@
+Fixed manually http://drupal.org/node/1838084

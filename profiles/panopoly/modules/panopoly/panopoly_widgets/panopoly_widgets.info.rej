@@ -1,0 +1,10 @@
+--- panopoly_widgets.info
++++ panopoly_widgets.info
+@@ -104,7 +104,6 @@
+ features[file_display][] = video__default__media_youtube_image
+ features[file_display][] = video__default__media_youtube_video
+ features[file_display][] = video__link__file_field_file_default
+-features[file_display][] = video__preview__file_field_media_large_icon
+ features[file_display][] = video__preview__media_youtube_image
+ features[file_display][] = video__teaser__media_youtube_image
+ features[file_display][] = video__teaser__media_youtube_video

@@ -1,0 +1,780 @@
+@import "variables";
+@import "custom";
+@import "compass/css3";
+
+$primary_text_color: #505050;
+$link_color: #fff;
+$primary_background_color: #42a5f5;
+$primary_foreground_color: #fff;
+
+@mixin rect($width,$height, $background) {
+  width: $width;
+  height: $height;
+  border: none;
+  background: $background;
+}
+
+@mixin thumbnail($dimension, $background) {
+  @include rect($dimension, $dimension, $background);
+  border-radius: $dimension/2;
+}
+
+@function square-view-column($dimension) {
+  @return $dimension/4;
+}
+
+@mixin square-view-parent($dimension, $factor, $height) {
+  $columns: square-view-column($dimension);
+  width: $factor*$columns;
+  //height:0;
+  //padding-bottom:$factor * $columns * $height;
+  //@extend .blocks;
+  text-align: center;
+  margin: 0;
+
+  @include respond-to(handheld) {
+    display: block;
+    clear: both;
+  }
+}
+
+@mixin square-view($dimension, $font-size) {
+  width: $dimension;
+  //height: 0;
+  //padding-bottom:$dimension;
+  //@extend .blocks;
+  margin: 0;
+  font-size: $font-size;
+  font-family: $alt-font-family-light;
+  display: table;
+  line-height: 1.5;
+  > span {
+    display: table-cell;
+    vertical-align: middle;
+    padding: 0 ($base_unit * 4);
+
+    a {
+      font-weight: 700;
+      font-family: $font-body;
+    }
+  }
+
+  @include respond-to(handheld) {
+    font-size: $h1-font-size;
+    height: $base_unit * 60;
+  }
+}
+
+@media all and (min-width: 760px) {
+  .form-type-select {
+    position: relative;
+    top: 6px;
+  }
+  .field-selector {
+    position: absolute;
+    width: 300px;
+  }
+  .field-selected {
+    text-align: left;
+    background-position: 40px bottom;
+  }
+  .field-selector-visible[style*="hidden"] {
+    z-index: 999;
+  }
+  .field-selector-visible[style*="scroll"] {
+    background-color: #fff;
+    z-index: 1001;
+  }
+  .career-container .job_sugg .views-widget {
+    margin-left: -50px !important;
+    margin-top: 0;
+    padding: 0 0 30px 0 !important;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+}
+
+@media all and (min-width: 1024px) {
+  .form-type-select {
+    top: 3px;
+  }
+}
+
+.centre-align {
+  max-width: 840px;
+  margin: 17px auto;
+}
+
+.blocks {
+  display: inline-block;
+  position: relative;
+  vertical-align: top;
+  margin-top: 10px;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+
+.col-3 {
+  width: 33%;
+  @extend .blocks;
+}
+
+.col-2 {
+  width: 48%;
+  @extend .blocks;
+}
+
+.col-1 {
+  width: 100%;
+  @extend .blocks;
+}
+
+.col-25 {
+  width: 25%;
+}
+
+.col-50 {
+  width: 50%;
+}
+
+.col-100 {
+  width: 100%;
+}
+
+#main {
+  max-width: 100%;
+}
+
+#career-main {
+  background: #fff;
+}
+
+.field-label {
+  display: none;
+}
+
+.field-collection-container {
+  border-bottom: 0 !important;
+}
+
+.career-container {
+
+  font-family: Arial, Helvetica, 'Nimbus Sans L', sans-serif;
+  .expand {
+    max-width: 100%;
+  }
+  section {
+    @extend .centre-align;
+
+    &.nav-menu {
+      max-width: inherit;
+      margin: 0;
+    }
+  }
+
+  #open_job {
+    margin-top: 0;
+  }
+  #open-job1 {
+    margin: 15px 0;
+  }
+  #open {
+    margin-top: 0;
+  }
+  .field-collection-container > section:first-of-type {
+    margin-top: 0;
+  }
+
+  h2 {
+    font-size: 32px;
+    padding: 24px 0 0;
+    //text-align:center;
+  }
+
+  /* Job Suggestion View */
+  .job-section {
+    margin: 0;
+    background-color: $gray-13;
+    //padding-bottom: $base_unit * 2;
+    padding-bottom: 0;
+
+    .job-list-section {
+      @extend .centre-align;
+      margin: 0 auto;
+      color: #fff;
+    }
+
+    .col-1 {
+      @extend .centre-align;
+      text-align: center;
+      display: block;
+      padding: ($base_unit * 2) ($base_unit * 3);
+      margin: 0 auto;
+    }
+  }
+  .job_sugg {
+    background: #ffb74d;
+    background-size: cover;
+    background-position: center top;
+    width: 100%;
+    min-height: 440px;
+    padding: 30px 0;
+    margin: 0;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    text-align: center;
+    color: #5e5e5e;
+
+    select {
+      /*background: #64B5F6;*/
+      color: #ef6c00;
+      border: 0;
+    }
+
+    h2 {
+      margin-top: 50px;
+      font-size: 2.6em;
+      color: #5e5e5e;
+    }
+
+    .views-widget {
+      font-size: 1.4em;
+      padding: 0;
+      margin: 0; // ($base_unit * 4) 0;
+    }
+  }
+  div.warning {
+    min-height: 40px;
+    border: 0;
+    background-color: #e56385;
+    color: #fff;
+    background-image: url("../images/bgalert.png");
+    background-position: 20px 10px;
+    margin: -10px -15px !important;
+  }
+
+  .generic-page {
+    background: #ffb74d;
+    width: 100%;
+    min-height: 357px;
+    color: #fff;
+    padding: 30px 0;
+    margin: 0;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    text-align: center;
+
+    select {
+      /*background: #64B5F6;*/
+      color: #ef6c00;
+      border: 0;
+    }
+
+    h2 {
+      margin-top: 50px;
+      font-size: 2.6em;
+    }
+
+    .views-widget {
+      font-size: 1.4em;
+      padding: 0;
+      margin: 0; // ($base_unit * 4) 0;
+    }
+  }
+
+  .generic-page-menu {
+    .nav-menu {
+      position: static;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      margin-top: -65px;
+
+      &.stick {
+        position: fixed;
+        top: 0;
+        bottom: inherit;
+        margin-top: 0;
+        z-index: 1;
+
+        .megamenu-block {
+          margin-top: 0;
+        }
+      }
+
+      @include respond-to(handheld) {
+        display: none;
+      }
+    }
+
+  }
+
+  .form-item {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    display: inline-block;
+
+    @include respond-to(handheld) {
+      display: block;
+    }
+  }
+  .job-list-section {
+    width: 100%;
+    position: relative;
+    border: 0;
+    border-spacing: 0;
+    border-collapse: collapse;
+
+    * {
+      border: 0;
+      border-spacing: 0;
+      border-collapse: collapse;
+      padding: 0;
+    }
+
+    h3 {
+      margin: 40% 0 0;
+      padding: 0 16px;
+    }
+    .primary-parent {
+      @include square-view-parent(100%, 1, 2);
+    }
+    .secondary-parent {
+      @include square-view-parent(100%, 2, 1);
+    }
+    .primary {
+      @include square-view(100%, $h3-font-size);
+      background-size: cover;
+      height: 209px;
+    }
+    .secondary {
+      @include square-view(100%, $h1-font-size);
+      background-size: cover;
+      height: 418px;
+    }
+
+    @include respond-to(handheld) {
+      .primary-parent,
+      .secondary-parent {
+        width: 100%;
+      }
+    }
+
+    a {
+      color: $link_color;
+    }
+  }
+  /* End of Job Suggestion View */
+
+  .ctools-auto-submit-processed {
+    position: relative;
+    text-align: center;
+    z-index: 400;
+    height: 74px;
+    @include respond-to(handheld) {
+      display: none;
+    }
+    .form-type-textfield {
+      display: block;
+      position: absolute;
+      top: -84px;
+      margin: 17px 0;
+      left: 0;
+      right: 0;
+    }
+    .form-text {
+      height: 40px;
+      padding: 0 1em 0 2.75em;
+      border: none;
+      margin: 0 auto;
+      background: #fff url(/sites/all/themes/tietocom/images/icons/search-light.png) no-repeat .75em center;
+      box-sizing: border-box;
+      width: 280px;
+    }
+  }
+
+  /* Sub Menu CSS*/
+  .nav-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: $base_unit auto;
+
+    &.stick {
+      position: fixed;
+      top: 0;
+      bottom: inherit;
+      margin-top: 0;
+      z-index: 1;
+
+      .megamenu-block {
+        margin-top: 0;
+      }
+    }
+
+    @include respond-to(handheld) {
+      display: none;
+    }
+  }
+
+  .megamenu-block {
+    @extend .centre-align;
+    display: block;
+
+    .menu {
+      width: 100%;
+      position: relative;
+      text-align: center;
+      display: table;
+      table-layout: fixed;
+    }
+
+    .menu__item {
+      display: table-cell;
+
+      &:first-child a {
+        margin-left: 0;
+      }
+
+      a {
+        display: block;
+        color: $link_color;
+        background: $primary-light-blue;
+        font-weight: 600;
+        text-align: center;
+        font-size: 14px;
+        padding: ($base_unit * 2) 0;
+        margin-left: 1px;
+      }
+    }
+  }
+  /* End of Sub Menu CSS*/
+
+  .view-career-highlight,
+  .view-career-cases,
+  .view-career-follow-us,
+  .view-careers-team {
+    @include respond-to(handheld) {
+      padding: 0 ($base_unit * 3);
+      clear: both;
+    }
+    @include respond-to(tab-portrait) {
+      padding: 0 ($base_unit * 3);
+    }
+  }
+
+  .highlight-content {
+    @extend .centre-align;
+  }
+
+  /* Team View CSS*/
+  .team-content {
+    padding: 0 5%;
+
+    .team-view {
+      color: $primary_text_color;
+      padding: ($base_unit * 3) ($base_unit * 8);
+      text-align: center;
+
+      @include respond-to(handheld) {
+        width: 100%;
+        padding: 0 !important;;
+        margin: ($base_unit * 3) 0 !important;
+        clear: both;
+
+        img {
+          width: $base_unit * 30;
+        }
+      }
+
+      .title {
+        .text {
+          margin: $base_unit 0 0 0;
+          font-size: 16px;
+
+          a {
+            color: inherit;
+          }
+        }
+        .desc {
+          font-size: 14px;
+        }
+      }
+      .sub-title {
+        margin: 10px 0 0 10px;
+        .text {
+          font-size: 14px;
+        }
+        .social-link {
+          display: inline-block;
+          margin: 8px;
+          width: 30px;
+          height: 30px;
+          font-size: 1.8em;
+        }
+
+      }
+      .thumbnail {
+
+      }
+    }
+  }
+  /* End of Team View CSS*/
+
+  .highlight-view {
+    text-align: center;
+    h2 {
+      text-align: left;
+      a {
+        color: inherit;
+      }
+    }
+
+    p {
+      text-align: left;
+    }
+
+    img {
+      margin: ($base_unit * 4) auto;
+    }
+    .h3 {
+      margin: 0;
+
+      a {
+        font-weight: 600;
+        color: #000;
+        margin: 0px;
+        width: 100%;
+        font-size: 18px;
+      }
+    }
+  }
+  /* CSS For Cases */
+  .cases-content {
+    .cases-view {
+      &:nth-of-type(1) {
+        margin-right: 2%;
+      }
+
+      @include respond-to(handheld) {
+        padding: 0 !important;
+        margin: ($base_unit * 3) 0 !important;
+        width: 100% !important;
+        clear: both;
+      }
+    }
+
+    h3 {
+      margin: 16px 0 32px 0;
+    }
+    span {
+      font-size: 14px;
+    }
+    .large {
+      @include rect(100%, 250px, #e91e63);
+    }
+  }
+  /* End of CSS For Cases */
+
+  /* CSS For Highlight List*/
+  .highlight-list {
+    width: 100%;
+    margin-top: $base_unit * 5;
+    clear: both;
+    float: left;
+
+    .thumbnail {
+      @include thumbnail(100px, #f57c00);
+    }
+    .image {
+      width: 58%;
+      @include respond-to(handheld) {
+        margin: ($base_unit * 3) 0;
+        clear: both;
+        width: 100%;
+      }
+
+      img {
+        margin: 0 1em;
+      }
+    }
+
+    .content {
+      width: 40%;
+      font-size: 14px;
+      font-weight: 200;
+      color: #888;
+
+      @include respond-to(handheld) {
+        width: 100%;
+      }
+
+      h3 {
+        margin: 0;
+        a {
+          font-size: 14px;
+          font-weight: 600;
+          color: #000;
+          margin: 0px;
+          width: 100%;
+        }
+      }
+    }
+
+    &:nth-child(even) {
+      .content {
+        float: left;
+      }
+      .image {
+        float: right;
+        text-align: left;
+      }
+    }
+    &:nth-child(odd) {
+      .content {
+        float: right;
+      }
+      .image {
+        float: left;
+        text-align: right;
+      }
+    }
+
+    @include respond-to(handheld) {
+      &:nth-child(odd),
+      &:nth-child(even) {
+        .content,
+        .image {
+          float: none;
+        }
+        .image {
+          text-align: center;
+        }
+      }
+    }
+
+  }
+  /* End of CSS For Highlight List*/
+
+  /* Start of css of follow us section*/
+  .social-media {
+    .blog2 {
+      padding: 0 10px;
+    }
+
+    @include respond-to(handheld) {
+      .col-3 {
+        width: 100%;
+        padding: 0 !important;;
+        margin: ($base_unit * 3) 0 !important;
+        clear: both;
+      }
+    }
+  }
+
+  /* End of css of follow us section*/
+
+  .block-addtoany {
+    text-align: center;
+  }
+}
+
+.select-field {
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 8px;
+  color: #0065a1;
+}
+
+.field-selector {
+  height: 40px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: top;
+  z-index: 1000;
+  cursor: pointer;
+
+  .field-options {
+    display: none;
+  }
+
+  &.field-selector-visible {
+    .field-options {
+      /*display: block;
+      padding: ($base_unit * 2) 0;*/
+      font-size: 18px;
+      line-height: 22px;
+      padding: 5px 10px;
+    }
+  }
+}
+
+.field-options {
+  background: #fff;
+  text-align: left;
+  color: #0081c8;
+
+}
+
+.field-selected {
+  padding-left: 7px;
+  color: $primary-blue;
+  position: relative;
+  background: url('../images/large/carousel_content_arrow_down.png') no-repeat bottom;
+  background-position: 10px 22px;
+  padding-bottom: $base_unit * 3;
+}
+
+.primary-button {
+  padding: ($base_unit * 2) 20%;
+  background: $primary-light-blue;
+  color: $primary_foreground_color;
+  border: 0;
+
+  @include respond-to(handheld) {
+    width: 100%;
+  }
+}
+
+.view-career-follow-us {
+  .view-tieto-blogs {
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+
+      li {
+        position: relative;
+        padding-left: $base_unit * 4;
+        padding-bottom: $base_unit * 2;
+
+        &:before {
+          position: absolute;
+          content: '>';
+          color: $primary-light-blue;
+          left: 0;
+          top: 0;
+          font-weight: 700;
+        }
+
+        .views-field-title {
+          font-weight: 700;
+          padding-bottom: $base_unit;
+        }
+      }
+    }
+  }
+}
+
+.sticky-menu-dependent {
+  clear: both;
+}
+
+.views-exposed-form .job_sugg {
+  background-size: 100% 100%;
+}
+body .node-type-concept-page {
+		background-color: #fff !important;
+}

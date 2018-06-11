@@ -1,0 +1,793 @@
+/**
+ * @file
+ * Navigation Styling
+ */
+
+/*
+ * The active item in a Drupal menu
+ */
+
+li {
+  a, a.active {
+    text-decoration: none;
+  }
+}
+
+/*
+ * Navigation bar
+ */
+
+#header {
+  #navigation {
+    margin: 0 auto;
+    max-width: 1140px;
+  }
+  a {
+    color: $white;
+  }
+  ul.links, /* Main menu and secondary menu links */
+  ul.menu {
+    /* Menu block links */
+    text-align: left; /* LTR */
+    list-style: none;
+    margin-bottom: 0;
+    //position: relative;
+  }
+
+  .menu__item.leaf .leaf {
+    background: none repeat scroll 0 0 rgba(0, 0, 0, 0);
+  }
+}
+
+.region-header-container {
+  opacity: 1;
+  position: absolute;
+  top: 0;
+  right: 1em;
+  //padding: 10px;
+  //z-index: 501;
+  pointer-events: none;
+  // Mobile styles for Menu field wrapper.
+  //@include respond-to(handheld) {
+  //  background: $parade-blue;
+  //  padding: 1em;
+  //  opacity: 0;
+  //  visibility: hidden;
+  //  will-change: opacity;
+  //  transition: opacity .2s, visibility .2s;
+  //  box-shadow: 0 10px 15px rgba(0, 0, 0, .3);
+  //  min-width: 50%;
+  //  font-size: 1.2em;
+  //
+  //  // Arrow for the dropdown.
+  //  &::before {
+  //    content: " ";
+  //    display: block;
+  //    position: absolute;
+  //    top: 0;
+  //    right: 4px;
+  //    border: 10px solid;
+  //    margin-top: -20px;
+  //    border-color: transparent transparent $parade-blue transparent;
+  //    box-sizing: content-box;
+  //  }
+  //  a {
+  //    border-bottom: 0;
+  //  }
+  //}
+
+  // Menu links <a> tags
+  a,
+  .megamenu-parent {
+    color: white;
+    text-decoration: none;
+    display: block;
+    text-align: center;
+    font-size: 1em;
+    letter-spacing: .5px;
+    padding: .5em;
+    font-weight: 700;
+    border-bottom: 2px solid transparent;
+    transition: border-color .2s;
+    pointer-events: auto;
+    cursor: pointer;
+    font-family: "Helvetica",Arial,sans-serif;
+
+    &:hover {
+      background: 0;
+      color: white;
+      border-color: white;
+    }
+  }
+
+  // Desktop styles for Menu field wrapper.
+  @include respond-to(narrow) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    text-align: right;
+    transition: background .2s;
+
+    a,
+    .megamenu-parent {
+      font-size: 15px;
+    }
+  }
+}
+
+.header-mainmenu,
+.region-header {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  height: 32px;
+  margin: 0 44px 0 0;
+  overflow: hidden;
+  padding: 0;
+  transition: all .5s ease-in-out;
+  transition-delay: .5s;
+  //max-width: calc(100vw - 110px);
+  max-width: 100%;
+  @media screen and (min-width: 870px) {
+    margin: 0 74px 0 0;
+    height: 60px;
+  }
+  @include respond-to(narrow) {
+    font-size: .5rem;
+    //max-width: calc(100vw - 90px);
+    margin-right: 0;
+    margin-left: 0;
+  }
+  @include respond-to(normal) {
+    font-size: 1rem;
+    //max-width: calc(100vw - 160px);
+  }
+  .menu {
+    list-style: none;
+    padding: 0;
+  }
+
+  .show-header-block {
+    display: none;
+  }
+  .header-block-content {
+    display: block;
+    position: static;
+  }
+  ul.menu {
+    li {
+      //display: inline-block;
+      padding: .5em;
+      a {
+        display: block;
+        text-align: center;
+      }
+      &.last a {
+        margin-right: 0;
+      }
+    }
+    ul.menu {
+      display: none;
+    }
+  }
+  > div:first-of-type {
+    .megamenu-parent.is_active {
+      @media all and (min-width: 870px) {
+        background: 0;
+        color: rgb(255, 255, 255);
+        border-color: rgb(255, 255, 255);
+      }
+    }
+    .megamenu-link .tieto-submenu-megamenu-container {
+      @include respond-to(narrow) {
+        padding-left: 90px;
+      }
+      @media all and (min-width: 870px) {
+        display: block;
+        position: absolute;
+        background: rgba(103, 175, 225, 0.95);
+        opacity: 0;
+        transition: opacity 0.5s;
+        z-index: -999999;
+        pointer-events: none;
+        left: 0;
+        right: 0;
+        padding-left: 160px;
+      }
+      &.is_active {
+        @media all and (min-width: 870px) {
+          opacity: 1;
+          z-index: inherit;
+          pointer-events: auto;
+        }
+        ul.menu {
+          @media all and (min-width: 870px) {
+            display: block;
+          }
+        }
+      }
+    }
+  }
+  .offcanvas_menu-block .megamenu-link .tieto-submenu-megamenu-container {
+    @include respond-to(narrow) {
+      padding-left: 0;
+    }
+  }
+  > div:first-of-type {
+    .tieto-submenu-megamenu-container-inner {
+      @media all and (min-width: 870px) {
+        z-index: -999999999;
+        padding: 45px 0 90px;
+        max-width: 800px;
+        margin: 0 auto;
+        display: block;
+        text-align: center;
+      }
+      > .menu__item {
+        @media all and (min-width: 870px) {
+          width: 30%;
+          display: inline-block;
+          float: left;
+          margin-right: 2.9%;
+          padding: 0;
+        }
+        > span,
+        > a {
+          @media all and (min-width: 870px) {
+            font-weight: 700;
+            display: block;
+            padding-bottom: 5px;
+            text-align: left;
+            transition: all 0.35s;
+            border: none;
+            font-size: 1rem;
+          }
+        }
+        > a:hover {
+          @media all and (min-width: 870px) {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none !important;
+          }
+        }
+        ul.menu {
+          @media all and (min-width: 870px) {
+            list-style-type: none;
+            text-align: left;
+            padding-left: 5px;
+            margin-left: 0;
+          }
+        }
+        .menu__item {
+          @media all and (min-width: 870px) {
+            padding: 0;
+            display: block;
+          }
+          a {
+            @media all and (min-width: 870px) {
+              text-align: left;
+              padding: 1.5px;
+              font-size: 14px;
+              letter-spacing: 0;
+              font-weight: 400;
+              border-bottom: none;
+            }
+            &:hover {
+              @media all and (min-width: 870px) {
+                background: transparent;
+                text-decoration: underline;
+                color: white;
+                border-bottom: none !important;
+              }
+            }
+          }
+        }
+      }
+      .megamenu-exit {
+        display: none;
+        @media all and (min-width: 870px) {
+          position: absolute;
+          right: 25px;
+          top: 25px;
+          z-index: 999999;
+          display: block;
+          width: 40px;
+          height: 32px;
+          cursor: pointer;
+        }
+        span {
+          backface-visibility: hidden;
+          background-color: rgb(255, 255, 255);
+          border-radius: 2px;
+          cursor: pointer;
+          display: block;
+          height: 4px;
+          right: 9px;
+          position: absolute;
+          top: 48%;
+          -webkit-transition: all .3s ease-in-out;
+          transition: all .3s ease-in-out;
+          width: 32px;
+          transform: rotate(45deg);
+          &:last-child {
+            transform: rotate(-45deg);
+          }
+        }
+      }
+    }
+  }
+}
+
+.region-header {
+  padding: 10px 0 10px 10px;
+}
+
+.header-mainmenu {
+  position: fixed;
+  top: 10px;
+  right: 0;
+  z-index: 501;
+  width: 100%;
+  overflow: visible;
+  max-width: 100%;
+  padding-right: 20px;
+  @include respond-to(narrow) {
+    Padding-right: 90px;
+  }
+  @include respond-to(normal) {
+    padding-right: 90px;
+  }
+  @include respond-to(wide) {
+    padding-right: 160px;
+  }
+}
+
+
+/*
+ * Menu blocks - Other header menus
+ */
+.region-header .block-menu {
+  .show-header-block {
+    @include respond-to(narrow-only) {
+      @include hide-text;
+    }
+    @include respond-to(normal) {
+      width: auto;
+    }
+  }
+
+  .block-title-wrapper {
+    height: $large-icon-size;
+    padding-left: $large-icon-size + $inline-padding;
+    padding-right: icons-sprite-width(arrow-white-down) + $inline-padding;
+    padding-top: 2px;
+    padding-bottom: 1px;
+    h2.block-title {
+      font-size: inherit;
+      font-weight: normal;
+      padding-left: $inline-padding;
+      padding-right: $inline-padding;
+      @include respond-to(narrow-only) {
+        display: none;
+      }
+    }
+  }
+
+  @include respond-to(handheld) {
+    .block-title-wrapper {
+      display: none;
+    }
+  }
+  @include respond-to(narrow) {
+    position: relative;
+    .show-header-block {
+      &:after {
+      }
+    }
+    .block-title-wrapper {
+      z-index: -1;
+    }
+
+    ul.menu {
+      white-space: nowrap;
+    }
+  }
+  h2.block-title {
+    color: $gray-9;
+  }
+}
+
+.region-header #block-menu-menu-customer-area {
+  ul.menu li a:before {
+    right: 0;
+    margin: $block-text-padding;
+    margin-left: 0;
+    top: 0;
+    @include respond-to(narrow) {
+      display: none;
+    }
+  }
+
+  .show-header-block,
+  .block-title-wrapper {
+    display: none;
+  }
+
+  @include respond-to(normal) {
+    .header-block-content {
+      display: block;
+      position: static;
+      z-index: 15;
+    }
+    .header-block-inner {
+      background-color: transparent;
+      padding: 0;
+    }
+    ul.menu {
+      display: block;
+      a {
+        display: block;
+      }
+    }
+  }
+}
+
+.region-header #block-search-form {
+  opacity: 1;
+  &.is_hidden {
+    opacity: 0;
+    .search-block-link a {
+      pointer-events: none;
+    }
+  }
+  .search-block-link {
+    a {
+      @extend .show-header-block;
+      display: block;
+      padding: 0;
+      border: none;
+    }
+  }
+}
+
+/*
+ * "Menu block" blocks - Main navigation
+ *
+ * Drupal core has limited ways in which it can display its menus. To get around
+ * these limitations, see http://drupal.org/project/menu_block
+ */
+
+/*
+ * Main menu panes
+ */
+
+.pane-menu-tree,
+.view-key-topics-navigation {
+  .show-content {
+    display: none;
+
+  }
+
+  ul.menu {
+    @include sprite-icons-menu();
+    margin: 0;
+    li.active-trail > a {
+      text-decoration: underline;
+    }
+  }
+
+  @include mobile-hidden-content-nav();
+  @include respond-to(handheld) {
+    margin-bottom: 1em;
+    .show-content {
+      display: block;
+      a {
+        text-indent: 0;
+        padding-left: 60px;
+      }
+    }
+    h2.pane-title {
+      display: none;
+    }
+    .pane-content {
+      margin-top: 1em;
+    }
+  }
+}
+
+.node-type-tieto-landing-page,
+.node-type-tieto-content-page {
+  .pane-menu-tree {
+    h2.pane-title {
+      display: none;
+    }
+  }
+}
+
+.pane-tieto-industry-hublinks ul.menu {
+  @include sprite-icons-menu();
+}
+
+/* Spriteys!!! */
+// No Spriteys.
+
+/*
+ * Offerings menu
+ */
+@include respond-to(handheld) {
+  #block-tieto-megamenus-megamenu {
+    display: none;
+  }
+}
+
+//@include respond-to(narrow) {
+//  .js .mobile-nav-enabled {
+//    // Hide megamenu links in top menu
+//    .megamenu-link {
+//      display: none;
+//    }
+//  }
+//}
+
+/* Colors and styles */
+.megamenu-block {
+  .megamenu-link {
+    ul.menu {
+      a {
+        @include link-hover($base-font-color);
+      }
+      a.active, ul a.active-trail {
+        color: $primary-red;
+      }
+      ul.menu {
+        a {
+          @include adjust-font-size-to($sidebar-font-size);
+          line-height: normal;
+        }
+      }
+    }
+
+    .button {
+      a {
+        color: $white;
+        font-weight: bold;
+      }
+      &:before {
+        background-color: $white;
+        @include opacity(.3);
+
+      }
+    }
+    .subnav {
+      @extend .icons-plus;
+
+    }
+    .megamenu-columns {
+      @include after-clearfix();
+      background-color: $white;
+    }
+    &:hover {
+      cursor: pointer;
+      .button {
+        a {
+          color: $primary-blue;
+        }
+
+        &:before {
+          @include opacity(1);
+        }
+      }
+      .subnav {
+        @extend .icons-minus;
+      }
+    }
+  }
+  .megamenu-link-expanded {
+    li.expanded > a {
+      font-weight: bold;
+      @include link-hover();
+    }
+  }
+}
+
+/* Layout */
+.megamenu-block {
+  .megamenu-link {
+    display: inline-block;
+    max-width: 33.5%;
+    left: -1px;
+    padding: 1px;
+    vertical-align: middle;
+    height: 2.75em;
+    @include box-sizing(border-box);
+    .megamenu-columns {
+      margin: 5px 1px;
+      padding: 0.5em 0 0.5em 0.75em;
+    }
+    ul.menu {
+      top: 2.75em;
+    }
+  }
+  .button {
+    position: relative;
+    height: 100%;
+    display: block;
+
+    &:before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      margin: 1px;
+      height: 100%;
+      width: 100%;
+    }
+
+    a {
+      @include box-sizing(border-box);
+      display: inline-block;
+      line-height: normal;
+      margin-top: -1em;
+      padding-left: 0.75em;
+      padding-right: 22px + $base-font-size;
+      position: relative;
+      top: 1.25em;
+      vertical-align: middle;
+      width: 100%;
+    }
+  }
+  .subnav {
+    position: absolute;
+    right: 0.75em;
+    top: 50%;
+    height: 22px;
+    width: 22px;
+    margin-top: -11px;
+  }
+
+  .megamenu-column {
+    float: left;
+    //height: 100%;
+  }
+}
+
+// Offerings menu is much bigger and centered on the front page
+.front .megamenu-block {
+  .megamenu-link {
+    height: 3.5em;
+
+    > ul.menu {
+      bottom: 100%;
+      z-index: 11;
+      top: auto;
+    }
+
+    .button a {
+      top: 1.625em;
+    }
+  }
+}
+
+.not-front .megamenu-block {
+  .megamenu-columns {
+    @include box-shadow();
+  }
+}
+
+//** Temporary IE8/9 Fixes, using \9 to link only to IE browsers. **//
+
+#header .megamenu-block {
+  .megamenu-link .button:before {
+    background-color: $primary-blue \9
+  ;
+  }
+  .megamenu-link:hover .button:before {
+    background-color: $white \9
+  ;
+  }
+}
+
+// Hotfix for ie9 related issues on megamenu
+
+.megamenu-block .megamenu-link:hover .button:before {
+  margin-top: -7px \9
+;
+  padding-bottom: 8px \9
+;
+}
+
+.region-header {
+  .region-header-right .block-menu-menu-tieto-worldwide {
+    display: none;
+  }
+
+  .show-header-block {
+    cursor: pointer;
+    z-index: 5;
+  }
+
+  .active-header-block {
+    .header-block-inner {
+      position: relative;
+      z-index: 10;
+    }
+  }
+
+  .header-block-content {
+    ul.menu {
+      padding-left: 0;
+      display: flex;
+      align-items: center;
+      //ul.menu {
+      //  padding-left: 20px;
+      //}
+    }
+  }
+}
+
+// frontpage header. used only on front pages where it has .node-type-tieto-frontpage class
+.html.node-type-tieto-frontpage:not(.window-handheld) {
+  #header #navigation {
+    max-width: $max-width;
+  }
+  .header-inner {
+    max-width: inherit;
+    padding: 0;
+
+    #block-tieto-megamenus-megamenu {
+      margin: 0 0.625em;
+    }
+    .block-menu-block.first {
+
+      .block-title-wrapper {
+        display: none;
+      }
+    }
+  }
+}
+
+// end frontpage header
+
+// restructured main navigation on handheld
+body.page-node.window-handheld:not(.node-type-key-topics) {
+  .region-header .block-menu-block.first .header-block-content {
+    > a.home-link:before {
+      background-image: none;
+      @include fa-icon($fa-var-home, 1.4em);
+      top: 0;
+      padding-right: 10px;
+    }
+    li.mobile-is-expanded > span:after {
+      @include fa-icon($fa-var-angle-down);
+      padding-left: 0;
+    }
+    span {
+      background-image: none;
+      margin: 0;
+      min-height: inherit;
+      &:after {
+        @include fa-icon($fa-var-angle-right);
+        line-height: 1.4;
+        padding-left: 0.2em;
+      }
+    }
+    a {
+      font-size: 0.6em;
+      height: inherit;
+      line-height: 1.4;
+      min-height: inherit;
+    }
+  }
+}
+
+.not-front {
+  .header-inner .segment-title div.title,
+  .header-inner .segment-title h1.title {
+    padding-top: 60px;
+    @include respond-to(narrow) {
+      padding-top: 100px;
+    }
+  }
+}

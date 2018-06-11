@@ -1,0 +1,6 @@
+name = Scald Custom text
+description = Allows the creation and edition of custom text and embedding.
+package = Scald
+core = 7.x
+dependencies[] = scald
+stylesheets[all][] = scald_customtext.css

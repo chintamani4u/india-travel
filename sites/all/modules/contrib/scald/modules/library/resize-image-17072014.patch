@@ -1,0 +1,93 @@
+--- dnd/js/dnd-library.js	2014-06-03 16:07:01.000000000 +0530
++++ dnd/js/dnd-library.js	2014-07-17 18:44:38.166498100 +0530
+@@ -196,7 +196,9 @@
+  */
+ Drupal.theme.prototype.scaldEmbed = function(atom, context, options) {
+   context = context ? context : Drupal.settings.dnd.contextDefault;
+-
++  var style="";
++  var paddingl=0;
++  var paddingt=0;
+   var classname = 'dnd-atom-wrapper';
+   classname += ' type-' + atom.meta.type;
+   classname += ' context-' + context;
+@@ -204,7 +206,15 @@
+     classname += ' atom-align-' + atom.meta.align;
+   }
+ 
+-  var output = '<div class="' + classname + '"><div class="dnd-drop-wrapper">' + atom.contexts[context] + '</div>';
++if (atom.meta.marginl && atom.meta.marginl != '') {
++    paddingl=atom.meta.marginl;
++  }
++  if (atom.meta.margint && atom.meta.margint != '') {
++    paddingt = atom.meta.margint;
++  }
++   style += ' padding:' + paddingt + "px " + paddingl + "px;";
++//alert(atom.meta.marginl);
++ var output = '<div class="' + classname + '" style="'+ style +'"><div class="dnd-drop-wrapper">' + atom.contexts[context] + '</div>';
+   if (atom.meta.legend) {
+     output += '<div class="dnd-legend-wrapper">' + atom.meta.legend + '</div>';
+   }
+   
+--- dnd/plugins/ckeditor/dialogs/dnd.js	2014-06-03 16:07:01.000000000 +0530
++++ dnd/plugins/ckeditor/dialogs/dnd.js	2014-07-17 18:52:20.655977500 +0530
+@@ -41,6 +41,8 @@
+         context: context,
+         options: options,
+         legend: legend,
++        marginl: elm.css("padding-left").replace(/px/g, ""),
++		margint: elm.css("padding-top").replace(/px/g, ""),
+         align: elm.hasClass('atom-align-left') ? 'left' : elm.hasClass('atom-align-right') ? 'right' : elm.hasClass('atom-align-center') ? 'center' : 'none'
+       };
+       Drupal.dnd.fetchAtom(context, sid, function() {
+@@ -58,6 +60,18 @@
+       Drupal.dnd.Atoms[atom.sid] = Drupal.dnd.Atoms[atom.sid] || {sid: atom.sid, contexts:{}, meta: {}};
+       Drupal.dnd.Atoms[atom.sid].meta.legend = this.getValueOf('info', 'txtLegend');
+       Drupal.dnd.Atoms[atom.sid].meta.align = this.getValueOf('info', 'cmbAlign');
++      if (!$.isNumeric( this.getValueOf('info', 'txtHspace') ))
++	  {
++		alert("Hspace must be whole number");
++		return false;
++	  }
++	  if(!$.isNumeric( this.getValueOf('info', 'txtVspace') ))
++	  {
++		alert("Vspace must be whole number");
++		return false;
++	  }
++	  Drupal.dnd.Atoms[atom.sid].meta.marginl= this.getValueOf('info', 'txtHspace');
++	  Drupal.dnd.Atoms[atom.sid].meta.margint= this.getValueOf('info', 'txtVspace');
+       var context = this.getValueOf('info', 'cmbContext');
+       atom.options.link = this.getValueOf('info', 'txtLink');
+       Drupal.dnd.fetchAtom(context, atom.sid, function() {
+@@ -77,12 +91,30 @@
+             id: 'txtLegend',
+             type: 'textarea',
+             rows: 5,
+-            label: lang.properties_legend,
++            label: 'Caption',
+             setup: function(atom) {
+               this.setValue(atom.legend);
+             }
+           },
+           {
++            id: 'txtHspace',
++            type: 'text',
++			size: 5,
++            label: 'Hspace',
++            setup: function(atom) {
++              this.setValue(atom.marginl);
++            }
++          },
++		  {
++            id: 'txtVspace',
++            type: 'text',
++			size: 5,
++            label: 'Vspace',
++            setup: function(atom) {
++              this.setValue(atom.margint);
++            }
++          },
++          {
+             id: 'cmbContext',
+             type: 'select',
+             label: lang.properties_context,

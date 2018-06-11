@@ -1,0 +1,28 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the search_api_node_exclude.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function search_api_exclude_schema() {
+  $schema['search_api_exclude'] = array(
+    'fields' => array(
+      'nid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+      ),
+      'node_exclude' => array(
+        'type' => 'int',
+        'not null' => FALSE,
+      ),
+    ),
+    'indexes' => array(
+      'node_exclude' => array('node_exclude'),
+    ),
+    'primary key' => array('nid'),
+  );
+  return $schema;
+}

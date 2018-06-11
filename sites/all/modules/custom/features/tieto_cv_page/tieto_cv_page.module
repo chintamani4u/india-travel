@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto CV Page feature.
+ */
+
+include_once 'tieto_cv_page.features.inc';

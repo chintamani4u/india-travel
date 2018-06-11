@@ -1,0 +1,20 @@
+name = Scald Facebook channel
+description = Scald Facebook channel
+core = 7.x
+package = Tieto.com
+php = 5.2.4
+version = 7.x-0.1
+project = scald_fb_channel
+dependencies[] = atom_reference
+dependencies[] = ctools
+dependencies[] = features
+
+stylesheets[all][] = css/scald_fb_channel.css
+
+features[ctools][] = flexslider:flexslider_default_preset:1
+features[features_api][] = api:1
+features[field][] = fieldable_panels_pane-fb_channel-field_fb_reference
+
+files[] = scald_fb_channel.module
+files[] = scald_fb_channel.install
+

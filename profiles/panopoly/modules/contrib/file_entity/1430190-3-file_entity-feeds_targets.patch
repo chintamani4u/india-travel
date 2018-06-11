@@ -1,0 +1,121 @@
+diff --git a/file_entity.feeds.inc b/file_entity.feeds.inc
+new file mode 100644
+index 0000000..cbeb617
+--- /dev/null
++++ b/file_entity.feeds.inc
+@@ -0,0 +1,95 @@
++<?php
++
++/**
++ * @file
++ * Feeds definitions for file_entity.
++ */
++
++/**
++ * Implements hook_feeds_processor_targets_alter().
++ */
++function file_entity_feeds_processor_targets_alter(&$targets, $entity_type, $bundle_name) {
++  if ($entity_type == 'file') {
++    // TODO - figure out how to avoid this.
++    unset($targets['type']);
++
++    $targets['file_local'] = array(
++      'name' => t('Local File'),
++      'description' => t('Path to a file that should be stored locally.'),
++      'callback' => 'file_entity_local_set_target',
++    );
++    $targets['file_uri'] = array(
++      'name' => t('File URI'),
++      'description' => t('URI of file to be used for this entity.'),
++      'callback' => 'file_entity_uri_set_target',
++    );
++    $targets['file_mimetype'] = array(
++      'name' => t('File MimeType'),
++      'description' => t('The mimetype to use for this entity.'),
++      'callback' => 'file_entity_mimetype_set_target',
++    );
++  }
++}
++
++/**
++ * Maps feeds source data to a file entity.
++ *
++ * @see file_feeds_set_target().
++ */
++function file_entity_local_set_target($source, $entity, $target, $value) {
++  if (empty($value)) {
++    return;
++  }
++  module_load_include('inc', 'file');
++
++  // Make sure $value is an object of type FeedsEnclosure.
++  if (!($value instanceof FeedsEnclosure)) {
++    if (is_string($value)) {
++      $value = new FeedsEnclosure($value, 'application/octet-stream');
++    }
++    else {
++      $value = null;
++    }
++  }
++  if (empty($value)) {
++    return;
++  }
++
++  // TODO - are destinations configurable?
++  $dest = file_build_uri('');
++  if ($file = $value->getFile($dest)) {
++    foreach ($file as $k => $v) {
++      $entity->{$k} = $v;
++    }
++  }
++}
++
++/**
++ * Maps feeds source data to a file entity, for files represented only by an
++ * external URI.
++ *
++ * @see file_feeds_set_target().
++ */
++function file_entity_uri_set_target($source, $entity, $target, $value) {
++  if (empty($value)) {
++    return;
++  }
++  module_load_include('inc', 'file');
++
++  $entity->uri = $value;
++  $entify->fid = NULL;
++  $entity->filename = basename($value);
++  $entity->filemime = file_get_mimetype($value);
++  $entity->uid = $GLOBALS['user']->uid;
++  $entity->status = FILE_STATUS_PERMANENT;
++}
++
++/**
++ * Maps feeds source data to a file entity mimetype.
++ */
++function file_entity_mimetype_set_target($source, $entity, $target, $value) {
++  if (empty($value)) {
++    return;
++  }
++  $entity->filemime = $value;
++}
+diff --git a/file_entity.module b/file_entity.module
+index 8930149..55b8e73 100644
+--- a/file_entity.module
++++ b/file_entity.module
+@@ -23,6 +23,15 @@ require_once dirname(__FILE__) . '/file_entity.file_api.inc';
+ require_once dirname(__FILE__) . '/file_entity.field.inc';
+ 
+ /**
++ * Implements hook_init().
++ */
++function file_entity_init() {
++  if (module_exists('feeds')) {
++    module_load_include('inc', 'file_entity', 'file_entity.feeds');
++  }
++}
++
++/**
+  * Implements hook_hook_info().
+  */
+ function file_entity_hook_info() {

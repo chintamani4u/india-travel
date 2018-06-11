@@ -1,0 +1,26 @@
+<?php
+/**
+ * @file
+ * Scald Slideshare Installation.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function scald_slideshare_install() {
+  ScaldAtomController::addType('slideshow', 'Slideshow', 'Slideshow');
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function scald_slideshare_uninstall() {
+  drupal_load('module', 'scald');
+  // If Scald is disabled, its classes are not autoloaded.
+  module_load_include('inc', 'scald', 'includes/ScaldAtomController');
+  ScaldAtomController::removeType('slideshow');
+
+  variable_del('scald_slideshare_api_key');
+  variable_del('scald_slideshare_imports');
+  variable_del('scald_slideshare_shared_secret');
+}

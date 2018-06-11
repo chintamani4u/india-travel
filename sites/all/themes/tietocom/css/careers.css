@@ -1,0 +1,818 @@
+/*
+$icons-spacing: 20px;
+$icons-position: 50%;
+@import "icons/*.png";
+
+$large-spacing: 20px;
+$large-position: 50%;
+@import "icons/large/*.png";
+*/
+.node-type-tieto-campaign .pane-tieto-key-topics-key-topics-social-icons {
+  float: left;
+  display: inline-flex;
+  position: relative;
+  font-size: 1.8em;
+}
+.node-type-tieto-campaign .pane-tieto-key-topics-key-topics-social-icons a {
+  padding: 3px;
+}
+.node-type-tieto-campaign .pane-tieto-key-topics-key-topics-social-icons .key_topics_social_icons {
+  margin-left: 10px;
+}
+.node-type-tieto-campaign .pane-tieto-key-topics-key-topics-social-icons .pane-title {
+  font-size: 20px;
+}
+.node-type-tieto-campaign #block-menu-menu-customer-area {
+  display: none;
+}
+.node-type-tieto-campaign .region-footer {
+  background-color: #fff;
+}
+
+/* Career Subpages */
+/* All Open Jobs */
+.section-careers #header div.header-image {
+  background-position: center top;
+  background-size: cover;
+}
+@media all and (min-width: 1024px) {
+  .section-careers #header div.header-image {
+    background-position: center top;
+    background-size: 100% auto;
+  }
+}
+.section-careers.node-type-concept-page #header div.header-image {
+  position: relative;
+}
+
+/* All Open Jobs for .fi */
+.section-uramahdollisuudet #header div.header-image {
+  background-position: center top;
+  background-size: cover;
+}
+@media all and (min-width: 1024px) {
+  .section-uramahdollisuudet #header div.header-image {
+    background-position: center top;
+    background-size: 100% auto;
+  }
+}
+.section-uramahdollisuudet.node-type-concept-page #header div.header-image {
+  position: relative;
+}
+
+/* All Open Jobs for .se */
+.section-karriar #header div.header-image {
+  background-position: center top;
+  background-size: cover;
+}
+@media all and (min-width: 1024px) {
+  .section-karriar #header div.header-image {
+    background-position: center top;
+    background-size: 100% auto;
+  }
+}
+.section-karriar.node-type-concept-page #header div.header-image {
+  position: relative;
+}
+
+/* All Open Jobs for .ee*/
+.section-tieto-careers-open-jobs #header div.header-image {
+  background-position: center top;
+  background-size: cover;
+  position: relative;
+}
+@media all and (min-width: 1024px) {
+  .section-tieto-careers-open-jobs #header div.header-image {
+    background-position: center top;
+    background-size: 100% auto;
+  }
+}
+.section-tieto-careers-open-jobs.node-type-concept-page #header div.header-image {
+  position: relative;
+}
+
+.front .view-main-carousel {
+  clip-path: polygon(0 0, 100% 0, calc(100% + 80vh) 100%, 0 90%);
+}
+.front #header div.header-image {
+  background-color: white;
+}
+
+#page {
+  background-color: #62b3e5;
+}
+
+@media screen and (min-width: 992px) {
+  .color-slider {
+    background-color: transparent;
+  }
+
+  #block-tieto-offcanvas-menu-offcanvas-menu .menu__item span.button a, #block-tieto-offcanvas-menu-offcanvas-menu .menu__item span.button > span {
+    display: inline;
+    padding-left: 7px;
+    padding-right: 7px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid transparent;
+    transition: border-color .2s;
+  }
+
+  #block-tieto-offcanvas-menu-offcanvas-menu .menu__item span.button a:hover, #block-tieto-offcanvas-menu-offcanvas-menu .menu__item span.button > span:hover {
+    border-bottom: 2px solid white;
+    pointer-events: auto;
+    cursor: pointer;
+  }
+}
+@media all and (min-width: 760px) {
+  .form-type-select {
+    position: relative;
+    top: 6px;
+  }
+
+  .field-selector {
+    position: absolute;
+    width: 300px;
+  }
+
+  .field-selected {
+    text-align: left;
+    background-position: 40px bottom;
+  }
+
+  .field-selector-visible[style*="hidden"] {
+    z-index: 999;
+  }
+
+  .field-selector-visible[style*="scroll"] {
+    background-color: #fff;
+    z-index: 1001;
+  }
+
+  .career-container .job_sugg .views-widget {
+    margin-left: -50px !important;
+    margin-top: 0;
+    padding: 0 0 30px 0 !important;
+    background-repeat: no-repeat;
+    background-size: cover;
+  }
+}
+@media all and (min-width: 1024px) {
+  .form-type-select {
+    top: 3px;
+  }
+}
+.centre-align, .career-container section, .career-container .job-section .job-list-section, .career-container .job-section .col-1, .career-container .megamenu-block, .career-container .highlight-content {
+  max-width: 840px;
+  margin: 17px auto;
+}
+
+.blocks, .col-3, .col-2, .col-1 {
+  display: inline-block;
+  position: relative;
+  vertical-align: top;
+  margin-top: 10px;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+
+.col-3 {
+  width: 33%;
+}
+
+.col-2 {
+  width: 48%;
+}
+
+.col-1 {
+  width: 100%;
+}
+
+.col-25 {
+  width: 25%;
+}
+
+.col-50 {
+  width: 50%;
+}
+
+.col-100 {
+  width: 100%;
+}
+
+#main {
+  max-width: 100%;
+}
+
+#career-main {
+  background: #fff;
+}
+
+.field-label {
+  display: none;
+}
+
+.field-collection-container {
+  border-bottom: 0 !important;
+}
+
+.career-container {
+  font-family: Arial, Helvetica, 'Nimbus Sans L', sans-serif;
+  /* Job Suggestion View */
+  /* End of Job Suggestion View */
+  /* Sub Menu CSS*/
+  /* End of Sub Menu CSS*/
+  /* Team View CSS*/
+  /* End of Team View CSS*/
+  /* CSS For Cases */
+  /* End of CSS For Cases */
+  /* CSS For Highlight List*/
+  /* End of CSS For Highlight List*/
+  /* Start of css of follow us section*/
+  /* End of css of follow us section*/
+}
+.career-container .expand {
+  max-width: 100%;
+}
+.career-container section.nav-menu {
+  max-width: inherit;
+  margin: 0;
+}
+.career-container #open_job {
+  margin-top: 0;
+}
+.career-container #open-job1 {
+  margin: 15px 0;
+}
+.career-container #open {
+  margin-top: 0;
+}
+.career-container .field-collection-container > section:first-of-type {
+  margin-top: 0;
+}
+.career-container h2 {
+  font-size: 32px;
+  padding: 24px 0 0;
+}
+.career-container .job-section {
+  margin: 0;
+  background-color: #F8F8F8;
+  padding-bottom: 0;
+}
+.career-container .job-section .job-list-section {
+  margin: 0 auto;
+  color: #fff;
+}
+.career-container .job-section .col-1 {
+  text-align: center;
+  display: block;
+  padding: 10px 15px;
+  margin: 0 auto;
+}
+.career-container .job_sugg {
+  background: #ffb74d;
+  background-size: cover;
+  background-position: center top;
+  width: 100%;
+  min-height: 440px;
+  padding: 30px 0;
+  margin: 0;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  text-align: center;
+  color: #5e5e5e;
+}
+.career-container .job_sugg select {
+  /*background: #64B5F6;*/
+  color: #ef6c00;
+  border: 0;
+}
+.career-container .job_sugg h2 {
+  margin-top: 50px;
+  font-size: 2.6em;
+  color: #5e5e5e;
+}
+.career-container .job_sugg .views-widget {
+  font-size: 1.4em;
+  padding: 0;
+  margin: 0;
+}
+.career-container div.warning {
+  min-height: 40px;
+  border: 0;
+  background-color: #e56385;
+  color: #fff;
+  background-image: url("../images/bgalert.png");
+  background-position: 20px 10px;
+  margin: -10px -15px !important;
+}
+.career-container .generic-page {
+  background: #ffb74d;
+  width: 100%;
+  min-height: 357px;
+  color: #fff;
+  padding: 30px 0;
+  margin: 0;
+  box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  text-align: center;
+}
+.career-container .generic-page select {
+  /*background: #64B5F6;*/
+  color: #ef6c00;
+  border: 0;
+}
+.career-container .generic-page h2 {
+  margin-top: 50px;
+  font-size: 2.6em;
+}
+.career-container .generic-page .views-widget {
+  font-size: 1.4em;
+  padding: 0;
+  margin: 0;
+}
+.career-container .generic-page-menu .nav-menu {
+  position: static;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin-top: -65px;
+}
+.career-container .generic-page-menu .nav-menu.stick {
+  position: fixed;
+  top: 0;
+  bottom: inherit;
+  margin-top: 0;
+  z-index: 1;
+}
+.career-container .generic-page-menu .nav-menu.stick .megamenu-block {
+  margin-top: 0;
+}
+@media all and (max-width: 760px) {
+  .career-container .generic-page-menu .nav-menu {
+    display: none;
+  }
+}
+.career-container .form-item {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  display: inline-block;
+}
+@media all and (max-width: 760px) {
+  .career-container .form-item {
+    display: block;
+  }
+}
+.career-container .job-list-section {
+  width: 100%;
+  position: relative;
+  border: 0;
+  border-spacing: 0;
+  border-collapse: collapse;
+}
+.career-container .job-list-section * {
+  border: 0;
+  border-spacing: 0;
+  border-collapse: collapse;
+  padding: 0;
+}
+.career-container .job-list-section h3 {
+  margin: 40% 0 0;
+  padding: 0 16px;
+}
+.career-container .job-list-section .primary-parent {
+  width: 25%;
+  text-align: center;
+  margin: 0;
+}
+@media all and (max-width: 760px) {
+  .career-container .job-list-section .primary-parent {
+    display: block;
+    clear: both;
+  }
+}
+.career-container .job-list-section .secondary-parent {
+  width: 50%;
+  text-align: center;
+  margin: 0;
+}
+@media all and (max-width: 760px) {
+  .career-container .job-list-section .secondary-parent {
+    display: block;
+    clear: both;
+  }
+}
+.career-container .job-list-section .primary {
+  width: 100%;
+  margin: 0;
+  font-size: 18px;
+  font-family: "HelveticaNeueW02-45Ligh", "Arial", sans-serif;
+  display: table;
+  line-height: 1.5;
+  background-size: cover;
+  height: 209px;
+}
+.career-container .job-list-section .primary > span {
+  display: table-cell;
+  vertical-align: middle;
+  padding: 0 20px;
+}
+.career-container .job-list-section .primary > span a {
+  font-weight: 700;
+  font-family: Arial, Helvetica, "Nimbus Sans L", sans-serif;
+}
+@media all and (max-width: 760px) {
+  .career-container .job-list-section .primary {
+    font-size: 30px;
+    height: 300px;
+  }
+}
+.career-container .job-list-section .secondary {
+  width: 100%;
+  margin: 0;
+  font-size: 30px;
+  font-family: "HelveticaNeueW02-45Ligh", "Arial", sans-serif;
+  display: table;
+  line-height: 1.5;
+  background-size: cover;
+  height: 418px;
+}
+.career-container .job-list-section .secondary > span {
+  display: table-cell;
+  vertical-align: middle;
+  padding: 0 20px;
+}
+.career-container .job-list-section .secondary > span a {
+  font-weight: 700;
+  font-family: Arial, Helvetica, "Nimbus Sans L", sans-serif;
+}
+@media all and (max-width: 760px) {
+  .career-container .job-list-section .secondary {
+    font-size: 30px;
+    height: 300px;
+  }
+}
+@media all and (max-width: 760px) {
+  .career-container .job-list-section .primary-parent,
+  .career-container .job-list-section .secondary-parent {
+    width: 100%;
+  }
+}
+.career-container .job-list-section a {
+  color: #fff;
+}
+.career-container .ctools-auto-submit-processed {
+  position: relative;
+  text-align: center;
+  z-index: 400;
+  height: 74px;
+}
+@media all and (max-width: 760px) {
+  .career-container .ctools-auto-submit-processed {
+    display: none;
+  }
+}
+.career-container .ctools-auto-submit-processed .form-type-textfield {
+  display: block;
+  position: absolute;
+  top: -84px;
+  margin: 17px 0;
+  left: 0;
+  right: 0;
+}
+.career-container .ctools-auto-submit-processed .form-text {
+  height: 40px;
+  padding: 0 1em 0 2.75em;
+  border: none;
+  margin: 0 auto;
+  background: #fff url(/sites/all/themes/tietocom/images/icons/search-light.png) no-repeat 0.75em center;
+  box-sizing: border-box;
+  width: 280px;
+}
+.career-container .nav-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 5px auto;
+}
+.career-container .nav-menu.stick {
+  position: fixed;
+  top: 0;
+  bottom: inherit;
+  margin-top: 0;
+  z-index: 1;
+}
+.career-container .nav-menu.stick .megamenu-block {
+  margin-top: 0;
+}
+@media all and (max-width: 760px) {
+  .career-container .nav-menu {
+    display: none;
+  }
+}
+.career-container .megamenu-block {
+  display: block;
+}
+.career-container .megamenu-block .menu {
+  width: 100%;
+  position: relative;
+  text-align: center;
+  display: table;
+  table-layout: fixed;
+}
+.career-container .megamenu-block .menu__item {
+  display: table-cell;
+}
+.career-container .megamenu-block .menu__item:first-child a {
+  margin-left: 0;
+}
+.career-container .megamenu-block .menu__item a {
+  display: block;
+  color: #fff;
+  background: #63b3e3;
+  font-weight: 600;
+  text-align: center;
+  font-size: 14px;
+  padding: 10px 0;
+  margin-left: 1px;
+}
+@media all and (max-width: 760px) {
+  .career-container .view-career-highlight,
+  .career-container .view-career-cases,
+  .career-container .view-career-follow-us,
+  .career-container .view-careers-team {
+    padding: 0 15px;
+    clear: both;
+  }
+}
+@media all and (min-width: 760px) and (max-width: 1024px) and (orientation: portrait) {
+  .career-container .view-career-highlight,
+  .career-container .view-career-cases,
+  .career-container .view-career-follow-us,
+  .career-container .view-careers-team {
+    padding: 0 15px;
+  }
+}
+.career-container .team-content {
+  padding: 0 5%;
+}
+.career-container .team-content .team-view {
+  color: #505050;
+  padding: 15px 40px;
+  text-align: center;
+}
+@media all and (max-width: 760px) {
+  .career-container .team-content .team-view {
+    width: 100%;
+    padding: 0 !important;
+    margin: 15px 0 !important;
+    clear: both;
+  }
+  .career-container .team-content .team-view img {
+    width: 150px;
+  }
+}
+.career-container .team-content .team-view .title .text {
+  margin: 5px 0 0 0;
+  font-size: 16px;
+}
+.career-container .team-content .team-view .title .text a {
+  color: inherit;
+}
+.career-container .team-content .team-view .title .desc {
+  font-size: 14px;
+}
+.career-container .team-content .team-view .sub-title {
+  margin: 10px 0 0 10px;
+}
+.career-container .team-content .team-view .sub-title .text {
+  font-size: 14px;
+}
+.career-container .team-content .team-view .sub-title .social-link {
+  display: inline-block;
+  margin: 8px;
+  width: 30px;
+  height: 30px;
+  font-size: 1.8em;
+}
+.career-container .highlight-view {
+  text-align: center;
+}
+.career-container .highlight-view h2 {
+  text-align: left;
+}
+.career-container .highlight-view h2 a {
+  color: inherit;
+}
+.career-container .highlight-view p {
+  text-align: left;
+}
+.career-container .highlight-view img {
+  margin: 20px auto;
+}
+.career-container .highlight-view .h3 {
+  margin: 0;
+}
+.career-container .highlight-view .h3 a {
+  font-weight: 600;
+  color: #000;
+  margin: 0px;
+  width: 100%;
+  font-size: 18px;
+}
+.career-container .cases-content .cases-view:nth-of-type(1) {
+  margin-right: 2%;
+}
+@media all and (max-width: 760px) {
+  .career-container .cases-content .cases-view {
+    padding: 0 !important;
+    margin: 15px 0 !important;
+    width: 100% !important;
+    clear: both;
+  }
+}
+.career-container .cases-content h3 {
+  margin: 16px 0 32px 0;
+}
+.career-container .cases-content span {
+  font-size: 14px;
+}
+.career-container .cases-content .large {
+  width: 100%;
+  height: 250px;
+  border: none;
+  background: #e91e63;
+}
+.career-container .highlight-list {
+  width: 100%;
+  margin-top: 25px;
+  clear: both;
+  float: left;
+}
+.career-container .highlight-list .thumbnail {
+  width: 100px;
+  height: 100px;
+  border: none;
+  background: #f57c00;
+  border-radius: 50px;
+}
+.career-container .highlight-list .image {
+  width: 58%;
+}
+@media all and (max-width: 760px) {
+  .career-container .highlight-list .image {
+    margin: 15px 0;
+    clear: both;
+    width: 100%;
+  }
+}
+.career-container .highlight-list .image img {
+  margin: 0 1em;
+}
+.career-container .highlight-list .content {
+  width: 40%;
+  font-size: 14px;
+  font-weight: 200;
+  color: #888;
+}
+@media all and (max-width: 760px) {
+  .career-container .highlight-list .content {
+    width: 100%;
+  }
+}
+.career-container .highlight-list .content h3 {
+  margin: 0;
+}
+.career-container .highlight-list .content h3 a {
+  font-size: 14px;
+  font-weight: 600;
+  color: #000;
+  margin: 0px;
+  width: 100%;
+}
+.career-container .highlight-list:nth-child(even) .content {
+  float: left;
+}
+.career-container .highlight-list:nth-child(even) .image {
+  float: right;
+  text-align: left;
+}
+.career-container .highlight-list:nth-child(odd) .content {
+  float: right;
+}
+.career-container .highlight-list:nth-child(odd) .image {
+  float: left;
+  text-align: right;
+}
+@media all and (max-width: 760px) {
+  .career-container .highlight-list:nth-child(odd) .content,
+  .career-container .highlight-list:nth-child(odd) .image, .career-container .highlight-list:nth-child(even) .content,
+  .career-container .highlight-list:nth-child(even) .image {
+    float: none;
+  }
+  .career-container .highlight-list:nth-child(odd) .image, .career-container .highlight-list:nth-child(even) .image {
+    text-align: center;
+  }
+}
+.career-container .social-media .blog2 {
+  padding: 0 10px;
+}
+@media all and (max-width: 760px) {
+  .career-container .social-media .col-3 {
+    width: 100%;
+    padding: 0 !important;
+    margin: 15px 0 !important;
+    clear: both;
+  }
+}
+.career-container .block-addtoany {
+  text-align: center;
+}
+
+.select-field {
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 8px;
+  color: #0065a1;
+}
+
+.field-selector {
+  height: 40px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: top;
+  z-index: 1000;
+  cursor: pointer;
+}
+.field-selector .field-options {
+  display: none;
+}
+.field-selector.field-selector-visible .field-options {
+  /*display: block;
+  padding: ($base_unit * 2) 0;*/
+  font-size: 18px;
+  line-height: 22px;
+  padding: 5px 10px;
+}
+
+.field-options {
+  background: #fff;
+  text-align: left;
+  color: #0081c8;
+}
+
+.field-selected {
+  padding-left: 7px;
+  color: #0065a1;
+  position: relative;
+  background: url("../images/large/carousel_content_arrow_down.png") no-repeat bottom;
+  background-position: 10px 22px;
+  padding-bottom: 15px;
+}
+
+.primary-button {
+  padding: 10px 20%;
+  background: #63b3e3;
+  color: #fff;
+  border: 0;
+}
+@media all and (max-width: 760px) {
+  .primary-button {
+    width: 100%;
+  }
+}
+
+.view-career-follow-us .view-tieto-blogs ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.view-career-follow-us .view-tieto-blogs ul li {
+  position: relative;
+  padding-left: 20px;
+  padding-bottom: 10px;
+}
+.view-career-follow-us .view-tieto-blogs ul li:before {
+  position: absolute;
+  content: '>';
+  color: #63b3e3;
+  left: 0;
+  top: 0;
+  font-weight: 700;
+}
+.view-career-follow-us .view-tieto-blogs ul li .views-field-title {
+  font-weight: 700;
+  padding-bottom: 5px;
+}
+
+.sticky-menu-dependent {
+  clear: both;
+}
+
+.views-exposed-form .job_sugg {
+  background-size: 100% 100%;
+}
+
+body .node-type-concept-page {
+  background-color: #fff !important;
+}

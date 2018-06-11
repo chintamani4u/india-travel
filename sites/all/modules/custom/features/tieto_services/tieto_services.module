@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Content Page feature.
+ */
+
+include_once 'tieto_services.features.inc';

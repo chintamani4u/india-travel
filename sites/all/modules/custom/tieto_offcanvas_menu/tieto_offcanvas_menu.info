@@ -1,0 +1,9 @@
+name = Tieto Off-Canvas Menu
+description = Allows administrators to enable an off-canvas on specific menu items
+core = 7.x
+package = Tieto.com
+version = 7.x-1.0
+project = tieto_offcanvas_menu
+dependencies[] = menu_block
+dependencies[] = libraries
+features[features_api][] = api:1

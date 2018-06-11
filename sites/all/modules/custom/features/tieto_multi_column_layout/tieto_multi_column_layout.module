@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Multi column layout feature.
+ */
+
+include_once 'tieto_multi_column_layout.features.inc';

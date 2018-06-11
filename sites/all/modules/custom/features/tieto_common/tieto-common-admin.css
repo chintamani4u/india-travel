@@ -1,0 +1,49 @@
+/**
+ * Node form styling.
+ *
+ */
+
+#node-edit .form-item-title label[for="edit-title"] {
+  /* Revert panopoly title improvement for node's title (H1 headline). */
+  display: block;
+}
+
+/*
+ * Make the admin menu take less space and get out of the way when not needed
+ */
+
+html body.logged-in.admin-menu {
+  /* It would be better to do this in configuration settings, but lets just do
+  it here until we are sure we want to keep it. */
+  margin-top: 0 !important;
+}
+
+#admin-menu {
+  height: 5px;
+}
+#admin-menu #admin-menu-wrapper {
+  display: block;
+}
+#admin-menu:hover {
+  height: auto;
+}
+/*#admin-menu:hover #admin-menu-wrapper {
+  display: block;
+}*/
+#admin-menu > div > .dropdown > li > a, .field-name-field-sidebar-reference-content .field-item > .entity-field-collection-item .field-items #admin-menu > div > .dropdown > div.field-item > a,
+#admin-menu #environment-indicator .environment-indicator-name,
+#admin-menu .admin-menu-search input {
+  padding: 2px 8px !important;
+  /*margin-bottom: 0 !important;*/
+  /*margin-top: 2px !important;*/
+}
+#admin-menu .admin-menu-search input {
+  /*width: 100px !important;*/
+  /*padding-top: 4px !important;*/
+  /*padding-bottom: 4px !important;*/
+}
+#admin-menu #admin-menu-wrapper {
+  /*font-size: 0.75em;*/
+  /*line-height: 1.66667em;*/
+  /*padding-top: 0;*/
+}

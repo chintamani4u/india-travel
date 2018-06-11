@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the tieto_sitemap feature.
+ */
+
+include_once 'tieto_sitemap.features.inc';

@@ -1,0 +1,88 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto New Concept Page feature.
+ */
+
+include_once 'tieto_new_concept_page.features.inc';
+
+
+
+/**
+ * Implements hook_block_info().
+ */
+function tieto_new_concept_page_block_info()
+{
+    $blocks['concept_page_menu'] = array(
+        'info' => t('Concept page menu'),
+        // DRUPAL_CACHE_PER_ROLE will be assumed.
+    );
+
+    return $blocks;
+}
+
+
+/**
+ * Implements hook_block_view().
+ */
+function tieto_new_concept_page_block_view($delta = '')
+{
+    $block = array();
+
+    switch ($delta) {
+        case 'concept_page_menu':
+            $block['subject'] = t('Concept page menu');
+            $block['content'] = _concept_page_menu_build();
+            break;
+
+    }
+    return $block;
+}
+
+
+/**
+ * Implements hook_menu().
+ */
+function _concept_page_menu_build()
+{   $output = '<section class="nav-menu">
+	<div class="megamenu-block length-5">
+		<ul class="menu">';
+  $output_menu = '';
+    $node_path = explode('/',$_GET['q']);
+    $node= node_load($node_path[1]);
+    $items = field_get_items('node', $node, 'field_references');
+    foreach ($items as $item) {
+        $fc = field_collection_field_get_entity($item);
+        $menu_item = $fc->field_menu[LANGUAGE_NONE][0]['value'];
+        $hashmenu  = str_replace(' ', '_', $menu_item);
+        // Adding anchor tag for jobs men tab in career page.
+        if (empty($output_menu)) {
+          $output_menu.= '<section class="nav-menu"><a id="'.$hashmenu.'" name="'.$hashmenu.'"></a></section>';
+        }
+        $output .= '<li class="menu__item">
+                    <a href="#'.$hashmenu .'"> '.
+            $menu_item.'</a></li>';
+    }
+
+    return $output_menu . $output;
+}
+
+
+/**
+ * Implements hook_form_alter().
+ *
+ */
+function tieto_new_concept_page_form_alter(&$form, &$form_state, $form_id) {
+  switch ($form['#id']) {
+
+  //the id of the form works as case
+
+  case 'views-exposed-form-job-suggestions-panel-pane-1':
+  $form['#action'] = '/careers';
+  break;
+
+  case 'views-exposed-form-job-suggestion-panel-pane-2':
+  $form['#action'] = '/careers';
+  break;
+  }
+}

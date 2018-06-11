@@ -1,0 +1,23 @@
+<?php
+
+/**
+ * @file
+ * Scald Twitter channel Installation
+ */
+
+
+/**
+ * Implementation of hook_install().
+ */
+function scald_twitter_channel_install() {
+  scald_add_type('twitter_channel', 'Twitter Channel', 'Render latest tweets or search by hashtag');
+}
+
+
+function scald_twitter_channel_enable() {}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function scald_twitter_channel_uninstall() {
+}

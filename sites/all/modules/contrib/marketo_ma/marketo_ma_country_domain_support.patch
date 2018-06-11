@@ -1,0 +1,139 @@
+diff -ruN marketo_ma/includes/marketo_ma.admin.inc marketo_ma_new/includes/marketo_ma.admin.inc
+--- marketo_ma/includes/marketo_ma.admin.inc	2014-06-20 11:26:48.584499228 +0530
++++ marketo_ma_new/includes/marketo_ma.admin.inc	2014-06-19 17:00:42.000000000 +0530
+@@ -71,13 +71,43 @@
+     '#required' => TRUE,
+     '#description' => t('Value can be found on the Munchkin Admin page at Admin > Integration > Munchkin'),
+   );
+-  $form['marketo_ma_tabs']['marketo_ma_api']['marketo_ma_munchkin']['marketo_ma_munchkin_partition'] = array(
++  
++  /*$form['marketo_ma_tabs']['marketo_ma_api']['marketo_ma_munchkin']['marketo_ma_munchkin_partition'] = array(
+     '#type' => 'textfield',
+     '#title' => t('Workspace (Partition)'),
+     '#default_value' => variable_get('marketo_ma_munchkin_partition', ''),
+     '#required' => FALSE,
+     '#description' => t('Value can be found on the Munchkin Admin page at Admin > Integration > Munchkin'),
+-  );
++  );*/
++  
++  //Code to add country domain specific workspace fields
++    foreach(language_list() as $key => $val) {
++    $lng = $val->name;
++    $lng_code = $val->language;
++    
++    $form['marketo_ma_tabs']['marketo_ma_api']['marketo_ma_munchkin'][$lng] = array(
++    '#type' => 'fieldset',
++    '#collapsible' => TRUE,
++    '#collapsed' => TRUE,
++    '#title' => t($lng),
++    );
++    
++    $form['marketo_ma_tabs']['marketo_ma_api']['marketo_ma_munchkin'][$lng]['enable_marketo_ma_munchkin_partition_'.$lng_code] = array(
++      '#type' => 'checkbox',
++      '#title' => t('Enable tracking for ').''. $lng,
++      '#default_value' => variable_get('enable_marketo_ma_munchkin_partition_'.$lng_code, ''),
++      '#required' => FALSE,
++      '#description' => t('Value can be found on the Munchkin Admin page at Admin > Integration > Munchkin'),
++    );
++    
++    $form['marketo_ma_tabs']['marketo_ma_api']['marketo_ma_munchkin'][$lng]['marketo_ma_munchkin_partition_'.$lng_code] = array(
++      '#type' => 'textfield',
++      '#title' => t('Workspace (Partition) ').''. $lng,
++      '#default_value' => variable_get('marketo_ma_munchkin_partition_'.$lng_code, ''),
++      '#required' => FALSE,
++      '#description' => t('Value can be found on the Munchkin Admin page at Admin > Integration > Munchkin'),
++    );
++  }
+ 
+   $form['marketo_ma_tabs']['marketo_ma_api']['marketo_ma_soap'] = array(
+     '#title' => t('SOAP API'),
+diff -ruN marketo_ma/js/marketo_ma.js marketo_ma_new/js/marketo_ma.js
+--- marketo_ma/js/marketo_ma.js	2014-06-20 11:27:18.496141757 +0530
++++ marketo_ma_new/js/marketo_ma.js	2014-06-19 16:59:57.000000000 +0530
+@@ -7,7 +7,7 @@
+           dataType: 'script',
+           cache: true,
+           success: function() {
+-            Munchkin.init(settings.marketo_ma.key);
++            Munchkin.init(settings.marketo_ma.key, {"wsInfo":settings.marketo_ma.wsinfo} );
+             if (typeof settings.marketo_ma.actions !== 'undefined') {
+               jQuery.each(settings.marketo_ma.actions, function() {
+                 Drupal.behaviors.marketo_ma.marketoMunchkinFunction(this.action, this.data, this.hash);
+diff -ruN marketo_ma/marketo_ma.module marketo_ma_new/marketo_ma.module
+--- marketo_ma/marketo_ma.module	2014-06-20 11:27:11.498119126 +0530
++++ marketo_ma_new/marketo_ma.module	2014-06-20 11:30:16.583021567 +0530
+@@ -120,22 +120,24 @@
+   global $user;
+   $marketo_ma_data = marketo_ma_get_queue();
+ 
+-  if ((_marketo_ma_visibility_pages() && _marketo_ma_visibility_roles($user)) || count($marketo_ma_data) > 0) {
++  if (_marketo_ma_visibility_country_site()) {
++    if ((_marketo_ma_visibility_pages() && _marketo_ma_visibility_roles($user)) || count($marketo_ma_data) > 0) {
+ 
+-    /*
+-     * @todo handle case where visibility = false, count > 0, and
+-     * tracking type != munchkin.. we don't need any tracking in this case
+-     */
+-    // Basic Munchkin tracking.
+-    _marketo_ma_output_tracking_code();
++      /*
++       * @todo handle case where visibility = false, count > 0, and
++       * tracking type != munchkin.. we don't need any tracking in this case
++       */
++      // Basic Munchkin tracking.
++      _marketo_ma_output_tracking_code();
+ 
+-    foreach ($marketo_ma_data as $lead) {
+-      if (array_key_exists('email', $lead)) {
+-        _marketo_ma_associate_lead($lead);
++      foreach ($marketo_ma_data as $lead) {
++        if (array_key_exists('email', $lead)) {
++          _marketo_ma_associate_lead($lead);
++        }
+       }
+-    }
+ 
+-    _marketo_ma_cleanup();
++      _marketo_ma_cleanup();
++    }
+   }
+ }
+ 
+@@ -143,18 +145,21 @@
+  * Adds basic tracking code to page.
+  */
+ function _marketo_ma_output_tracking_code() {
++  global $language;
++  $ws_info = variable_get('marketo_ma_munchkin_partition_'.$language->language);
+   if (_marketo_ma_munchkin_is_configured()) {
+     $marketo_ma_munchkin_account_id = variable_get('marketo_ma_munchkin_account_id');
+     $marketo_ma_munchkin_javascript_library = '//' . str_replace(array(
+         'http://',
+         'https://',
+         '//'), '', variable_get('marketo_ma_munchkin_javascript_library'));
+-
++    
+     drupal_add_js(array(
+       'marketo_ma' => array(
+         'track' => TRUE,
+         'key' => $marketo_ma_munchkin_account_id,
+-        'library' => $marketo_ma_munchkin_javascript_library),
++        'library' => $marketo_ma_munchkin_javascript_library,
++        'wsinfo' => $ws_info),
+       ), 'setting');
+   }
+ }
+@@ -492,6 +497,13 @@
+ /**
+  * Based on page visibility setting determines if marketo should be included.
+  */
++
++function _marketo_ma_visibility_country_site() {
++  global $language;
++  $tracking_enabled_country_site = variable_get('enable_marketo_ma_munchkin_partition_'.$language->language);
++  return $tracking_enabled_country_site;
++}
++
+ function _marketo_ma_visibility_pages() {
+   static $page_match;
+ 

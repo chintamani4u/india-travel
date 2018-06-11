@@ -1,0 +1,117 @@
+<?php
+
+/**
+ * Fix migrated redirect data.
+ */
+function tieto_worldwide_update_7000(&$sandbox) {
+  if (!isset($sandbox['progress'])) {
+    $sandbox['progress'] = 0;
+    $sandbox['current_rid'] = 0;
+    $sandbox['max'] = db_query("SELECT COUNT(rid) FROM {redirect} WHERE source LIKE 'http://%' AND uid = 0 AND type = 'redirect' AND status_code = 0")->fetchField();
+    $sandbox['skipped'] = $sandbox['fixed'] = array();
+  }
+
+  if (empty($sandbox['max'])) {
+    $sandbox['#finished'] = 1;
+    return 'No redirects to fix.';
+  }
+
+  // Ensure the redirect module is loaded since we need to use its functions.
+  drupal_load('module', 'redirect');
+
+  $stop_at = time() + 5;
+  $query = db_query("SELECT * FROM {redirect} WHERE source LIKE 'http://%' AND uid = 0 AND type = 'redirect' AND status_code = 0 AND rid > :rid ORDER BY rid", array(':rid' => $sandbox['current_rid']));
+  foreach ($query as $old_redirect) {
+    $old_redirect->source_options = unserialize($old_redirect->source_options);
+    $old_redirect->redirect_options = unserialize($old_redirect->redirect_options);
+    $redirect = _tieto_worldwide_update_7000_fix_redirect($old_redirect);
+
+    if ($redirect->success) {
+      $sandbox['fixed'][$redirect->rid] = $redirect->rid;
+    }
+    else {
+      $sandbox['skipped'][$old_redirect->rid] = $old_redirect->rid;
+    }
+    $sandbox[$redirect->success ? 'fixed' : 'skipped'][$old_redirect->rid] = $old_redirect->rid;
+    $sandbox['progress']++;
+    $sandbox['current_rid'] = $old_redirect->rid;
+
+    if (time() > $stop_at) {
+      break;
+    }
+  }
+
+  $sandbox['#finished'] = $sandbox['progress'] / $sandbox['max'];
+
+  if ($sandbox['#finished'] >= 1) {
+
+    // Show a message about how many redirects were fixed, and how many
+    // were skipped.
+    $skipped = count($sandbox['skipped']);
+    $fixed = $sandbox['progress'] - $skipped;
+
+    $return = "Fixed $fixed redirects.";
+    if (!empty($sandbox['skipped'])) {
+      $items = array();
+      foreach (redirect_load_multiple($sandbox['skipped']) as $redirect) {
+        $items[$redirect->rid] = t('RID @rid: @from to @to', array(
+          '@rid' => $redirect->rid,
+          '@from' => redirect_url($redirect->source, $redirect->source_options),
+          '@to' => redirect_url($redirect->redirect, $redirect->redirect_options),
+        ));
+      }
+      $return .= theme('item_list', array(
+        'title' => "The following $skipped redirects were not fixed since there were already existing redirects for the path and language combination",
+        'items' => $items,
+      ));
+    }
+    return $return;
+  }
+}
+
+function _tieto_worldwide_update_7000_fix_redirect_get_language($url) {
+  $languages = array(
+    'cs' => 'www.tieto.cz',
+    'da' => 'www.tieto.dk',
+    'de' => 'www.tieto.de',
+    'de-at' => 'www.tieto.at',
+    'en' => 'www.tieto.com',
+    'en-in' => 'www.tieto.in',
+    'et' => 'www.tieto.ee',
+    'fi' => 'www.tieto.fi',
+    'fil' => 'www.tieto.ph',
+    'lt' => 'www.tieto.lt',
+    'lv' => 'www.tieto.lv',
+    'nl' => 'www.tieto.nl',
+    'nn' => 'www.tieto.no',
+    'pl' => 'www.tieto.pl',
+    'ru' => 'www.tieto.ru',
+    'sv' => 'www.tieto.se',
+    'zh-hans' => 'www.tieto.cn',
+  );
+  $host = parse_url($url, PHP_URL_HOST);
+  $language = array_search($host, $languages);
+  return $language ? $language : LANGUAGE_NONE;
+}
+
+function _tieto_worldwide_update_7000_fix_redirect($old_redirect) {
+  $redirect = clone $old_redirect;
+  $redirect->hash = '';
+  $redirect->source = trim(parse_url($old_redirect->source, PHP_URL_PATH), '/');
+  $redirect->language = _tieto_worldwide_update_7000_fix_redirect_get_language($old_redirect->source);
+  redirect_hash($redirect);
+  $existing = redirect_load_by_hash($redirect->hash);
+  if (!$existing || $existing->rid == $redirect->rid) {
+    // Save the redirect to the database.
+    drupal_write_record('redirect', $redirect, array('rid'));
+    // Fixing this redirect succeeded.
+    $redirect->success = TRUE;
+  }
+  else {
+    // If a redirect with the same hash already exists, then it needs to be
+    // skipped.
+    $redirect->success = FALSE;
+  }
+
+  return $redirect;
+}

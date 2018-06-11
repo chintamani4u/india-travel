@@ -1,0 +1,75 @@
+7.x-1.0-dev
+-----------
+
+Says dev now...change to a stable release number
+
+7.x-1.1
+-------
+
+Updated the feature for News page adjustments.
+
+    1: "PUBLISHED ON:" date element  moved to the bottom of the page (above the sharing buttons but under the body content)
+    2: "THIS ARTICLE IS ABOUT:" taxonomy categories element removed from the viewable content of the page
+    3: added sidebar content: contacts refrence (similar to the Magazine article content type)
+
+Jira issue TIET-1601 News page adjustments
+
+Pull Request ID #190
+
+Changed the press releases subscription URL for the form and added the compulsory p_sendemail field
+
+JIRA task: TIET-1602 PROD: Subscribe of press releases is malfunctioning
+
+------
+Removed Automotive and Trade options under the selection "Only from the selected industries"
+from  /docroot/sites/all/modules/custom/features/tieto_news/plugins/content_types/tieto_news_subscribe.inc file.
+
+JIRA task: TIET-1613 Remove Automotive and Trade from the list of options on Thomson Reuters press releases subscription 
+Pull Request ID #206
+
+------
+Updated Change Log
+JIRA task: TIET-1613 Remove Automotive and Trade from the list of options on Thomson Reuters press releases subscription 
+Pull Request ID #207
+
+-------
+TIET 1620 - Change to local names on header titles for News, Events and Top Stories 
+Pull request #209 - Added t() to  news page display title
+
+
+TIET 1633 - Added Sidebar reference content and Contact Reference fields in news article, also added it into sidebar panel.
+Pull Request ID #213
+
+#PR 270 - Recreated this feature
+
+12.03.2014 - Panels update made many features overridden #378 
+
+7.x-1.2
+-------
+
+TIET-2008 Clone the current hugin importer and create necessary content type
+Recreated the feature to include the content type "Cision feed" and the feeds importer for Cision.
+PR #406
+
+Updated colorbox node module, had to recreate this feature. Only added a few lines.
+PR #413
+
+07.04.2014 - Changed the breadcrumb alter in the module file to work dynamically on all languages. It is now getting
+the url of the node and removing the last part of the url to make it work correctly. #422
+
+7.x-1.3
+-------
+14-04-2014 Updated news feature for new Releases from Cision to Tieto websites: frontend TIET-1952
+Clone the Press release view and create necessary term. 
+Recreated the feature to include the Press release view for Cision.
+Recreated the feature to  resolve duplicate node creation by adding unique casting to CISION ID to GUID in Cision importer
+
+7.x-1.4
+-------
+Updated the feature to list corporate news under the Press Releases in /press
+PR #536
+
+7.x-1.5
+-------
+Recreated feature in production to get the correct taxonomy term for the "More trade releases" link
+PR #625

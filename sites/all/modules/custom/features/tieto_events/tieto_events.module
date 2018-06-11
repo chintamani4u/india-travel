@@ -1,0 +1,25 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Events feature.
+ */
+
+include_once 'tieto_events.features.inc';
+
+/**
+ * Implements hook_menu_breadcrumb_alter().
+ *
+ * @param $active_trail
+ *   An array containing breadcrumb links for the current page.
+ * @param $item
+ *   The menu router item of the current page.
+ */
+function tieto_events_menu_breadcrumb_alter(&$active_trail, $item) {
+  if (($node = menu_get_object()) && $node->type == 'tieto_event') {
+    $active_trail[1] = array(
+      'title' => t('Tieto calendar'),
+      'href' => dirname(url('node/'. $node->nid)),
+      'localized_options' => array(),
+    );
+  }
+}

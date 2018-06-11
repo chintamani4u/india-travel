@@ -1,0 +1,20 @@
+7.x-1.0
+-------
+
+This feature provides the functionalities to contact forms, contact images and all things related.
+
+
+7.x-1.1
+-------
+
+27.11.2013: Removed the contact image pane from the panelizer of the contact form for personnel.
+PR #215
+
+7.x-1.2
+-------
+
+17.01.2014 - Recreated feature to API:2
+PR #263
+12.03.2014 - Panels update made many features overridden #378
+
+15.04.2014 - Recreated this feature to go with chosen module update #438

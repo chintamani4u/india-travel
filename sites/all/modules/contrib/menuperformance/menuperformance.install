@@ -1,0 +1,12 @@
+<?php
+/**
+ * @file
+ * This is the install file for Menuperformance.
+ */
+
+/**
+ * Implements hook_enable().
+ */
+function menuperformance_enable() {
+  drupal_set_message(t('Menuperformance module activated. To take the module into use, <a href="!url">go to the settings page</a> and check the checkbox.', array('!url' => url('admin/config/user-interface/menuperformance'))));
+}

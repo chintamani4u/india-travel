@@ -1,0 +1,423 @@
+<?php
+function _debug_auto_clone_translate($o)
+{
+	// change this to true to debug
+	$isDebugMode = false;
+	if($isDebugMode)
+		dsm($o);		
+}
+
+/**
+* Implementation of hook_rules_action_info().
+*/
+function auto_clone_translate_rules_action_info() {
+  return array(
+    'auto_clone_translate_action_node_translate' => array(
+      'label' => t('Translated nodes to au-de-language'),
+      'group' => t('Node'),
+      'parameter' => array(
+        'node' => array(
+          'type' => 'node',
+          'label' => t('Content')),
+      ),
+    ),
+	
+	/*'delete_auto_clone_translate_action_node_translate' => array(
+      'label' => t('Delete translated nodes to au-de-language'),
+      'group' => t('Node'),
+      'parameter' => array(
+        'node' => array(
+          'type' => 'node',
+          'label' => t('Content')),
+      ),
+    ),*/
+	
+  );
+}
+
+
+function arrayCopy( array $array ) {
+	$result = array();
+	foreach( $array as $key => $val ) {
+		if( is_array( $val ) ) {
+			$result[$key] = arrayCopy( $val );
+		} elseif ( is_object( $val ) ) {
+			$result[$key] = clone $val;
+		} else {
+			$result[$key] = $val;
+		}
+	}
+	return $result;
+}
+
+
+function load_node_by_language($tnid, $lang)
+{
+	_debug_auto_clone_translate("load_node_by_language tnid=$tnid, lang=$lang");
+	$a=translation_node_get_translations($tnid);
+	_debug_auto_clone_translate("load_node_by_language a");
+	_debug_auto_clone_translate($a);
+	
+	if(array_key_exists($lang, $a))
+	{
+		//print_r($a);
+		$o = $a[$lang];
+		//print_r($o);
+		$nid = $o->nid;
+		//print "\nnid=" . $nid;
+		$n = node_load($o->nid, null, true);
+		return $n;
+	}
+	
+	return null;
+}
+
+
+function delete_menu_links($node)
+{
+	_debug_auto_clone_translate("delete_menu_links: enter");
+	$menu = $node->menu;
+	$mlid = $menu['mlid'];
+
+	_debug_auto_clone_translate("mlid=" . $mlid);
+	menu_link_delete($mlid);
+}
+
+function get_mlid_by_nid($nid)
+{
+	_debug_auto_clone_translate("get_mlid_by_nid: enter nid=$nid");
+	
+$mlid = db_select('menu_links' , 'ml')
+  ->condition('ml.link_path' , 'node/' . $nid)
+  ->fields('ml' , array('mlid'))
+  ->execute()
+  ->fetchField();
+  
+  _debug_auto_clone_translate("mlid=$mlid");
+  return $mlid;
+}
+
+function get_mlid_by_nid2($guideNid)
+{
+
+	_debug_auto_clone_translate("get_mlid_by_nid: enter guideNid=$guideNid");
+	$mlid = NULL;	
+	$result = db_query("SELECT mlid FROM {menu_links} WHERE link_path=':link_path'", array(':link_path' => 'node/' . $guideNid));
+
+	_debug_auto_clone_translate("2");
+
+	if(db_num_rows() > 0)
+	{
+	_debug_auto_clone_translate("3");
+	return null;
+		//Get the mlid of the first result
+		$row = db_fetch_array($result);
+		$mlid = $row['mlid'];
+	}
+	
+	return $mlid;
+}
+
+/**
+* Tries to find dest_lang's node's parent
+* Searches current node's link's parent node. And from that finds translated node and return that's link
+*/
+function find_translated_parent_link($node, $dest_lang)
+{
+	_debug_auto_clone_translate("find_parent_node: enter");
+	_debug_auto_clone_translate($node);
+	$link = $node->menu;
+	if( ! isset($link['plid']) || 0 == $link['plid'])		
+		return null;
+		
+	// find link node 
+	_debug_auto_clone_translate("find_parent_node: yes parent");
+	$parent_menu_link = menu_link_load($link['plid']);
+	if( ! isset($parent_menu_link))
+		return null;
+
+		
+	_debug_auto_clone_translate("parent_menu_link:");
+	_debug_auto_clone_translate($parent_menu_link);
+	
+	$norm_path = drupal_get_normal_path($parent_menu_link['link_path']);
+	$t = explode("/", $norm_path);
+	$nid = $t[1];			
+	_debug_auto_clone_translate("norm_path=" . $norm_path . ", nid=" . $nid);		
+	if( !isset($nid))
+		return null;
+		
+	$n = node_load($nid);
+	_debug_auto_clone_translate($n);
+	
+	// .. and find translated node by nid
+	_debug_auto_clone_translate("before load_node_by_language 1");
+	$translated_node = load_node_by_language($nid, $dest_lang);	
+	_debug_auto_clone_translate("translated node");
+	_debug_auto_clone_translate($translated_node);
+	if(! isset($translated_node))
+		return null;
+		
+	// token_node_menu_link_load because node_load does not load menu
+	//$translated_node->menu = token_menu_link_load($translated_node->nid);
+	/*$menu = null;
+	if(FALSE != ($menu = token_node_menu_link_load($current_dest_node)))
+	{
+		$current_dest_node->menu = $menu;
+	}*/
+	$mlid = null;
+	if(null != ($mlid = get_mlid_by_nid($translated_node->nid)))
+	{
+		$translated_node->menu = menu_link_load($mlid);
+		$translated_node->menu['enabled']  = TRUE; // so that drupal does not delete menu in node_save
+	}
+	//if ( ! $current_dest_node->menu)
+		//	unset($current_dest_node->menu);
+			
+	return $translated_node->menu;
+}
+
+
+/**
+* Copies source language's menu to destination
+* also checks if menu's exists in destination and not in source. Then deletes menus from destination
+*/
+function clone_menu($source_node, 
+$dest_node, 
+$dest_lang_code,
+$dest_menu_name)
+{
+	_debug_auto_clone_translate("clone_menu: enter: dest_menu_name=$dest_menu_name, source_node");
+	_debug_auto_clone_translate($source_node);
+	_debug_auto_clone_translate("dest node:");
+	_debug_auto_clone_translate($dest_node);
+
+	// if source has no more links, then delete from dest links too
+	if( !isset($source_node->menu))
+	{
+		_debug_auto_clone_translate("in source no menu_node_links");
+		//if(isset($dest_node->menu))			delete_menu_links($dest_node);
+		return;
+	}
+
+	$parent_link = find_translated_parent_link($source_node, $dest_lang_code);
+	_debug_auto_clone_translate("parent_link");
+	_debug_auto_clone_translate($parent_link);
+	
+	$link = $source_node->menu;
+	$link['link_path'] = 'node/' . $dest_node->nid;
+	$link['language'] = $dest_lang_code;
+	$link['plid'] = isset($parent_link)? $parent_link['mlid'] : null;
+	
+	$opts = arrayCopy($link['options']);
+	$opts['langcode'] = $dest_lang_code;
+	_debug_auto_clone_translate("opts");
+	_debug_auto_clone_translate($opts);
+	$link['options'] = arrayCopy($opts);
+	
+	if(isset($dest_node->menu))
+	{
+		_debug_auto_clone_translate("updating existing link");		
+		$destLink = arrayCopy($dest_node->menu);
+		_debug_auto_clone_translate("destLink:");
+		_debug_auto_clone_translate($destLink);
+		// for updating existing
+		$link['mlid'] = $destLink['mlid'];
+		$link['menu_name'] = $destLink['menu_name'];
+		// $link['has_children'] = $destLink['has_children'];
+		$link['href'] = $destLink['href'];
+		$link['p1'] = $destLink['p1'];
+		$link['p2'] = $destLink['p2'];
+		$link['p3'] = $destLink['p3'];
+		$link['p4'] = $destLink['p4'];
+		$link['p5'] = $destLink['p5'];
+		$link['p6'] = $destLink['p6'];
+		$link['p7'] = $destLink['p7'];
+		$link['p8'] = $destLink['p8'];
+		$link['parent_menu'] = $dest_menu_name;
+		unset($link['parent']);
+		$link['updated'] = 1;
+	}
+	else
+	{
+		_debug_auto_clone_translate("new link");	
+		$link['mlid'] = null; // tämä aina uudessa null		
+	}
+	
+	unset($link['parts']);
+		
+	_debug_auto_clone_translate("ennen linkin talletusta");
+	$link['menu_name'] = $dest_menu_name;
+	_debug_auto_clone_translate($link);
+$dest_node->menu['enabled'] = TRUE;
+	$isMenuLinkSaveOk = menu_link_save($link);
+	_debug_auto_clone_translate($isMenuLinkSaveOk);
+}
+
+
+
+/**
+* Creates a translation for a node in every enabled language.
+*/
+function auto_clone_translate_action_node_translate($node) {
+	_debug_auto_clone_translate("auto_clone_translate_action_node_translate: enter");
+	$dest_lang_code = 'de-at';
+	$dest_menu_name = 'menu-austria';
+	
+	_debug_auto_clone_translate($node);
+	// If this is not a source node, don't do automatic translations.
+	if ($node->tnid != 0 and $node->tnid != $node->nid)
+		return;
+
+	// copy menus and restore after load
+	$menu = arrayCopy($node->menu);
+	$node=node_load($node->nid, $node->vid, true);
+	$node->menu = arrayCopy($menu);
+
+	_debug_auto_clone_translate("before load_node_by_language 2");
+	$current_dest_node = load_node_by_language($node->nid, $dest_lang_code);	
+	$dest_node = clone $node;
+	
+	// depending if new or existing node
+	if( !isset($current_dest_node))
+	{
+		_debug_auto_clone_translate("new node");
+		$dest_node->nid = null; 
+		unset($dest_node->menu);
+		$dest_node->vid = null;
+		$dest_node->created = null;
+		$dest_node->is_new = TRUE;
+	}
+	else
+	{
+		_debug_auto_clone_translate("updating node current_dest_node 1");
+		//_debug_auto_clone_translate($current_dest_node);
+		//$n = node_load($current_dest_node->nid, $current_dest_node->nid, null);
+		//_debug_auto_clone_translate($n);
+		//$current_dest_node->menu = token_menu_link_load($current_dest_node->nid);
+		//$menu = null;
+		/*if(FALSE != ($menu = token_node_menu_link_load($current_dest_node)))
+		{		
+			$current_dest_node->menu = $menu;
+		}*/
+		$mlid = null;
+		if(null != ($mlid = get_mlid_by_nid($current_dest_node->nid)))
+		{
+			$current_dest_node->menu = menu_link_load($mlid);
+		}
+		
+		_debug_auto_clone_translate($current_dest_node);
+		/*_debug_auto_clone_translate($l);
+	return;
+		
+		$current_dest_node->menu = token_node_menu_link_load($current_dest_node);
+		_debug_auto_clone_translate($current_dest_node);
+		if ( ! $current_dest_node->menu)
+			unset($current_dest_node->menu);*/
+		
+		
+		
+		$dest_node->nid = $current_dest_node->nid;		
+		$dest_node->vid = $current_dest_node->vid;
+		_debug_auto_clone_translate("current_dest_node");
+		_debug_auto_clone_translate($current_dest_node);
+		if(isset($current_dest_node->menu))
+		{
+			$dest_node->menu = arrayCopy($current_dest_node->menu);
+			$dest_node->menu['enabled'] = 1;
+			
+		}		 
+		$dest_node->is_new = FALSE;
+	}
+
+	$dest_node->language = $dest_lang_code;
+	$dest_node->tnid = $node->nid;
+	
+	// copy source language to destiantion. And remove old language from new destination node
+	// TODO body's key can be same language as node's language or then 'unk'. So
+	$bodies = $node->body;
+	$body = current($bodies);
+	if( is_array($body))
+	{		
+		$dest_node->body[$dest_lang_code] = arrayCopy( $body);
+		unset($dest_node->body[ $node->language]);
+	}
+
+	
+	// fixes for panelizer. This seems to be needed in panopoly. We only remove it from dest-node
+	unset($dest_node->panelizer);
+	
+	_debug_auto_clone_translate("going to save dest_node");
+	_debug_auto_clone_translate($dest_node);
+	$isOk = node_save(node_submit($dest_node));
+	// save menu if it exists, because on node_save Drupal deletes also menu item:(
+	/*if( isset($dest_node->menu))
+	{		
+		menu_link_save($dest_node->menu);
+	}
+	_debug_auto_clone_translate("after dest_noade save");
+	_debug_auto_clone_translate($dest_node);*/
+//return;	
+	
+	//	$node=node_load($node->nid, $node->vid, true);
+	// and save also original. because we need to update tnid-field with its nid
+	$node->tnid = $node->nid;	
+	$node->panelizer = null;
+	_debug_auto_clone_translate("node last");
+	_debug_auto_clone_translate($node);
+	$isOk = node_save($node);
+	//_debug_auto_clone_translate("node last isOk=" . $isOk);
+
+	clone_menu($node, 
+		$dest_node, 
+		$dest_lang_code,
+		$dest_menu_name);
+}
+
+
+
+function auto_clone_translate_form_alter(&$form, $form_state, $form_id)
+{
+	//drupal_set_message("auto_clone_translate_form_alter");
+	_debug_auto_clone_translate("auto_clone_translate_form_alter: enter form");
+	_debug_auto_clone_translate($form);
+	_debug_auto_clone_translate("form_state");
+	_debug_auto_clone_translate($form_state);
+	_debug_auto_clone_translate("form_id");
+	_debug_auto_clone_translate($form_id);
+	
+	if($form_id != 'node_delete_confirm')
+		return;
+		
+	_debug_auto_clone_translate("form id is $form_id");
+		
+	if(! isset($form_state['input']))
+		return;
+	_debug_auto_clone_translate("Yes form_state[input]");
+	
+	if(! isset($form_state['input']['op']))
+		return;	
+	_debug_auto_clone_translate("Yes form_state[input][opt]");		
+	
+	if( "Delete" != $form_state['input']['op'])
+		return;
+		
+	$nid = $form['nid']['#value'];
+	_debug_auto_clone_translate("TODO here delete.. nid=$nid");
+	$node = node_load($nid, null, true);
+	_debug_auto_clone_translate($node);
+
+		// If this is not a source node, don't do automatic translations.
+	if ($node->tnid != 0 and $node->tnid != $node->nid)
+		return;
+	
+	$dest_lang_code = 'de-at';	
+	_debug_auto_clone_translate("Delete translated pair dest_lang_code=$dest_lang_code");
+	
+	$d_node = load_node_by_language($node->tnid, $dest_lang_code);
+	_debug_auto_clone_translate("d_node");
+	_debug_auto_clone_translate($d_node);
+	node_delete($d_node->nid);
+}
+
+

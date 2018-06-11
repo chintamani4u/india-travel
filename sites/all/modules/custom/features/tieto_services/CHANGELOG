@@ -1,0 +1,17 @@
+7.x-1.0-beta2
+-------------
+
+Says beta2 now...change to a stable release number
+
+7.x-1.1
+-------------
+TIET 1220 - Added product code filed on the "Product/service page" content type..
+Pull Request ID #214
+TIET-1220 - changed position of product code - Pull request #223
+TIET-1220 - changed position of product code - Pull request #224
+
+TIET-1717 - Changed position of product code - PR #249
+
+PR#271 Recreated this feature to fit API:2
+
+12.03.2014 - Panels update made many features overridden #378

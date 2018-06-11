@@ -1,0 +1,12 @@
+name = Marketo Munchkin
+description = "A simple module for displaying a tracking code obtained from Marketo.com."
+package = SEO
+core = 7.x
+configure = admin/config/search/marketo-munchkin
+
+; Information added by drupal.org packaging script on 2012-09-09
+version = "7.x-2.3"
+core = "7.x"
+project = "marketo_munchkin"
+datestamp = "1347224567"
+

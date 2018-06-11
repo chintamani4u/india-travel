@@ -1,0 +1,32 @@
+From c30dfc04d94e6bd2814a185c7ef7ad5a18b4d6a1 Mon Sep 17 00:00:00 2001
+From: sachinwable <wable.sachin@gmail.com>
+Date: Thu, 25 Feb 2016 11:06:07 +0530
+Subject: [PATCH] Updating search api solr get max length from 3600 to 3800
+
+---
+ .../all/modules/contrib/search_api_acquia/search_api_acquia.install   | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/docroot/sites/all/modules/contrib/search_api_acquia/search_api_acquia.install b/docroot/sites/all/modules/contrib/search_api_acquia/search_api_acquia.install
+index 2c9a0b2..ff6f570 100644
+--- a/docroot/sites/all/modules/contrib/search_api_acquia/search_api_acquia.install
++++ b/docroot/sites/all/modules/contrib/search_api_acquia/search_api_acquia.install
+@@ -19,7 +19,7 @@ function search_api_acquia_uninstall() {
+  * Sets the threshold between GET and POST requests to a value compatible with Acquia Search.
+  */
+ function search_api_acquia_install() {
+-  variable_set('search_api_solr_http_get_max_length', 3600);
++  variable_set('search_api_solr_http_get_max_length', 3800);
+ }
+ 
+ /**
+@@ -28,5 +28,5 @@ function search_api_acquia_install() {
+  * Sets the threshold between GET and POST requests to a value compatible with Acquia Search.
+  */
+ function search_api_acquia_update_7001() {
+-  variable_set('search_api_solr_http_get_max_length', 3600);
++  variable_set('search_api_solr_http_get_max_length', 3800);
+ }
+-- 
+1.8.3.msysgit.0
+

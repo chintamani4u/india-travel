@@ -1,0 +1,78 @@
+<?php
+
+/**
+ * @file
+ * Scald File is a Scald Atom Provider for Files.
+ */
+
+/*******************************************************************************
+ * SCALD HOOK IMPLEMENTATIONS
+ ******************************************************************************/
+
+/**
+ * Implements hook_scald_atom_providers.
+ */
+function scald_customtext_scald_atom_providers() {
+  return array(
+    'customtext' => 'Custom HTML in atom'
+  );
+}
+
+/**
+ * Implements hook_scald_add_form.
+ */
+function scald_customtext_scald_add_form(&$form, &$form_state) {
+  $form['customtitle'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Custom HTML title'),
+    '#default_value' => '',
+  );
+}
+
+/**
+ * Implements hook_scald_add_form_fill.
+ */
+function scald_customtext_scald_add_form_fill(&$atom, $form, $form_state) {
+  $title = $form_state['values']['customtitle'];
+  $atom->title = $title;
+}
+
+/**
+ * Implements hook_scald_fetch.
+ */
+function scald_customtext_scald_fetch($atom, $type) {
+  if ($type == 'atom') {}
+}
+
+/**
+ * Implements hook_scald_prerender().
+ */
+function scald_customtext_scald_prerender($atom, $context, $options, $mode) {
+  $customtext = $atom->field_atom_customtext['und'][0]['safe_value'];
+
+  if ($mode == 'atom') {
+    if ($context != 'sdl_library_item') {
+      $atom->rendered->player = theme('scald_customtext_render',
+        array('vars' =>
+        array(
+          'customtext_title'   => $atom->title,
+          'customtext_content' => $customtext,
+        )
+        )
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_theme.
+ */
+function scald_customtext_theme() {
+  return array(
+    'scald_customtext_render' => array(
+      'variables' => array('vars' => NULL),
+      'template' => 'scald_customtext_render'
+    ),
+  );
+
+}

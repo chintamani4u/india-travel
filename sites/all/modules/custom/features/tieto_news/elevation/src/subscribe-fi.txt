@@ -1,0 +1,140 @@
+<form action="#" method="post" name="releases-subscribe-form" id="releases-subscribe-form">
+							<h1>Tiedotteiden tilaus</h1>
+							<div class="content report">				
+								<div class="form-leave-comment">
+									<div>
+										<label for="f_name">Nimi *
+										<span class="error" id="nameMissing">Nimi puuttuu.</span></label>
+										<input type="text" title="Etunimi ja sukunimi" value="Etunimi ja sukunimi" name="f_name" id="f_name" class="hidableInfo">
+									</div>
+									
+									<div>
+										<label for="email">Sähköposti *
+										<span class="error" id="emailMissing">Sähköpostiosoite puuttuu.</span>
+										<span class="error" id="emailAddresNotValid">Ole hyvä ja tarkista sähköpostiosoitteesi.</span>
+										</label>
+										<input type="text" title="Sähköposti" value="Sähköposti" name="email" id="email" class="hidableInfo">
+									</div>
+									
+									<div>
+										<label for="organization">Organisaatio</label>
+										<input type="text" title="Yritys" value="Yritys" id="organization" class="filled hidableInfo">
+									</div>
+
+									<div class="form-selection">							
+										<label for="all-releases">Tilaa *
+										<span class="error" id="languageMissing">Millä kielellä haluat vastaanottaa sähköposteja?</span></label>		
+										
+										<div class="selection-field-area field-area-selected">
+											<a class="eventcheck radio eventchecked" href="#" id="all-releases">
+												<input type="radio" checked="checked" value="press-and-stock" id="press-and-stock">Press releases
+											</a>
+											<div class="select-language">
+												<a class="eventcheck eng" href="#"><input type="checkbox" value="all">Englanti</a>
+												<a class="eventcheck fin eventchecked" href="#"><input type="checkbox" value="all">Suomi</a>
+												<a class="eventcheck swe" href="#"><input type="checkbox" value="all">Ruotsi</a>
+											</div>
+										</div>
+
+										<div class="selection-field-area field-area-disabled">
+											<a class="eventcheck radio" href="#">
+												<input type="radio" value="stock-only" id="stock-only">Stock exchange releases
+											</a>								
+											<div class="select-language">
+												<select id="preferredLanguage" name="preferredLanguage">
+													<option class="eng" value="en">Englanti</option>
+													<option class="fin" value="fi" selected="selected">Suomi</option>													
+													<option class="swe" value="sv">Ruotsi</option>
+												</select>
+											</div>
+										</div>
+
+										<div class="selection-field-area field-area-disabled">
+											<a class="eventcheck radio" href="#"><input type="radio" value="selected-industries" id="selected-industries">Tiedotteet vain valituilta toimialoilta</a>						
+
+											<div class="industries-selection">
+												<p>Valitse yksi tai useampia toimialoja/palveluja sekä kieli, jolla haluat vastaanottaa viestimme.</p>
+		        									
+												<div class="dropdown-area">
+													<div class="select-industries">
+														<select id="dropdown-values" class="select-ind-off" disabled="">
+														
+															<option selected="selected" value="">Valitse...</option>
+															<option value="852684|852686|852642">Autoteollisuus</option>
+															<option value="852685|852687|852643">Energia</option>
+															<option value="756975|756978|757180">Pankki ja vakuutus</option>
+															<option value="756984|756985|757182">Metsäteollisuus</option>
+															<option value="852662|852671|852648">Sosiaali ja terveys</option>
+															<option value="852663|852672|852649">Logistiikka</option>
+															<option value="756995|756994|757201">Valmistava teollisuus</option>
+															<option value="852667|852673|852650">Media</option>
+															<option value="852668|852674|852651">Öljy ja kaasu</option>
+															<option value="756986|757013|757195">Julkinen hallinto</option>
+															<option value="852669|852676|852660">Tietoliikenne</option>
+															<option value="852670|852677|852661">Tukku- ja vähittäiskauppa</option>
+														</select>
+		            									
+														<select style="display:none;" id="dropdown-all-values" class="select-ind-off">
+														
+															<option selected="selected" value="">Valitse...</option>
+															<option value="852684|852686|852642">Autoteollisuus</option>
+															<option value="852685|852687|852643">Energia</option>
+															<option value="756975|756978|757180">Pankki ja vakuutus</option>
+															<option value="756984|756985|757182">Metsäteollisuus</option>
+															<option value="852662|852671|852648">Sosiaali ja terveys</option>
+															<option value="852663|852672|852649">Logistiikka</option>
+															<option value="756995|756994|757201">Valmistava teollisuus</option>
+															<option value="852667|852673|852650">Media</option>
+															<option value="852668|852674|852651">Öljy ja kaasu</option>
+															<option value="756986|757013|757195">Julkinen hallinto</option>
+															<option value="852669|852676|852660">Tietoliikenne</option>
+															<option value="852670|852677|852661">Tukku- ja vähittäiskauppa</option>
+														</select>
+											            
+														<div class="add-more"><a href="#">Lisää</a></div>
+													</div>
+
+													<div style="display:none;" class="select-industries">
+														<div class="select-language">
+															<a class="eventcheck eng" href="#"><input type="checkbox" value="" name="p_list_id">Englanti</a>
+															<a class="eventcheck fin" href="#"><input type="checkbox" value="" name="p_list_id">Suomi</a>
+															<a class="eventcheck swe" href="#"><input type="checkbox" value="" name="p_list_id">Ruotsi</a>
+														</div>
+														<div id="remove" class="select-all">
+															<a class="eventcheck" href="#"><input type="checkbox" value="" name=""><input type="checkbox" value="" name=""></a>
+														</div>
+													</div>
+		        									
+												</div>
+											</div>
+										 </div>
+									</div>
+									<div>
+										<input type="submit" title="Hyväksy" value="Hyväksy" class="send" id="send-releases-subscription">
+									</div>
+									
+									<input type="hidden" value="fin" id="RootPageLanguage">
+									<input type="hidden" value="http://www.huginonline.com/plsql/try/user_sign_up3.subscribe" id="PressUrl">
+									<input type="hidden" value="https://cns.omxgroup.com/cdsPublic/addDynamicSubscription.action" id="StockUrl">
+
+									<div style="display:none;" id="pressHelpers">
+										<input type="hidden" value="3114" name="f_id">
+										<input type="hidden" value="5" name="lan">									
+										<input type="hidden" value="3114" name="p_firm_id">
+										<input type="hidden" value="1058" name="p_firm_id">
+										<input type="hidden" value="f_name" name="p_mandatory">
+										<input type="hidden" value="email" name="p_mandatory">
+										<input type="hidden" value="p_list_id" name="p_mandatory">
+										<input type="hidden" value="aspx?elepath=606,4914,13481,26978" name="p_file_ext">
+										<input type="hidden" value="http://www.tieto.fi/" name="base_href">
+									</div>
+
+									<div style="display:none;" id="stockHelpers">
+										<input type="hidden" value="1057" name="disclosingPartyId">
+										<input type="hidden" value="6" name="infoTypes">
+										<input type="hidden" value="http://www.tieto.fi/Media/materiaalipankki/tilaa-tiedotteita?result=success" name="successUrl">
+										<input type="hidden" value="http://www.tieto.fi/Media/materiaalipankki/tilaa-tiedotteita?result=error" name="failureUrl">
+									</div>
+								</div>
+							</div>
+						</form>

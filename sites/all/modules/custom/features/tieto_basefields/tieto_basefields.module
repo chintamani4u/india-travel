@@ -1,0 +1,215 @@
+<?php
+/**
+ * @file
+ * Drupal needs this blank file.
+ */
+
+include_once 'tieto_basefields.features.inc';
+
+/**
+ * Implements hook_feeds_presave().
+ */
+function tieto_basefields_feeds_presave(FeedsSource $source, $entity, $item) {
+  // When importing a new node, set some required fields to default values.
+  if ($entity->feeds_item->entity_type == 'node' && empty($entity->feeds_item->entity_id)) {
+
+    // If url title is empty, set to title
+    if (empty($entity->field_url_title[LANGUAGE_NONE][0]['value'])) {
+      $entity->field_url_title[LANGUAGE_NONE][0]['value'] = $entity->title;
+    }
+
+    // If meta title is empty, set to title
+    if (empty($entity->field_meta_title[LANGUAGE_NONE][0]['value'])) {
+      $entity->field_meta_title[LANGUAGE_NONE][0]['value'] = $entity->title;
+    }
+
+    // If alias is not set, force pathauto. see path_feeds_set_target().
+    if (empty($entity->path['alias'])) {
+      $entity->path['pathauto'] = TRUE;
+    }
+  }
+}
+
+/**
+ * Implements hook_node_presave().
+ *
+ * Populate field_landing_page reference automatically according to menu parent.
+ */
+function tieto_basefields_node_presave($node) {
+  // @todo Use path alias as a fallback if node is not in menu?
+  if (!empty($node->menu['plid'])) {
+    // Find the first landing page in menu parents.
+    $menu_link = $node->menu;
+    $landing_page_node = NULL;
+    while (!empty($menu_link['plid']) && $menu_link = menu_link_load($menu_link['plid'])) {
+      $parent_path = drupal_get_normal_path($menu_link['href']);
+      $parent_node = menu_get_object('node', 1, $parent_path);
+      if ($parent_node && $parent_node->type == 'tieto_landing_page') {
+        $landing_page_node = $parent_node;
+        break;
+      }
+    }
+    if ($landing_page_node) {
+      $node->field_landing_page[LANGUAGE_NONE][0]['target_id'] = $landing_page_node->nid;
+    }
+  }
+}
+
+/**
+ * Helper; Return the active landing page background image uri.
+ */
+function _tieto_basefields_get_background_image_uri() {
+  // Using field_landing_page reference could speed this up a bit, but
+  // backgound image inheritance has to work also for hub pages.
+  // For now, we use active menu trail and take the first background image
+  // atom found regardless of content type.
+  $trail = menu_get_active_trail();
+  while ($menu_link = array_pop($trail)) {
+    if ($menu_link['href'] == '<front>') {
+      $path = variable_get('site_frontpage', 'node');
+    }
+    else {
+      $path = $menu_link['href'];
+    }
+
+    $path = drupal_get_normal_path($path);
+    $node = menu_get_object('node', 1, $path);
+    if (!$node || empty($node->field_background_atom)) {
+      continue;
+    }
+    try {
+      $background_atom = entity_metadata_wrapper('node', $node)->field_background_atom->value();
+    }
+    catch (Exception $e) {
+      continue;
+    }
+    // According to scald_image_scald_fetch(), base_id contains the actual fid.
+    if (empty($background_atom->base_id)) {
+      continue;
+    }
+    $file = file_load($background_atom->base_id);
+    if (empty($file->uri) || !is_file($file->uri)) {
+      continue;
+    }
+    return file_create_url($file->uri);
+  }
+}
+
+/**
+ * Helper; Return landing page node for a given node.
+ */
+function _tieto_basefields_get_landing_page_node($node) {
+  $section_node = NULL;
+
+  if ($node->type == 'tieto_landing_page' || !isset($node->field_landing_page)) {
+    // On landing page and on hub pages, the section title is from current node.
+    $section_node = $node;
+  }
+  elseif (!empty($node->field_landing_page[LANGUAGE_NONE][0]['target_id'])) {
+    // On a page under the landing page, the section title is from current landing page.
+    $landing_page = node_load($node->field_landing_page[LANGUAGE_NONE][0]['target_id']);
+    if ($landing_page && node_access('view', $landing_page)) {
+      $section_node = $landing_page;
+    }
+  }
+
+  return $section_node;
+}
+
+/**
+ * Implements hook_preprocess_page().
+ *
+ * - Set background image using bg_image_add_background_image().
+ * - Add landing page title as $tieto_landing_page_title.
+ */
+function tieto_basefields_preprocess_page(&$vars) {
+  // Set background image from current landing page.
+  $bg_image_uri = _tieto_basefields_get_background_image_uri();
+  if ($bg_image_uri) {
+    module_invoke('bg_image', 'add_background_image' , $bg_image_uri);
+  }
+
+  $section_title = NULL;
+  if (isset($vars['node'])) {
+    $section_node = _tieto_basefields_get_landing_page_node($vars['node']);
+    if (!$section_node) {
+      // If field_landing_page is not populated yet, find landing page in menu.
+      $trail = menu_get_active_trail();
+      while ($menu_link = array_pop($trail)) {
+        $path = drupal_get_normal_path($menu_link['href']);
+        $node = menu_get_object('node', 1, $path);
+        if ($node && $node->type == 'tieto_landing_page') {
+          $section_node = $node;
+          break;
+        }
+      }
+    }
+
+    if (!$section_node && !drupal_is_front_page()) {
+      // If there is no landing page and we're not on front page, use current node.
+      $section_node = $vars['node'];
+    }
+
+    if ($section_node) {
+      $data = array('node' => $section_node);
+      $token = '[node:menu-link:title]';
+      $section_title = token_replace($token, $data, array('sanitize' => TRUE));
+      if ($section_title == $token) {
+        $section_title = NULL;
+      }
+    }
+  }
+  else {
+    // If we're not on a content page, do nothing
+  }
+
+  $vars['tieto_landing_page_title'] = $section_title;
+}
+
+function _tieto_basefields_tieto_terms_from_node($node) {
+  $fields = array(
+    'field_concepts',
+    'field_services',
+    'field_industry',
+    'field_technologies',
+    'field_news_type',
+    'field_event_type'
+  );
+
+  $terms = array();
+
+  foreach ($fields as $field_name) {
+    $items = field_get_items('node', $node, $field_name);
+    if (is_array($items)) {
+      foreach ($items as $item) {
+        $terms[$item['tid']] = $item['tid'];
+      }
+    }
+  }
+
+  // Filter out terms which ancestor is also selected.
+  foreach ($terms as $tid) {
+    $ancestors = taxonomy_get_parents_all($tid);
+    // First ancestor is the term itself.
+    array_shift($ancestors);
+    // Start from root.
+    while ($term = array_pop($ancestors)) {
+      // If an ancestor is selected, deselect the original
+      if (isset($terms[$term->tid])) {
+        unset($terms[$tid]);
+        break;
+      }
+    }
+  }
+
+  return $terms;
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function tieto_basefields_ctools_plugin_directory($owner, $plugin) {
+  if ($owner == 'ctools' && $plugin == 'relationships') {
+    return 'plugins/relationships';
+  }
+}

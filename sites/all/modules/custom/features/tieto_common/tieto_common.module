@@ -1,0 +1,438 @@
+<?php
+/**
+ * @file
+ * Drupal needs this blank file.
+ */
+
+include_once 'tieto_common.features.inc';
+
+/**
+ * Implements hook_date_format_types()
+ */
+function tieto_common_date_format_types() {
+  return array(
+    'tieto_date' => 'Tieto ' . t('Date'),
+    'tieto_month' => 'Tieto ' . t('Month'),
+    'tieto_short_date' => 'Tieto ' . t('Short Date'),
+    'tieto_short_date_time' => 'Tieto ' . t('Short Date / Time'),
+    'tieto_medium_date' => 'Tieto ' . t('Medium Date'),
+    'tieto_medium_date_time' => 'Tieto ' . t('Medium Date / Time'),
+    'tieto_short_date_full' => 'Tieto ' . t('Short Date Full'),
+  );
+}
+
+/**
+ * Implements hook_date_formats().
+ */
+function tieto_common_date_formats() {
+  $formats = array();
+
+  $formats[] = array(
+    'type' => 'tieto_date',
+    'format' => 'd.m.Y',
+    'locales' => array(),
+  );
+
+  $formats[] = array(
+    'type' => 'tieto_month',
+    'format' => 'F',
+    'locales' => array(),
+  );
+
+  $formats[] = array(
+    'type' => 'tieto_short_date',
+    'format' => 'd M',
+    'locales' => array(),
+  );
+
+  $formats[] = array(
+    'type' => 'tieto_short_date_time',
+    'format' => 'd M H:i',
+    'locales' => array(),
+  );
+
+  $formats[] = array(
+    'type' => 'tieto_medium_date',
+    'format' => 'd F Y',
+    'locales' => array(),
+  );
+
+  $formats[] = array(
+    'type' => 'tieto_medium_date_time',
+    'format' => 'd F Y H:i',
+    'locales' => array(),
+  );
+
+  $formats[] = array(
+    'type' => 'tieto_short_date_full',
+    'format' => 'd M Y',
+    'locales' => array(),
+  );
+
+  return $formats;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Add 3, 5 and 10 minutes to Periodic import's options.
+ */
+function tieto_common_form_FeedsImporter_feeds_form_alter(&$form, &$form_state) {
+  if (isset($form['import_period']['#options'])) {
+    $period = drupal_map_assoc(array(3*60, 5*60, 10*60), 'format_interval');
+    foreach ($period as &$p) {
+      $p = t('Every !p', array('!p' => $p));
+    }
+    $form['import_period']['#options'] += $period;
+    ksort($form['import_period']['#options']);
+  }
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter().
+ */
+function tieto_common_form_node_form_alter(&$form, &$form_state) {
+//  $form['#attached']['css'][] = drupal_get_path('module', 'tieto_common') . '/tieto-common-admin.css';
+  //dsm($form);
+  //[43643237] Hide permalink from others than sysop
+  if (user_access('administer features') && isset($form['#entity_type']) && $form['#entity_type'] == 'node' && isset($form['path']) && isset($form['path']['alias'])) {
+    $form['path']['#access'] = TRUE;
+  } else {
+    $form['path']['#access'] = FALSE;
+  }
+  //dsm($form['#bundle']);
+  /* HIDE "Provide navigation form on repository content types" */
+  switch ($form['#bundle']) {
+    case "contact":
+    case "tieto_event":
+    case "tieto_news_article":
+    case "tieto_addresses":
+    case "tieto_carousel_content":
+    case "tieto_jobs_vacancy":
+    case "tieto_hugin_feed":
+      $form['menu']['#access'] = FALSE;
+    break;
+
+    default:
+      $node = $form['#node'];
+      $options = variable_get('menu_options_' . $node->type, array('main-menu'));
+      // By default, hide navigation options if none available nor set.
+      if (empty($options) && empty($node->menu['mlid'])) {
+        $form['menu']['#access'] = FALSE;
+      }
+      break;
+  }
+
+
+  // Revert panopoly title improvement for node's title (H1 headline).
+  // See panopoly_admin_form_alter() and panopoly-admin.css.
+  if (isset($form['title']['#attributes']['placeholder'])) {
+    unset($form['title']['#attributes']['placeholder']);
+  }
+  if ($form['type']['#value'] == 'tieto_carousel_content') {
+    // Revert: Improve the publishing options by remove promote to front page and stick.
+    $form['options']['promote']['#access'] = user_access('create tieto_frontpage content');
+  }
+  if($form['type']['#value'] == 'magazine_article') {
+    // Re-enable the sticky option for magazine_article
+    $form['options']['sticky']['#access'] = user_access('create magazine_article content');
+    $form['options']['sticky']['#title'] = t("Set as promoted (editorial) article");
+  }
+  if (isset($form['menu']['link'])) {
+    // Panopoly admin changes #title to "Title", which we dont want.
+    $form['menu']['link']['link_title']['#title'] = '';
+    $form['menu']['link']['link_title']['#attributes']['placeholder'] = t('Menu link title');
+
+    // Add a checkbox toggle control to the node form (copy-paste from disable_node_menu_item.module).
+    $form['menu']['link']['tieto_link_hidden'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Disable in menu'),
+      '#description' => t('Select this option to create the menu item, but hide it from the menu tree. This may be useful to keep your content structured without cluttering the menu for site visitors.'),
+      '#default_value' => isset($form_state['node']->menu['hidden']) ? $form_state['node']->menu['hidden'] : 0,
+    );
+    $form['#submit'][] = 'tieto_common__menu_link_submit';
+  }
+}
+
+/**
+ * Submit callback; Set menu link hidden property.
+ */
+function tieto_common__menu_link_submit($form, &$form_state) {
+  $form_state['values']['menu']['hidden'] = $form_state['values']['menu']['tieto_link_hidden'];
+}
+
+/**
+ * Implements hook_module_implements_alter().
+ *
+ * Try to run our form alter hooks after panopoly and menuperformance.
+ *
+ * @see menuperformance_module_implements_alter()
+ * @see panopoly_admin_module_implements_alter()
+ */
+function tieto_common_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'form_alter' || $hook == 'form_node_form_alter') {
+    if (isset($implementations['tieto_common'])) {
+      $group = $implementations['tieto_common'];
+      unset($implementations['tieto_common']);
+    }
+    else {
+      $group = FALSE;
+    }
+    $implementations['tieto_common'] = $group;
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * @see panopoly_widgets_form_alter()
+ */
+function tieto_common_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'fieldable_panels_panes_fieldable_panels_pane_content_type_edit_form') {
+    // Revert: Improve the reusable interface
+    if (isset($form['widget_settings']['reusable']['category']) && $form['widget_settings']['reusable']['category']['#type'] == 'value') {
+      // Panopoly sets type to value and value to 'Reusable Content'. We try to revert that.
+      $form['widget_settings']['reusable']['category']['#type'] = 'textfield';
+      unset($form['widget_settings']['reusable']['category']['#value']);
+    }
+  }
+  
+  if ($form_id == 'user_pass_reset') {
+    global $base_root;
+    $current_url = $base_root . request_uri();
+    $form['#action'] = $current_url . "/login";
+  }
+
+	//TIET-2657 Exclude the "Key topics: multi column content" from Search API
+   if ($form_id == 'multi_column_content_node_form' || $form_id = 'facebook_posts_node_form') {
+    $selected_contenttypes = array('multi_column_content','facebook_posts'); 
+	  foreach($selected_contenttypes as $ct) {
+	   $form['search_api_exclude']['search_api_exclude']['#default_value'] = 1 ;
+     }
+   }
+  
+}
+
+/**
+ * Implements hook_wysiwyg_editor_settings_alter().
+ */
+function tieto_common_wysiwyg_editor_settings_alter(&$settings, $context) {
+  if ($context['profile']->editor == 'tinymce') {
+    $settings['style_formats'][] = array(
+      'title' => 'Highlight section',
+      'block' => 'div',
+      'wrapper' => TRUE,
+      'classes' => 'highlight_text'
+    );
+
+    // @todo remove this when tieto_panopoly works.
+    $settings['theme_advanced_blockformats'] = 'h2,h3,h4';
+  }
+}
+
+/**
+ *
+ * Disable Listings and some general drupal pages.
+ * taxonomy/term/xxx
+ * node
+ * rss.xml
+ * user/xxx
+ * aggregator/*
+ */
+
+/**
+ * Implements hook_menu_alter().
+ */
+function tieto_common_menu_alter(&$items) {
+  //Handled with global redirect?
+  unset($items['node']);
+
+  unset($items['rss.xml']); //['access callback'] = FALSE;
+
+  //@TODO: administrator test?
+  //unset($items['user/%user']);
+
+  // Term access control are done in taxonomy/term/% views
+  // unset($items['taxonomy/term/%taxonomy_term']);
+  unset($items['taxonomy/term/%taxonomy_term/view']);
+  unset($items['taxonomy/term/%taxonomy_term/feed']); // If you want to hide the feed as well.
+
+}
+
+/**
+ * Implements hook_menu_block_tree_alter().
+ *
+ * Sets menu depth based on parent menu.
+ */
+function tieto_common_menu_block_tree_alter(&$tree, &$config) {
+  global $language;
+
+  // Make sure we have follow set to 0.
+  // There's a bug in panel menu_block settings, which disables
+  // unchecking settings checkboxes
+  $config['follow'] = 0;
+
+  // Menu ID's for industries of all available languages
+  static $mlids = array(
+    'en'      => 4317,
+    'fi'      => 1950,
+    'sv'      => 4475,
+    'nn'      => 4487,
+    'zh-hans' => 4779,
+    'nl'      => 1957,
+    'pl'      => 1959,
+    'de'      => 4537,
+  );
+  $mlid = $mlids[$language->language];
+  if(isset($mlid)) {
+    $active_trail = menu_get_active_trail();
+    // Make sure this is the main menu and it's the panelizer pane (override title)
+    if(isset($active_trail[1]['mlid']) && $active_trail[1]['mlid'] == $mlid && isset($config['override_title'])) {
+      // If the active trail is deeper than 3, we set the starting level at 3
+      if(count($active_trail) <= 2) {
+        // Else it's 2
+        $config['level'] = 2;
+      }
+      else {
+        $config['level'] = 3;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function tieto_common_ctools_plugin_directory($owner, $plugin) {
+  if ($owner == 'ctools' && $plugin == 'content_types') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/*
+ * Global search by current user language as default facet
+ */
+function tieto_common_search_box_form_submit($form, &$form_state) {
+  // The search form relies on control of the redirect destination for its
+  // functionality, so we override any static destination set in the request,
+  // for example by drupal_access_denied() or drupal_not_found()
+  // (see http://drupal.org/node/292565).
+  if (isset($_GET['destination'])) {
+    unset($_GET['destination']);
+  }
+
+  // Check to see if the form was submitted empty.
+  // If it is empty, display an error message.
+  // (This method is used instead of setting #required to TRUE for this field
+  // because that results in a confusing error message.  It would say a plain
+  // "field is required" because the search keywords field has no title.
+  // The error message would also complain about a missing #title field.)
+  if ($form_state['values']['search_block_form'] == '') {
+    form_set_error('keys', t('Please enter some keywords.'));
+  }
+
+  $form_id = $form['form_id']['#value'];
+  $info = search_get_default_module_info();
+  if ($info) {
+    global $language;
+    $lang = isset($language->language) ? $language->language : 'en';
+    $search_url = 'search/' . $info['path'] . '/' . trim($form_state['values'][$form_id]);
+
+    $form_state['redirect'] = array(
+      $search_url,
+      array(
+        'query' => array(
+          'f' => array(
+            'language:' . $lang
+          )
+        )
+      )
+    );
+  }
+  else {
+    form_set_error(NULL, t('Search is currently disabled.'), 'error');
+  }
+}
+
+//TIET-1581 - Auto update of permalink when changing menu structure
+//This hook will update url aliases of child industry hub pages, when url alias of parent industry hub page is updated
+/* function tieto_common_node_update($node){
+  //check if url alias field is available for node type
+  $new_path = $node->field_url_title['und'][0]['value'];
+  $old_path = $node->path['original']['alias'];
+  $tmp = explode('/',$old_path);
+  $old_path = array_pop($tmp);
+ 
+  if($old_path != $new_path ){   
+    $search_path = "/".$old_path."/";
+    $replace_path = "/".$new_path."/";
+
+    db_update('url_alias')
+    ->expression('alias', 'replace(alias, :old_path, :new_path)', array(':old_path' => $search_path, ':new_path' => $replace_path))
+    ->execute();
+
+  }
+}
+*/
+
+function tieto_common_node_presave($node) {
+	if ($node->type == 'tieto_news_article' && isset($node->field_hugin_id[LANGUAGE_NONE][0]['value'])) {
+		$node->field_news_type[LANGUAGE_NONE][0]['tid'] = key(taxonomy_get_term_by_name("Managers’ transactions"));;
+	}
+}
+
+
+function tieto_common_feeds_after_import(FeedsSource $source) {
+  if($_ENV['AH_SITE_ENVIRONMENT'] == "prod"){
+    switch ($source->feed_nid) {
+	  //Cision Feed Importer (tieto.com) nid 51716
+	  //Cision Stock exchange Feed Importer (tieto.com) nid 60681
+	  case "51716":
+	  case "60681":
+	    if($source->state['process']->created || $source->state['process']->updated){
+	      _domain_cache_clear('tieto.com');
+	    };
+	  break;
+	
+	  //Cision Feed Importer (tieto.se) nid 51701
+	  //Cision Stock exchange Feed Importer (tieto.se) nid 60686
+	  case "51701":
+	  case "60686":
+	    if($source->state['process']->created || $source->state['process']->updated){
+	      _domain_cache_clear('tieto.se');
+	    };
+	  break;
+    
+	  //Cision Feed Importer (tieto.fi) nid 51686
+	  //Cision Stock exchange Feed Importer (tieto.fi) nid 60676
+	    case "51686":
+	    case "60676":
+	      if($source->state['process']->created || $source->state['process']->updated){
+	        _domain_cache_clear('tieto.fi');
+	      };
+	    break;
+    
+	  //Cision Feed Importer (tieto.no) nid 51681
+      case "51681":
+	      if($source->state['process']->created || $source->state['process']->updated){
+	       _domain_cache_clear('tieto.no');
+	      };
+	    break;
+   }
+  }
+}
+
+function _domain_cache_clear($domain){
+  //create domain variable for www and non-www
+  $www_domain = 'www.'. $domain;
+  
+  $cmd_for_domain = "curl -s -u chintamani.umarani@tieto.com:plHVh3J3pqvipvYqahOjiBWJQp3HmTA6CdbMTP5sCEOBmV6qNYU6p+aSbZqe6lXhrD+l4MATnCKV -X DELETE https://cloudapi.acquia.com/v1/sites/prod:tieto/envs/prod/domains/". $domain ."/cache.json";
+	
+  $cmd_for_www_domain = "curl -s -u chintamani.umarani@tieto.com:plHVh3J3pqvipvYqahOjiBWJQp3HmTA6CdbMTP5sCEOBmV6qNYU6p+aSbZqe6lXhrD+l4MATnCKV -X DELETE https://cloudapi.acquia.com/v1/sites/prod:tieto/envs/prod/domains/". $www_domain ."/cache.json";
+	
+  $result1 = shell_exec($cmd_for_domain);
+  $result2 = shell_exec($cmd_for_www_domain);
+  
+  watchdog('Cache-api-call', 'API call result %result1', array('%result1' => $result1), WATCHDOG_NOTICE, $link = NULL);
+  watchdog('Cache-api-call', 'API call result %result2', array('%result2' => $result2), WATCHDOG_NOTICE, $link = NULL);
+}

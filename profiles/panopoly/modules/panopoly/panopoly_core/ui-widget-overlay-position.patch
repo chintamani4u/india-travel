@@ -1,0 +1,11 @@
+--- css/panopoly-jquery-ui-theme_org.css	Wed Jan 28 14:24:23 2015
++++ css/panopoly-jquery-ui-theme.css	Wed Jan 28 14:48:59 2015
+@@ -35,7 +35,7 @@
+ ----------------------------------*/
+ 
+ /* Overlays */
+-.ui-widget-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
++.ui-widget-overlay { position: fixed; top: 0; left: 0; bottom: 0; width: 100%; height: 100%; }
+ 
+ 
+ /*

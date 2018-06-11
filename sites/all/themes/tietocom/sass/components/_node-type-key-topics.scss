@@ -1,0 +1,711 @@
+/*
+ * Key topics
+ */
+
+.node-type-key-topics {
+  .logo-click {
+    background: url("/sites/all/themes/tietocom/tietologo.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0);
+    background-size: 108px;
+    height: 54px;
+    left: 19px;
+    position: absolute;
+    top: 19px;
+    width: 120px;
+    z-index: 20;
+    display: none;
+  }
+  //Add a display:none class for key topics pages.
+  .breadcrumb {
+    display: none;
+  }
+  h2.pane-title {
+    @include adjust-font-size-to($h1-font-size);
+    @include leader(2, $h1-font-size);
+    @include trailer(0.5, $h1-font-size);
+    padding: 0 $gutter-width;
+  }
+  .key-topics-hidden, .concept-page-hidden {
+    display: none;
+  }
+  .key-topics-visible, .concept-page-visible {
+    display: inline;
+  }
+  .mobile-nav-key-topics {
+    display: none;
+    @include respond-to(handheld) {
+      background: url("/sites/all/themes/tietocom/images/large/mobile_nav_white.png") no-repeat scroll 0 0 rgba(0, 0, 0, 0);
+      background-size: 40px auto;
+      content: "";
+      cursor: pointer;
+      padding: 20px;
+      position: fixed;
+      right: 11px;
+      top: 15px;
+      z-index: 100;
+    }
+  }
+  #header div.header-image {
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover; //100% auto;
+  }
+  .view-key-topics-phases {
+    .views-field-title a {
+      @include adjust-font-size-to($h2-font-size);
+      @include title-font();
+      @include link-hover();
+      @include limit-lines(2, $h2-font-size);
+    }
+    .views-field-field-punchline {
+      font-size: 12px;
+      font-weight: 700;
+      img {
+        width: 280px;
+        height: 120px;
+        margin-bottom: 10px;
+      }
+    }
+  }
+  #page-title {
+    @include respond-to(handheld) {
+      padding-bottom: 30px;
+      padding-top: 30px;
+    }
+  }
+  .pane-bundle-text{
+    padding: 0 20px;
+    font-size: 0.875em;
+    width: 50%;
+    @include respond-to(handheld) { width: auto}
+  }
+
+  #page {
+    overflow: hidden;
+  }
+
+  /* Parallax images in the middle */
+  .field-name-field-basic-image-image {
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: 100% auto; //cover;
+    img {
+      display: none;
+    }
+  }
+  .field-name-field-basic-image-image, .extendright {
+    margin-right: -3000px;
+    padding-right: 3000px;
+  }
+  .field-name-field-basic-image-image, .extendleft {
+    margin-left: -3000px;
+    padding-left: 3000px;
+  }
+  /* General style overrides for header */
+
+  .header-inner {
+    .segment-title {
+      margin: 0 auto;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: none;
+      max-width: 1140px;
+      box-sizing: border-box;
+      &::after {
+        display: none;
+      }
+      @include respond-to(handheld) {
+        top: 45px;
+        position: relative;
+        font-size: 0.8em;
+        margin: 0;
+        padding: $base-font-size + 1;
+        background-color: rgba(black, 0.2);
+      }
+      .title {
+        @include title-font($banner-font-size, $alt-font-family-heavy);
+        text-align: left;
+      }
+      .show-header-block {
+        color: $primary-blue;
+      }
+    }
+    .segment-title .sub-title {
+      color: $white;
+      @include adjust-font-size-to($h1-font-size);
+      @include title-font($h1-font-size, $alt-font-family-normal);
+      @include respond-to(handheld) {
+        font-size: 1.4em;
+      }
+    }
+  }
+  &.not-front {
+    .header-inner .segment-title {
+      .title {
+        padding-top: 1em;
+        @include respond-to(narrow) {
+          padding-top: 100px;
+        }
+      }
+    }
+  }
+
+  #header {
+    @include blue-sprite-theme(narrow);
+    @include respond-to(narrow) {
+      height: 510px;
+    }
+    @include respond-to(handheld) {
+      padding-bottom: 2.8em;
+    }
+  }
+  #navigation {
+    max-width: 996px !important;
+    position: absolute;
+    bottom: 40px;
+    right: 0;
+    left: 0;
+    @include respond-to(handheld) {
+      position: relative;
+      bottom: -40px;
+    }
+
+    .region-navigation {
+      //position: absolute;
+      bottom: 25px;
+      z-index: 2;
+      @include respond-to(narrow-only) {
+        left: 0;
+        right: 0;
+      }
+      @include respond-to(handheld) {
+        position: relative;
+        bottom: 0;
+      }
+    }
+  }
+
+  #main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding-bottom: 2em;
+    #content {
+      padding: 0;
+      .panel-pane {
+        margin: 0;
+        // add this widget
+        &.pane-tieto-addthis {
+          margin: 0 10px;
+          .addthis_toolbox { float: right; }
+        }
+
+        > h2.pane-title {
+          margin-top: 15px;
+        }
+      }
+
+      .content-block-inner .conceptpage-container {
+        margin: 0 -10px;
+        @include respond-to(handheld) {
+          margin: 0;
+          margin-bottom: 2em;
+        }
+        @include respond-to(tab-portrait) {
+          margin: 0;
+        }
+        .panel-panel-inner {
+          @include respond-to(handheld) {
+            margin: 0;
+          }
+        }
+      }
+
+      // multi columns 20150128
+      .views-field-field-multi-columns .field-items {
+        margin: 10px 0;
+        > .field-item .multi-column-content{
+          margin: 15px 10px;
+          background-color: $gray-13;
+          padding: 20px;
+        }
+        &.multi-column-4 > .field-item {
+          @include grid-columns(4);
+        }
+        &.multi-column-3 > .field-item {
+          @include grid-columns(3);
+        }
+        &.multi-column-2 > .field-item {
+          @include grid-columns(2);
+        }
+      }
+
+
+      // portfolio
+      .panel-pane.pane-key-topics-portfolio-panel-pane-1,
+      .panel-pane.pane-key-topics-portfolio-panel-pane-2 {
+        margin: 0;
+        padding: 0;
+        @include grid-columns(2);
+        @include respond-to(handheld) {
+          float: none;
+          display: block;
+        }
+        .view-key-topics-portfolio {
+          background-color: $gray-13;
+          margin: 10px;
+          @include respond-to(handheld) {
+            margin: 10px 0;
+          }
+          > .view-content {
+            padding: 10px 20px;
+            li.views-row > div {
+              padding: 0;
+            }
+          }
+        }
+
+        .field-content * {
+          max-width: 100% !important;
+        }
+      }
+
+      .panel-pane.pane-key-topics-portfolio-panel-pane-1 {
+        .item-list {
+          clear: both;
+          > h3 {
+            //            margin-bottom: 0;
+          }
+          &:first-child > h3 {
+            //            margin-top: 0;
+          }
+          li {
+            clear: both;
+            display: block;
+          }
+        }
+        .views-field {
+          //          padding: 0 !important;
+          //          margin: 10px 0 !important;
+          display: block;
+          clear: both;
+
+          .offering_data {
+            //            padding: 5px 0;
+            //            font-size: $base-font-size;
+            @include apply-margin();
+
+            .offerings_icon img {
+              float: left;
+              margin: 3px 20px 10px 0;
+              width: 90px !important;
+              height: 60px !important;
+              overflow: hidden;
+            }
+            .offerings_description {
+              //              padding-top: 5px;
+            }
+          }
+        }
+      }
+
+      // New portfolio two column section
+      // TODO: No unique ID or Class for this section?
+      .field-collection-item-field-two-column-content > .content > div {
+        @include grid-columns(2);
+        > .field-items {
+          margin: 0 20px;
+          > .field-item {
+
+          }
+        }
+        .exp-title {
+          font-weight: bold;
+          font-size: 20px;
+          margin-bottom: 13px;
+        }
+        .exp-illustration {
+          position: relative;
+          display: block;
+          margin-bottom: 35px;
+          img {
+            display: block;
+          }
+        }
+        .key-topics {
+          position: absolute;
+          left: 0;
+          padding: 10px;
+          bottom: -30px;
+          > * {
+            display: inline-block;
+            color: white;
+            margin: 1.5px 0;
+            padding: 3px 6px;
+            font-size: 16px;
+            white-space: nowrap;
+            width: inherit;
+            float: left;
+            clear: left;
+          }
+        }
+        .exp-desc {
+          padding: 0 5px;
+		  font-size: 0.875em;
+        }
+        .banking-exp {
+          .exp-title a {
+            color: $primary-orange-dark;
+          }
+          .key-topics {
+            > * {
+              background: $primary-orange-dark;
+            }
+          }
+        }
+        .retail-exp {
+          .exp-title a {
+            color: $primary-red;
+          }
+          .key-topics {
+            > * {
+              background: $primary-red;
+            }
+          }
+        }
+        .industrial-exp {
+          .exp-title a {
+            color: $primary-green;
+          }
+          .key-topics {
+            > * {
+              background: $primary-green;
+            }
+          }
+        }
+        .exp-hub {
+          .exp-title a {
+            color: $primary-light-blue;
+          }
+          .key-topics {
+            > * {
+              background: $primary-light-blue;
+            }
+          }
+        }
+      }
+
+      // New three column section
+      // TODO: No unique ID or Class for this section?
+      .field-collection-item-field-three-column-content > .content > div {
+        @include grid-columns();
+        > .field-items {
+          margin: 10px;
+          > .field-item {
+            background-color: $gray-13;
+            padding: 20px;
+          }
+        }
+      }
+
+      // New four column section
+      // TODO: No unique ID or Class for this section?
+      .field-collection-item-field-four-column-content > .content > div {
+        @include grid-columns(4);
+        > .field-items {
+          margin: 10px;
+          > .field-item {
+            background-color: $gray-13;
+            padding: 20px;
+          }
+        }
+      }
+	  .field field-name-field-two-left-column {
+        margin: 0px;
+       }
+    }
+  }
+
+  .field-name-field-basic-image-image {
+    max-height: 270px;
+    min-height: 270px;
+  }
+
+  .pane-key-topics-portfolio-offerings-panel-pane-2 {
+    float: left;
+  }
+  .pane-key-topics-portfolio-offerings-panel-pane-1 {
+    float: right;
+  }
+  .key-topics-visible {
+    display: block;
+    position: relative;
+    overflow: hidden;
+  }
+  .field.field-name-scald-thumbnail.field-type-image.field-label-hidden {
+    position: relative;
+    z-index: 1;
+  }
+
+  //tile close button
+  .tile-close {
+    text-align: center;
+    a {
+      @include adjust-font-size-to($sidebar-font-size);
+      padding: 2px 0 2px 20px;
+      &:before {
+        @include fa-icon($fa-var-times-circle, 1.5em);
+        top: 2px;
+        right: 5px;
+      }
+    }
+  }
+  //addtoany styling
+  .addtoany_list {
+    display: block;
+    padding-top: 30px;
+    a span.a2a_img {
+      display: inline-block;
+      height: 17px;
+      opacity: 1;
+      overflow: hidden;
+      width: 16px;
+      margin-bottom: 4px;
+    }
+  }
+
+  //Key topics webform styles
+  .node-webform {
+    background: $gray-13;
+    width: inherit;
+    margin: 0 10px;
+    padding: 0;
+    @include respond-to(handheld) {
+      width: 100%;
+      margin: 0;
+    }
+
+    .webform-client-form {
+      padding: 20px;
+      @include columns(2, 20px);
+
+      @include respond-to(handheld) {
+        @include columns();
+      }
+
+      .contact-form-ie-col-1 {
+        float: left;
+        width: 49%;
+        @include respond-to(handheld) {
+          float: none;
+          clear: both;
+          width: 100%;
+        }
+      }
+      .contact-form-ie-col-2 {
+        float: right;
+        width: 49%;
+        @include respond-to(handheld) {
+          float: none;
+          clear: both;
+          width: 100%;
+        }
+      }
+
+      &.ie-lte-9 {
+        label:not(.option) {
+          display: block;
+          font-weight: 400;
+        }
+      }
+
+      .form-item {
+        margin: 10px 0;
+        padding: 0;
+        width: 100%;
+        display: block;
+        position: relative;
+        overflow: hidden;
+
+        @include respond-to(handheld) {
+          clear: both;
+          display: block;
+          width: 100%;
+          padding: 0;
+        }
+
+        label {
+          font-weight: 400;
+          display: none;
+          &.option {
+            display: inline;
+          }
+        }
+
+        .form-text {
+          padding: 4px 6px;
+          width: 100%;
+          border: 0px solid;
+          color: $base-font-color;
+        }
+
+        .form-select {
+          padding: 3px 6px;
+          width: 99.5%;
+          margin-left: 4px;
+          border: 0px solid;
+          color: $base-font-color;
+          @include respond-to(handheld) {
+            margin-left: 0;
+            width: 100%;
+          }
+          @include respond-to(tab-landscape) {
+            float: right;
+            width: 98.5%;
+            margin-left: 0;
+          }
+          @include respond-to(normal) {
+            width: 100%;
+            margin-left: 0;
+          }
+        }
+
+        textarea {
+          border: 0;
+          padding: 5px;
+        }
+
+        .description {
+          margin: 10px 0;
+        }
+      }
+
+      #webform-component-Information-request,
+      .contact-form-ie-col-1 .form-item.form-type-radio {
+        margin-top: 0 !important;
+      }
+
+      .form-actions {
+        text-align: right;
+        background-color: #f5f5f5;
+        input {
+          background-color: $primary-light-blue;
+          &.form-submit {
+            margin: 0.5em 0;
+            float: right;
+            &:hover {
+              background-color: $primary-red;
+            }
+          }
+        }
+      }
+
+      /*.form-item:nth-child(even) {
+  float: right;
+  padding-right: 0;
+  @include respond-to(handheld) {
+    float: left;
+    clear: both;
+    display: block;
+    width: 100%;
+    padding: 0;
+  }
+  .form-text {
+    float: right;
+    @include respond-to(handheld) {
+      float: left;
+    }
+  }
+}
+      */
+
+    }
+  }
+
+  .item-list {
+    .pager {
+      float: left;
+      margin: 0;
+      padding: 0;
+      width: 100%;
+
+      li {
+        padding-bottom: 0;
+        display: block;
+        text-transform: inherit;
+        text-align: center;
+        position: relative;
+        margin: 10px;
+        @include respond-to(handheld) {
+          margin: 10px 0;
+        }
+        @include respond-to(tab-portrait) {
+          margin: 10px;
+        }
+
+        a {
+          display: block;
+          background-color: $gray-13;
+          color: $primary-blue;
+          font-weight: 700;
+
+          &:before,
+          &:after {
+            @include fa-icon($fa-var-plus-circle, 1.5em);
+            vertical-align: middle;
+          }
+          &:before {
+            left: 37.6%;
+            @include respond-to(handheld) { left: 50%; }
+          }
+          &:after {
+            right: 37.6%;
+            @include respond-to(handheld) { right: 50%; }
+          }
+          &:hover {
+            color: $primary-red;
+            background-color: $gray-13;
+          }
+        }
+
+        &.pager-previous a {
+          &:before, &:after {
+            @include fa-icon($fa-var-minus-circle, 1.5em);
+          }
+        }
+      }
+    }
+  }
+}
+
+.node-type-key-topics.window-handheld {
+  .field-name-field-basic-image-image {
+    display: none;
+  }
+
+  #header div.header-image {
+    background-position: 80% top !important;
+  }
+}
+
+.node-type-key-topics.window-narrow {
+  .field-name-field-basic-image-image {
+    background-size: 150% auto;
+  }
+
+  // for iOS/iPad Air only - because background-position: fixed not supported!
+  &.ios-ipad {
+    .field-name-field-basic-image-image {
+      background-image: none;
+      overflow: hidden;
+      img {
+        display: block;
+      }
+    }
+  }
+}
+.field, .field-name-field-sidebar-reference-content .field-item .entity-field-collection-item{
+    margin: 0;
+}

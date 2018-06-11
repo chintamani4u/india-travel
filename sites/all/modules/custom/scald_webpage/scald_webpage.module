@@ -1,0 +1,542 @@
+<?php
+/**
+ * @file
+ *   Defines a Webpage provider for Scald.
+ *   a atom which data is grabbed from og:metadata
+ *
+ */
+
+/**
+ * Implements hook_scald_atom_providers.
+ * Tell Scald that we'll be providing some webpage atoms.
+ */
+function scald_webpage_scald_atom_providers() {
+  return array(
+    'webpage' => 'Any Given URL'
+  );
+}
+
+/**
+ * Implements hook_scald_add_form.
+ * This is step 1
+ */
+function scald_webpage_scald_add_form(&$form, &$form_state) {
+  $form['URL'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Webpage URL (internal/external)'),
+    '#element_validate' => array('scald_webpage_validate_url'),
+    '#default_value' => '',
+    '#size' => 60,
+    '#maxlength' => 255,
+    '#description' => t('You may use internal urls without http://. Example: /press. For external urls include full http address'),
+  );
+  $form['iframe'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Render the webpage URL as iframe'),
+    '#default_value' => '0',
+    '#description' => t('By checking the checkbox you enable rendering the attached webpage as IFRAME atom. Usefull for pardot forms')
+  );
+  $form['iframe_height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Iframe Height (px)'),
+    '#size' => 10,
+    '#maxlength' => 10,
+    '#description' => t('When Embedding the url as Iframe to field or body you may want to set it height in pixels'),
+    '#default_value' => '100',
+  );
+  $form['iframe_width'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Iframe Width (%)'),
+    '#size' => 10,
+    '#maxlength' => 10,
+    '#description' => t('When Embedding the url as Iframe to field or body you may want to set it width in %'),
+    '#default_value' => '100',
+  );
+  $form['options'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Other options'),
+    '#default_value' => 'seamless allowfullscreen="yes" scrolling="auto" frameborder="0"',
+    '#size' => 60,
+    '#maxlength' => 255,
+    '#description' => t('You may add options for: seamless, allowfullscreen, scrolling=[auto|yes|no], frameborder=[yes/no]'),
+  );
+}
+
+/**
+ * Implements hook_scald_add_form_fill.
+ * Step 2 and update
+ */
+function scald_webpage_scald_add_form_fill(&$atom, $form, $form_state) {
+  // Get the URL
+  $URL = scald_webpage_check_url($form_state['values']['URL'], TRUE);
+  // Get URL info by it OG:metadata
+  $infos = scald_webpage_fetch_metadata($URL);
+
+  $iframe = $form_state['values']['iframe'];
+  $height = $form_state['values']['iframe_height'];
+  $width = $form_state['values']['iframe_width'];
+  $options = $form_state['values']['options'];
+
+  //dsm($infos);
+
+  /*
+   * Add form data into database and fetch the scald_webpage>webpage_id as base_id
+   */
+  $URL = scald_webpage_create($URL,$iframe,$height,$width,$options);
+
+  $base_id = scald_webpage_load_wid($URL);
+
+  $atom->base_id = $base_id->wid;
+  $atom->title = $infos->title;
+  $atom->URL = $URL;
+
+  // Prefill the author
+  $atom->scald_authors[LANGUAGE_NONE][0] = array(
+    'tid' => 0,
+    'taxonomy_term' => (object) (array('name' => $infos->author))
+  );
+
+  // Prefill tags
+  if (isset($infos->tags)) {
+    $i = 0;
+    $tag_array = explode(" ", $infos->tags);
+    foreach ($tag_array as $tag) {
+      $atom->scald_tags[LANGUAGE_NONE][$i] = array(
+        'tid' => $i, // Beware, this is not a real tid, it's just an index
+        'taxonomy_term' => (object) (array('name' => $tag))
+      );
+      $i++;
+    }
+  }
+
+  // Download a copy of the webpage og:image thumbnail. This makes it possible
+  // to do interesting manipulation with image styles presets.
+  $thumb = drupal_http_request($infos->thumbnail['src']);
+  $filename = transliteration_clean_filename($infos->title);
+  //dsm($filename);
+  $dir = 'public://webpage';
+  if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
+    $dest = $dir . '/' . $filename . '.jpg';
+    $file = file_save_data($thumb->data, $dest);
+
+    if ($file) {
+      // Set the file status to temporary
+      $query = db_update('file_managed')
+        ->condition('fid', $file->fid)
+        ->fields(array('status' => 0))
+        ->execute();
+
+      $atom->scald_thumbnail[LANGUAGE_NONE][0] = (array) $file;
+    }
+  }
+}
+
+/*
+  * Implement hook_form_alter()
+  * This is step 2 or edit
+  */
+function scald_webpage_form_alter(&$form, &$form_state, $form_id) {
+
+  if ($form_id == 'scald_atom_add_form_options' && $form['atom0']['#bundle'] == "webpage") {
+    /**
+     * Check if we are updating existing one or
+     * creating a new atom. Good way knowing the status is to check if the atom is fetched
+     */
+    $operation = $form_state['scald']['atoms'][0]->fetched;
+
+    if ($operation) {
+
+      //Atom is existing so use it's entity baseID as wid
+      $wid = $form['atom0']['#entity']->base_id;
+    }
+    else {
+      //We are just creating the atom
+      $wid = $form_state['scald']['atoms'][0]->base_id;
+      $scald_webpage['url'] = $form_state['input']['URL'];
+    }
+
+    $scald_webpage = scald_webpage_load($wid);
+
+    $form['URL'] = array(
+      '#type' => 'textfield',
+      '#title' => t('URL'),
+      '#default_value' => $scald_webpage['url'],
+      //'#disabled'       => $readonly,
+      '#size' => 60,
+      '#maxlength' => 255,
+      '#description' => t('This is the BaseID or custom string to identify individual items. If the value is <em>numeric</em>, do not change the value!'),
+      '#required' => TRUE,
+    );
+    $form['iframe'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Render the webpage URL as iframe'),
+      '#default_value' => $scald_webpage['iframe'],
+      '#description' => t('By checking the checkbox you enable rendering the attached webpage as IFRAME atom. Usefull for pardot forms')
+    );
+    $form['iframe_height'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Iframe Height (px)'),
+      '#size' => 10,
+      '#maxlength' => 10,
+      '#description' => t('When Embedding the url as Iframe to field or body you may want to set it height in pixels'),
+      '#default_value' => $scald_webpage['height'],
+    );
+    $form['iframe_width'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Iframe Width (%)'),
+      '#size' => 10,
+      '#maxlength' => 10,
+      '#description' => t('When Embedding the url as Iframe to field or body you may want to set it width in %'),
+      '#default_value' => $scald_webpage['width'],
+    );
+    $form['options'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Other options'),
+      '#default_value' => $scald_webpage['options'],
+      '#size' => 60,
+      '#maxlength' => 255,
+      '#description' => t('You may add options for: seamless, allowfullscreen, scrolling=[auto|yes|no], frameborder=[yes/no]'),
+    );
+  }
+}
+
+/*
+ * Implement hook_scald_update_atom
+ */
+
+
+function scald_webpage_scald_update_atom($atom, $mode) {
+  $wid = $atom->base_id;
+  $url = $atom->URL;
+  $iframe = $atom->iframe;
+  $height = $atom->iframe_height;
+  $width = $atom->iframe_width;
+  $options = $atom->options;
+  /*
+   * No need to recreate the reference, so lets just update the existing
+   */
+  scald_webpage_update($url, $iframe, $height, $width, $wid, $options);
+}
+
+/*
+ * Implement hook_scald_delete_confirm_submit()
+ */
+
+function scald_webpage_scald_atom_delete($atom) {
+  scald_webpage_delete($atom->base_id);
+}
+
+/**
+ * Implements hook_scald_prerender.
+ */
+function scald_webpage_scald_prerender($atom, $context, $options, $mode) {
+  $webpage = scald_webpage_load($atom->base_id);
+  // Check if $webpage['url'] is relative or absolute
+  $url_parts = parse_url(trim($webpage['url']));
+
+  // default. Changes if relative url
+  $webpage_url = $webpage['url'];
+  if (!isset($url_parts['host'])) {
+    // use $webpage['language'] to get language object
+    $lang = $webpage['language'];
+
+    // Get the system path
+    $url = $webpage['url'];
+
+    $options = array(
+      'language' => $lang,
+      'absolute' => TRUE
+    );
+    $webpage_url = url($url, $options);
+  }
+  // If absolute, do nothing
+  $iframe = $webpage['iframe'];
+  if ($mode == 'atom') {
+    if ($context != 'sdl_library_item') {
+      if ($iframe) {
+        $atom->rendered->player = theme('scald_webpage_iframe',
+          array(
+            'vars' => array(
+              'url' => $webpage_url,
+              'title' => $atom->title,
+              'thumbnail' => $atom->rendered->thumbnail_source_url,
+              'iframe_width' => $webpage['width'] ? $webpage['width'] : 100,
+              'iframe_height' => $webpage['height'] ? $webpage['height'] : 100,
+              'options' => $webpage['options'] ? $webpage['options'] : 'allowfullscreen seamless scrolling="no" frameborder="no"',
+            )
+          )
+        );
+      }
+      else {
+        $atom->rendered->player = theme('scald_webpage_player',
+          array(
+            'vars' => array(
+              'url' => $webpage_url,
+              'title' => $atom->title,
+              'thumbnail' => $atom->rendered->thumbnail_source_url,
+            )
+          )
+        );
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_theme.
+ */
+function scald_webpage_theme() {
+  return array(
+    'scald_webpage_player' => array(
+      'variables' => array('vars' => NULL),
+      'template' => 'scald_webpage_player'
+    ),
+    'scald_webpage_iframe' => array(
+      'variables' => array('vars' => NULL),
+      'template' => 'scald_webpage_iframe'
+    ),
+  );
+}
+
+/**
+ * Creates an atom based on a URL OG:metadata
+ *
+ * @param $text
+ *   Unique Title of the text URL
+ *   returned by scald_webpage_fetch_metadata
+ * @return integer
+ *   Unique URL of the new atom
+ */
+function scald_webpage_register($url) {
+  // Fetch the needed information
+  if (is_object($url)) {
+    $infos = $url;
+  }
+  else {
+    $infos = scald_webpage_fetch_metadata($url);
+  }
+  // Check if the url has already been imported to prevent duplicate
+  $old = scald_webpage_url_already_imported($infos->url);
+  if ($old) {
+    return FALSE;
+  }
+
+  // Download a copy of the webpage og:image. This makes it possible
+  // to do interesting manipulation with image styles presets.
+  $thumb = drupal_http_request($infos->thumbnail['src']);
+  $filename = transliteration_clean_filename($infos->title);
+  $dir = 'public://webpage';
+  if ($thumb->code == 200 && file_prepare_directory($dir, FILE_CREATE_DIRECTORY)) {
+    $dest = $dir . '/' . $filename . '.jpg';
+    $file = file_save_data($thumb->data, $dest);
+  }
+
+  // Create an atom
+  $atom = new ScaldAtom('webpage', 'scald_webpage', array(
+    'base_id' => $infos->id,
+    'title' => $infos->title,
+  ));
+
+  // And save it
+  $atom_sid = scald_atom_save($atom);
+  // Finally, return this id
+  return $atom_sid;
+}
+
+/**
+ * Get all necessary on an given URL using OpenGraph metadata
+ * @param $id
+ *   Unique URL
+ * @return object
+ *   Object containing all necessary info.
+ */
+function scald_webpage_fetch_metadata($id) {
+  try {
+    $curler = (new Cookie());
+    $curler->_setCookie(drupal_realpath(file_default_scheme() . '://') . '/cookies.txt');
+    $url = $id;
+    $body = $curler->get($url);
+    $parser = (new MetaParser($body, $url));
+  } catch (Exception $e) {
+    watchdog('scald_webpage', $e->getMessage());
+    return FALSE;
+  }
+
+  $graph = $parser->getDetails();
+  //dsm($graph);
+  $info = new stdClass();
+  // ID
+  $info->id = $id;
+  // Title
+  $info->title = $graph['openGraph']['title'];
+  // OpenGraph image
+  if ($graph['openGraph']['image']) {
+    // Artwork is always 100x100
+    $info->thumbnail = array(
+      'src' => $graph['openGraph']['image'],
+      'width' => 50,
+      'height' => 50,
+    );
+  }
+
+  // Tags
+  // we could take every word starting by #, or grab from meta:keywords?
+  $info->tags = '';
+  // License
+  $info->license = 'SC';
+
+  return $info;
+}
+
+/**
+ * Checks if an URL has already been imported, based on its URL.
+ * @param $id
+ *   The URL
+ * @return mixed
+ *   FALSE if the URL was never imported
+ */
+function scald_webpage_url_already_imported($id) {
+  $query = db_query("SELECT url FROM {scald_webpages} WHERE url = :url", array(':url' => $id));
+  $id = $query->fetchAssoc();
+  return $id['url'];
+}
+
+/**
+ * Form element validation handler for URL
+ *
+ */
+function scald_webpage_validate_url($element, &$form_state) {
+  $id = scald_webpage_check_url($form_state['values']['URL'], TRUE);
+  if (!$id) {
+    form_error($element, t('Invalid URL.'));
+  }
+  else {
+    if (scald_webpage_url_already_imported($id)) {
+      /*
+      * Get some informative info about existing links.
+      * Just to help editors.
+      */
+      $existing = scald_webpage_atom_info($id);
+      form_error($element, t('URL already imported with the name: ' . $existing['title'] . ' and scald id: ' . $existing['sid']));
+    }
+  }
+}
+
+/**
+ * Parse URL and check validity
+ *
+ */
+function scald_webpage_check_url($string, $check) {
+  $string = trim($string);
+  if (preg_match("/^http/", $string)) {
+    // This string is a URL, most likely a shortened one. (http://dai.ly, http://bit.ly, etc...)
+    $response = drupal_http_request($string);
+    if ($response->code == 200 && isset($response->redirect_code) && ($response->redirect_code == 301 || $response->redirect_code == 302)) {
+      return scald_webpage_check_url($response->redirect_url, $check);
+    }
+  }
+  return $string;
+}
+
+/*
+ * Create the scald webpage data to scald_webpages table
+ */
+function scald_webpage_create($url, $iframe, $height, $width, $options) {
+  $url_parts = parse_url(trim($url));
+  $host = $url_parts['host'];
+
+  // Get languages
+  $langs = language_list();
+  $lang_code = 'und';
+  // Scroll through the languages
+  foreach ($langs as $lang) {
+    if ($host == $lang->domain) {
+      // Get the system path
+      $uri = ltrim(drupal_get_normal_path($url_parts['path'], $lang->language), "/");
+      $lang_code = $lang->language;
+    }
+  }
+  // If the the path is not yet set (i.e. it's not internal), set the uri
+  // to url
+  if (!isset($uri)) {
+    $uri = $url;
+  }
+  else {
+    $decoded = urldecode(ltrim($uri, "/"));
+    $uri = drupal_get_normal_path($decoded, $lang_code);
+  }
+
+  /*
+   * Save data to scald_webpage table
+   * Primary Key is wid (autoincrement)
+   */
+  try {
+    db_insert('scald_webpages')
+      ->fields(array('url', 'language', 'iframe', 'height', 'width', 'options'))
+      ->values(array($uri, $lang_code, $iframe, $height, $width, $options))
+      ->execute();
+  } catch (Exception $e) {
+    drupal_set_message(t("There was a problem in inserting into database."), 'error');
+  }
+  // If successful, return the modified uri
+  return $uri;
+
+}
+
+/*
+ * Update the scald webpage
+ */
+function scald_webpage_update($url, $iframe, $height, $width, $wid, $options) {
+  db_update('scald_webpages')
+    ->fields(array('url' => $url, 'iframe' => $iframe, 'height' => $height, 'width' => $width, 'options' => $options))
+    ->condition('wid', $wid)
+    ->execute();
+}
+
+/*
+ * Delete the scald webpage
+ */
+function scald_webpage_delete($wid) {
+  // Finally, delete the data assosiated to Atom.
+  db_delete('scald_webpages')
+    ->condition('wid', $wid)
+    ->execute();
+}
+/*
+ * Search scald webpages with the url
+ * @param $url
+ *   The url of the webpage atom
+ * @return object
+ *   Return the wid object
+ */
+function scald_webpage_load_wid($url) {
+  $search_results = db_query("SELECT wid FROM {scald_webpages} WHERE url = :url", array(':url' => $url));
+  return $search_results->fetchObject();
+}
+
+/*
+ * Search scald webpages with the id
+ * @param $wid
+ *   The base id of atom
+ * @return object
+ *   Return the webpage object
+ */
+function scald_webpage_load($wid) {
+  $search_results = db_query("SELECT * FROM {scald_webpages} WHERE wid = :wid", array(':wid' => $wid));
+  return $search_results->fetchAssoc();
+}
+
+/*
+ * For better error handling find the Title from scald atoms to inform users
+ * of existing atoms during creation
+ */
+function scald_webpage_atom_info($wid) {
+  /*
+   * First take the wid (URL) as parameter and find its relative base_id from scald atoms
+   */
+  $infoQuery = db_query("SELECT sa.sid, sa.base_id, sa.title
+    FROM {scald_atoms} sa
+    INNER JOIN {scald_webpages} sw ON sa.base_id = sw.wid
+    WHERE sw.url = :url", array(":url" => $wid));
+  return $infoQuery->fetchAssoc();
+}

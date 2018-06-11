@@ -1,0 +1,61 @@
+diff --git a/addressfield.module b/addressfield.module
+index 177d92b..78387c8 100644
+--- a/addressfield.module
++++ b/addressfield.module
+@@ -648,6 +648,56 @@ function addressfield_property_info_callback(&$info, $entity_type, $field, $inst
+ }
+ 
+ /**
++ * Implements hook_entity_presave().
++ */
++function addressfield_entity_presave($entity, $type) {
++  // Remove empty additional locations before saving.
++  $info = entity_get_info($type);
++  if (empty($info['entity keys']['bundle'])) {
++    $bundle = $type;
++  }
++  else {
++    $bundle = $entity->{$info['entity keys']['bundle']};
++  }
++  $instances = field_info_instances($type, $bundle);
++
++  foreach ($instances as $field_name => $instance) {
++    $field = field_info_field($field_name);
++    // If this isn't an addressfield OR if the field is not a multiple field,
++    // move on to the next field.
++    if ($field['type'] != 'addressfield' || !($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED || $field['cardinality'] > 1)) {
++      continue;
++    }
++
++    $lang = field_language($type, $entity, $field_name);
++    if (isset($entity->{$field_name}[$lang]) && is_array($entity->{$field_name}[$lang])) {
++      $element_key = $entity->{$field_name}[$lang][0]['element_key'];
++      foreach ($entity->{$field_name}[$lang] as $delta => $location) {
++        // Unset if no state is selected.
++        if (empty($location['administrative_area'])) {
++          unset($entity->{$field_name}[$lang][$delta]);
++        }
++      }
++      // Normalzie the array.
++      $entity->{$field_name}[$lang] = array_values($entity->{$field_name}[$lang]);
++
++      // Create default if array is empty.
++      if (empty($entity->{$field_name}[$lang])) {
++        $entity->$field_name['und'][0] = array(
++          'element_key' => $element_key,
++          'thoroughfare' => '',
++          'premise' => '',
++          'locality' => '',
++          'administrative_area' => '',
++          'postal_code' => '',
++          'country' => variable_get('site_default_country', NULL),
++        );
++      }
++    }
++  }
++}
++
++/**
+  * Defines info for the properties of the address field data structure.
+  */
+ function addressfield_data_property_info($name = NULL) {

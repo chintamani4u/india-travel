@@ -1,0 +1,26 @@
+<?php
+
+/*
+* Removing leaflet modules from database
+*/
+
+function tieto_addresses_update_7008() {
+
+  cache_clear_all();
+
+  if(module_exists('leaflet_views')) {
+    module_disable(array('leaflet_views'));
+    cache_clear_all();
+    drupal_uninstall_modules(array('leaflet_views'));
+  }
+  if( module_exists('leaflet_googlemaps')) {
+    module_disable(array('leaflet_googlemaps'));
+    cache_clear_all();
+    drupal_uninstall_modules(array('leaflet_googlemaps'));
+  }
+  if( module_exists('leaflet')) {
+    module_disable(array('leaflet'));
+    cache_clear_all();
+    drupal_uninstall_modules(array('leaflet'));
+  }
+}

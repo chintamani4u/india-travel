@@ -1,0 +1,9 @@
+.dnd-library-wrapper .editor-item .meta.type-webpage {
+    background-image: url('icons/webpage.png');
+}
+.scald-menu .add-buttons .add-webpage {
+    background: url('icons/webpage-grey.png') 50% 50% no-repeat;
+}
+.scald-menu .add-buttons .add-webpage:hover {
+    background-image: url('icons/webpage.png');
+}

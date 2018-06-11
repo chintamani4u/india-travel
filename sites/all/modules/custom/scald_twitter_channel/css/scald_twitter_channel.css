@@ -1,0 +1,23 @@
+.dnd-library-wrapper .editor-item .meta.type-twitter {
+    background-image: url('../icons/twitter.png');
+}
+.scald-menu .add-buttons .add-twitter_channel {
+    background: url('../icons/twitter-large-inverted.png') 50% 50% no-repeat;
+}
+.scald-menu .add-buttons .add-twitter_channel:hover {
+    background-image: url('../icons/twitter-large-color.png');
+}
+
+.tweets-pulled-carousel { position: relative; min-height: 140px;}
+.flex-nav-container { margin-bottom: 0; }
+.flex-control-nav { bottom: 0; }
+.tweets-pulled-carousel .flexslider .slides > li {
+    display: block !important;
+}
+.tweet-author {}
+    .tweet-author a {}
+.tweet-text {}
+    .tweet-text a {}
+.tweet-time {}
+    .tweet-time a {}
+.tweet-divider {}

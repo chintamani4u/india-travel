@@ -1,0 +1,25 @@
+--- plugins/content_types/menu_tree/menu_tree_old.inc	2014-07-16 17:18:37.000000000 +0530
++++ plugins/content_types/menu_tree/menu_tree.inc	2014-07-16 16:47:37.000000000 +0530
+@@ -15,6 +15,14 @@
+   // And this is just the administrative title.
+   // All our callbacks are named according to the standard pattern and can be deduced.
+   'title' => t('Menu tree'),
++  'defaults' => array('override_title' => '', 'title' => ''),
++  'i18n_settings' => array(
++    'override_title',
++    'body' => array('format' => 'plain_text'),
++    'items|0|override_title'
++  ),
++
++
+ );
+ 
+ /**
+@@ -114,6 +122,7 @@
+   $form['parent']['#options'] = menu_parent_options(array($conf['menu_name'] => $menus[$conf['menu_name']]), array('mlid' => 0));
+   // Hide the Parent item option for the special "active" menu.
+   if ($conf['menu_name'] == MENU_TREE__CURRENT_PAGE_MENU) {
++    unset($form['parent']['#options']);
+     $form['parent']['#type'] = 'hidden';
+   }
+   // Remove CSS class hooks for jQuery script on parent select.

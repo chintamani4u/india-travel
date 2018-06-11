@@ -1,0 +1,9 @@
+<?php
+
+function scald_fb_channel_install() {
+  scald_add_type('fb_channel', 'Facebook Channel', 'Facebook Channel');
+}
+
+function scald_fb_channel_uninstall() {
+  scald_remove_type('fb_channel');
+}

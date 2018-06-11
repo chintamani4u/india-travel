@@ -1,0 +1,460 @@
+<?php
+
+/**
+ * @file
+ * Module file for off-canvas menu functionality.
+ *
+ * Defines permissions, a block and custom logic.
+ * @see tieto_megamenus module, that was the template for this.
+ */
+
+define('TIETO_OFFCANVAS_MENU_ENABLED_MENUS_VARIABLE', 'tieto_offcanvas_menu_enabled_menus');
+define('TIETO_OFFCANVAS_MENU_ENABLED_LINKS_VARIABLE', 'tieto_offcanvas_menu_enabled_links');
+
+///**
+// * Implements hook_permission().
+// * @note: Use administer tieto megamenus instead. It makes life easier.
+// */
+//function tieto_offcanvas_menu_permission() {
+//  return array(
+//    'administer tieto offcanvas menu' => array(
+//      'title' => t('Administer tieto off-canvas menu'),
+//      'description' => t('Administer tieto off-canvas menu.'),
+//    ),
+//  );
+//}
+
+/**
+ * Implements hook_library().
+ */
+function tieto_offcanvas_menu_library() {
+  $libraries['jquery.actual'] = array(
+    'title' => 'jQuery Actual',
+    'website' => 'http://dreamerslab.com/blog/en/get-hidden-elements-width-and-height-with-jquery/',
+    'version' => '1.0.14',
+    'js' => array(
+      libraries_get_path('jquery.actual') . '/jquery.actual.min.js' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'jquery'),
+    ),
+  );
+  return $libraries;
+}
+
+/**
+ * Implements hook_block_info().
+ *
+ * Create a block for off-canvas menu navigation.
+ */
+function tieto_offcanvas_menu_block_info() {
+  $blocks['offcanvas_menu'] = array(
+    'info' => t('Off-canvas menu navigation'),
+    'status' => TRUE,
+    'region' => 'header',
+  );
+  $blocks['offcanvas_menu_button'] = array(
+    'info' => t('Off-canvas menu open button'),
+    'status' => TRUE,
+    'region' => 'header',
+  );
+
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * Block with off-canvas navigation.
+ */
+function tieto_offcanvas_menu_block_view($delta = '') {
+  $block = [];
+  switch ($delta) {
+    case 'offcanvas_menu':
+
+      $block['content'] = [
+        [
+          '#markup' => '<div id="offcanvas_menu"></div>',
+          '#prefix' => '<div class="offcanvas_menu-margin offcanvas_menu-left"></div>',
+          '#suffix' => '<div class="offcanvas_menu-margin offcanvas_menu-right"></div>',
+        ],
+      ];
+
+      break;
+    case 'offcanvas_menu_button':
+
+      $block['content'] = [
+        [
+          '#markup' => '
+            <div id="hamburger" class="hamburger-menu-toggler not-fixed">
+              <span class="animated-hamburger-menu"></span>
+            </div>',
+        ],
+      ];
+
+      break;
+
+  }
+  return $block;
+}
+
+/**
+ * Implements hook_init().
+ *
+ * Add necessary JS.
+ */
+function tieto_offcanvas_menu_init() {
+  $offcanvas_enabled_menus = variable_get(TIETO_OFFCANVAS_MENU_ENABLED_MENUS_VARIABLE, array());
+  if (in_array(TRUE, $offcanvas_enabled_menus, FALSE)) {
+    $options = array(
+      'group' => JS_LIBRARY,
+      'every_page' => TRUE,
+    );
+
+    $module_path = drupal_get_path('module', 'tieto_offcanvas_menu');
+    drupal_add_library('tieto_offcanvas_menu', 'jquery.actual', TRUE);
+    drupal_add_js($module_path . DIRECTORY_SEPARATOR . 'tieto_offcanvas_menu.js', $options);
+//    drupal_add_css($module_path . DIRECTORY_SEPARATOR . 'tieto_offcanvas_menu.css');
+  }
+}
+
+/**
+ * Implements hook_block_view_alter().
+ *
+ * Add classes to menu links for either system menu blocks
+ * or blocks created by Menu Block module.
+ */
+function tieto_offcanvas_menu_block_view_alter(&$data, $block) {
+  if (empty($data['content'])) {
+    return;
+  }
+  switch ($block->module) {
+    case 'menu_block':
+      // Add classes to block menu blocks.
+      $delta = $data['content']['#config']['menu_name'];
+      _add_offcanvas_menu_classes($delta, $data['content']['#content']);
+      break;
+
+    case 'system':
+      // Add classes to Menu blocks.
+      _add_offcanvas_menu_classes($block->delta, $data['content']);
+      break;
+  }
+}
+
+/**
+ * Helper function to add classes to menu links and blocks.
+ *
+ * @param string $menu_name
+ *   Name of the menu.
+ * @param string|array $menu_links
+ *   Menu link array.
+ */
+function _add_offcanvas_menu_classes($menu_name, &$menu_links) {
+  $enabled_menus = variable_get(TIETO_OFFCANVAS_MENU_ENABLED_MENUS_VARIABLE, array());
+  $enabled_links = variable_get(TIETO_OFFCANVAS_MENU_ENABLED_LINKS_VARIABLE, array());
+
+  if (!isset($enabled_menus[$menu_name])) {
+    // This block is not a menu.
+    return;
+  }
+
+  // Check that offcanvas_menu are enabled for this menu.
+  if ($enabled_menus[$menu_name]) {
+    foreach ($menu_links as $key => &$content) {
+      _tieto_offcanvas_menu_check_recursive($enabled_links, $key, $content);
+    }
+  }
+}
+
+/**
+ * Helper function to recursively add classes to menus.
+ *
+ * @param array $enabled_links
+ *   Array of enabled links.
+ * @param int $key
+ *   Menu link key.
+ * @param array $content
+ *   Menu link content.
+ */
+function _tieto_offcanvas_menu_check_recursive(array $enabled_links, $key, &$content) {
+  if (is_numeric($key)) {
+    if (isset($enabled_links[$key])) {
+      $content['#attributes']['class'][] = 'offcanvas_menu-link';
+      if ($enabled_links[$key]['expand']) {
+        $content['#attributes']['class'][] = 'offcanvas_menu-link-expanded';
+      }
+    }
+    if (isset($content['#below']) && !empty($content['#below'])) {
+      foreach ($content['#below'] as $key => &$content) {
+        _tieto_offcanvas_menu_check_recursive($enabled_links, $key, $content);
+      }
+    }
+    else {
+      return;
+    }
+  }
+}
+
+/**
+ * Implements hook_form_alter().
+ *
+ * Alters the menu settings form per menu with our menu attribute settings.
+ */
+function tieto_offcanvas_menu_form_alter(&$form, $form_state) {
+  if ($form['#form_id'] === 'menu_edit_menu') {
+    $menu_name = $form['menu_name']['#default_value'];
+
+    $offcanvas_enabled_menus = variable_get(TIETO_OFFCANVAS_MENU_ENABLED_MENUS_VARIABLE, array());
+
+    $enabled = (isset($offcanvas_enabled_menus[$menu_name]) && $offcanvas_enabled_menus[$menu_name]) ? TRUE : FALSE;
+
+    $form['tieto_offcanvas_enabled'] = array(
+      '#type' => 'checkbox',
+      '#title' => 'Off-canvas menu',
+      '#description' => t('Display as an off-canvas menu?'),
+      '#default_value' => $enabled,
+    );
+  }
+
+  if ($form['#form_id'] === 'block_admin_configure' && $form['module']['#value'] === 'menu_block') {
+    $form['#submit'][] = 'tieto_offcanvas_block_form_submit';
+  }
+}
+
+/**
+ * Implements hook_form_submit().
+ *
+ * For some weird reason, the menu (parent) of the menu_blocks does not get
+ * saved in the default setup
+ * Had to make a custom submit function to force it to be saved correctly...
+ *
+ * @TODO: This is a very temporary solution but works for now, should be investigated deeper on what
+ *        is causing this behavior.
+ */
+function tieto_offcanvas_menu_block_form_submit($form, &$form_state) {
+  variable_set('menu_block_' . $form_state['values']['delta'] . '_parent', $form_state['values']['menu_name']);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Adds menu attribute options to the edit menu item form.
+ *
+ * @see menu_edit_item()
+ * @see _tieto_offcanvas_menu_form_alter()
+ */
+function tieto_offcanvas_menu_form_menu_edit_item_alter(&$form, $form_state) {
+  $item = $form['original_item']['#value'];
+  _tieto_offcanvas_menu_form_alter($form, $item, $form);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * @see _tieto_offcanvas_menu_form_alter()
+ */
+function tieto_offcanvas_menu_form_node_form_alter(&$form, $form_state) {
+  if (isset($form['menu']['link'])) {
+    $item = $form['#node']->menu;
+    _tieto_offcanvas_menu_form_alter($form['menu']['link'], $item, $form);
+    $form['menu']['link']['options']['attributes']['#type'] = 'container';
+  }
+}
+
+/**
+ * Add the tieto offcanvas_menu to a menu item edit form.
+ *
+ * @param array $form
+ *   The menu item edit form passed by reference.
+ * @param array $item
+ *   The optional existing menu item for context.
+ */
+function _tieto_offcanvas_menu_form_alter(array &$form, array $item, array &$complete_form) {
+  $offcanvas_enabled_menus = variable_get(TIETO_OFFCANVAS_MENU_ENABLED_MENUS_VARIABLE, array());
+
+  if (isset($offcanvas_enabled_menus[$item['menu_name']]) && $offcanvas_enabled_menus[$item['menu_name']]) {
+
+    $enabled_links = variable_get(TIETO_OFFCANVAS_MENU_ENABLED_LINKS_VARIABLE, array());
+    $enabled = $enabled_links[$item['mlid']] ? TRUE : FALSE;
+    $expanded = ($enabled && $enabled_links[$item['mlid']]['expand']) ? TRUE : FALSE;
+
+    $form['tieto_offcanvas_menu'] = array(
+      '#access' => user_access('administer tieto megamenus'),
+      '#title' => t('Off-canvas menu settings'),
+      '#type' => 'fieldset',
+    );
+
+    $form['tieto_offcanvas_menu']['tieto_offcanvas_link'] = array(
+      '#access' => user_access('administer tieto megamenus'),
+      '#title' => t('Off-canvas menu'),
+      '#type' => 'checkbox',
+      '#description' => t('If checked, this menu item will display children in the off-canvas menu.'),
+      '#default_value' => $enabled,
+    );
+
+    $form['tieto_offcanvas_menu']['tieto_offcanvas_link_expanded'] = array(
+      '#access' => user_access('administer tieto megamenus'),
+      '#title' => t('Two levels'),
+      '#type' => 'checkbox',
+      '#description' => t('Off-canvas links show only one level of children by default. Check this option to show two levels.'),
+      '#default_value' => $expanded,
+    );
+
+    array_unshift($complete_form['#submit'], '_tieto_offcanvas_menu_form_submit');
+  }
+}
+
+/**
+ * Form submit handler for menu item links.
+ *
+ * Update offcanvas_menu option on link editing form
+ * hook_menu_link_update() is not executed when the form is submitted if nothing
+ * else is changed, so we must do this option differently.
+ */
+function _tieto_offcanvas_menu_form_submit($form, &$form_state) {
+  $link = $form_state['values'];
+
+  if ($link['mlid'] && !_tieto_offcanvas_menu_link_update($link)) {
+    drupal_set_message(t('There was an error saving the off-canvas menu option.'), 'error');
+  }
+}
+
+/**
+ * A custom menu was created.
+ *
+ * @param array $menu
+ *   An array representing a custom menu:
+ *   - menu_name: The unique name of the custom menu.
+ *   - title: The human readable menu title.
+ *   - description: The custom menu description.
+ *
+ * @see hook_menu_update()
+ * @see hook_menu_delete()
+ */
+function tieto_offcanvas_menu_menu_insert(array $menu) {
+  if (isset($menu['form_id']) && $menu['form_id'] === 'menu_overview_form') {
+    $menus = variable_get(TIETO_OFFCANVAS_MENU_ENABLED_MENUS_VARIABLE, array());
+    $menus[$menu['menu_name']] = 0;
+    variable_set(TIETO_OFFCANVAS_MENU_ENABLED_MENUS_VARIABLE, $menus);
+  }
+}
+
+/**
+ * A custom menu was updated.
+ *
+ * @param array $menu
+ *   An array representing a custom menu:
+ *   - menu_name: The unique name of the custom menu.
+ *   - title: The human readable menu title.
+ *   - description: The custom menu description.
+ *   - old_name: The current 'menu_name'. Note that internal menu names cannot
+ *     be changed after initial creation.
+ *
+ * @see hook_menu_insert()
+ * @see hook_menu_delete()
+ */
+function tieto_offcanvas_menu_menu_update(array $menu) {
+  if (!user_access('administer tieto megamenus')) {
+    return;
+  }
+
+  if (isset($menu['form_id']) && $menu['form_id'] === 'menu_edit_menu') {
+    $menus = variable_get(TIETO_OFFCANVAS_MENU_ENABLED_MENUS_VARIABLE, array());
+    $menus[$menu['menu_name']] = $menu['tieto_offcanvas_enabled'];
+    variable_set(TIETO_OFFCANVAS_MENU_ENABLED_MENUS_VARIABLE, $menus);
+  }
+}
+
+/**
+ * A custom menu was deleted.
+ *
+ * @param array $menu
+ *   An array representing a custom menu:
+ *   - menu_name: The unique name of the custom menu.
+ *   - title: The human readable menu title.
+ *   - description: The custom menu description.
+ *
+ * @see hook_menu_insert()
+ * @see hook_menu_update()
+ */
+function tieto_offcanvas_menu_menu_delete(array $menu) {
+  $menus = variable_get(TIETO_OFFCANVAS_MENU_ENABLED_MENUS_VARIABLE, array());
+  if (isset($menus[$menu['menu_name']])) {
+    unset($menus[$menu['menu_name']]);
+  }
+  variable_set(TIETO_OFFCANVAS_MENU_ENABLED_MENUS_VARIABLE, $menus);
+}
+
+/**
+ * A custom menu link was inserted.
+ *
+ * @param array $link
+ *   Associative array defining a menu link as passed into menu_link_save()
+ *
+ * @see hook_menu_link_update()
+ * @see hook_menu_link_delete()
+ */
+function tieto_offcanvas_menu_menu_link_insert($link) {
+  if (!_tieto_offcanvas_menu_link_update($link)) {
+    drupal_set_message(t('There was an error saving the off-canvas option.'), 'error');
+  }
+}
+
+/**
+ * A custom menu link was deleted.
+ *
+ * @param array $link
+ *   Associative array defining a menu link as passed into menu_link_save()
+ *
+ * @see hook_menu_link_insert()
+ */
+function tieto_offcanvas_menu_menu_link_delete($link) {
+  _tieto_offcanvas_menu_link_update($link);
+}
+
+/**
+ * Implements hook_menu_link_update().
+ *
+ * @see hook_menu_link_update()
+ */
+function tieto_offcanvas_menu_menu_link_update($link) {
+  _tieto_offcanvas_menu_link_update($link);
+}
+
+/**
+ * Set menu link variables for off-canvas links.
+ */
+function _tieto_offcanvas_menu_link_update($link) {
+  $links = variable_get(TIETO_OFFCANVAS_MENU_ENABLED_LINKS_VARIABLE, array());
+
+  $enabled = isset($link['tieto_offcanvas_link']) ? $link['tieto_offcanvas_link'] : FALSE;
+  $expanded = isset($link['tieto_offcanvas_link_expanded']) ? $link['tieto_offcanvas_link_expanded'] : FALSE;
+  $mlid = $link['mlid'];
+
+  if ($enabled) {
+    $links[$mlid] = array(
+      'mlid' => $mlid,
+      'expand' => $expanded,
+    );
+  }
+  elseif (!$enabled && isset($links[$mlid])) {
+    unset($links[$mlid]);
+  }
+
+  // Sort links array before saving.
+  ksort($links, SORT_NUMERIC);
+  variable_set(TIETO_OFFCANVAS_MENU_ENABLED_LINKS_VARIABLE, $links);
+
+  return $link['mlid'];
+}
+
+/**
+ * Implements hook_page_alter().
+ */
+function tieto_offcanvas_menu_page_alter(&$page) {
+  $worldwide_block = $page['header']['menu_menu-tieto-worldwide'];
+
+  $page['header']['tieto_offcanvas_menu_offcanvas_menu'][] = $worldwide_block;
+  unset($page['header']['menu_menu-tieto-worldwide']);
+}

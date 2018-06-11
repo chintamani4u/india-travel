@@ -1,0 +1,185 @@
+// sticky nav common
+.node-type-key-topics {
+  #navigation {
+    position: relative;
+    &::after {
+      display: none;
+    }
+    z-index: 1;
+    .region-navigation {
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+  }
+  .navigation-block-inner {
+    position: relative;
+    margin-left:-2px;
+  }
+  .floating-block-active {
+    left: inherit !important;
+    width: 100%;
+    max-width: $break2 - 24;
+    margin: 0 auto;
+  }
+	.sticky-navigation {
+    z-index: 998; // One less than admin menu, otherwise admin menu shadow looks stupid
+    position: relative;
+    ul {
+      display: table;
+      table-layout: fixed;
+      @include horizontal-list(false);
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      @include respond-to(handheld) {
+        display: block;
+        padding: 1em 15px;
+      }
+      li {
+        white-space: normal;
+        float: none;
+        display: table-cell;
+        text-align: center;
+        vertical-align: middle;
+        background-color: $primary-light-blue;
+        cursor: pointer;
+        font-weight: bold;
+        border-left: 1px solid $white;
+        @include respond-to(handheld) {
+          font-weight: normal;
+          text-align: left;
+          display: block;
+          background: none;
+          border: none;
+        }
+        &.first {
+          border-left: 0;
+        }
+        &:hover {
+          background-color: $white;
+          @include respond-to(handheld) {
+            background: none;
+          }
+          a {
+            color: $primary-blue !important;
+            @include respond-to(handheld) {
+              color: $primary-red !important;
+            }
+          }
+        }
+        a {
+          padding: 0.75em;
+          display: block;
+          color: $white;
+          font-weight: bold;
+          @include respond-to(handheld) {
+            color: $primary-blue !important;
+            font-weight: normal;
+            padding: 0.5em 20px;
+            &::before {
+              content: " ";
+              padding-left: 15px;
+              position: relative;
+              margin-left: -15px;
+              top: 4.5px;
+              background-position: 0 -54px;
+              height: 7px;
+              width: 7px;
+              background-image: url(../images/icons-s514b3104b7.png);
+              background-repeat: no-repeat;
+            }
+          }
+
+          &:focus {
+            outline: 0;
+          }
+        }
+      }
+    }
+	}
+}
+
+// sticky nav for handheld
+.node-type-key-topics.window-handheld {
+  &.sticky-nav-visible .header-inner:before {
+    background-color: $primary-blue;
+  }
+  .navigation-block-inner { position: inherit;}
+  .sticky-navigation {
+    left: 0;
+    width: 100%;
+    position: static;
+  }
+}
+
+// sticky nav for tablet mode
+.node-type-key-topics.window-narrow.tablet-mode {
+  .navigation-block-inner {
+    margin: 0;
+  }
+  .sticky-navigation {
+    &.floating-block-active {
+      left: -1px !important;
+      width: 101%;
+    }
+
+    &.sticky-nav-items-4 ul,
+    &.sticky-nav-items-5 ul,
+    &.sticky-nav-items-6 ul,
+    &.sticky-nav-items-7 ul,
+    &.sticky-nav-items-8 ul {
+      display: block;
+      li {
+        float: left;
+        border-left: 0;
+        border-top: 1px solid $white;
+        position: relative;
+        &:before {
+          border-left: 1px solid $white;
+          content: '';
+          position: absolute;
+          height: 100%;
+          left: 0;
+        }
+      }
+    }
+
+    &.sticky-nav-items-4 ul li,
+    &.sticky-nav-items-5 ul li {
+      width: 100/2 * 1%;
+      &.sticky-nav-item-0,
+      &.sticky-nav-item-1 {
+        border-top: 0;
+      }
+    }
+    &.sticky-nav-items-6 ul li,
+    &.sticky-nav-items-7 ul li {
+      width: 100/3 * 1%;
+      &.sticky-nav-item-0,
+      &.sticky-nav-item-1,
+      &.sticky-nav-item-2 {
+        border-top: 0;
+      }
+      &.sticky-nav-item-0:before,
+      &.sticky-nav-item-3:before {
+        border-left: 0;
+      }
+    }
+    &.sticky-nav-items-8 ul li {
+      width: 100/4 * 1%;
+      &.sticky-nav-item-0,
+      &.sticky-nav-item-1,
+      &.sticky-nav-item-2,
+      &.sticky-nav-item-3 {
+        border-top: 0;
+      }
+    }
+
+    // odd nav's last item
+    &.sticky-nav-items-5 ul li:last-child,
+    &.sticky-nav-items-7 ul li:last-child {
+      width: 100% !important;
+    }
+  }
+}

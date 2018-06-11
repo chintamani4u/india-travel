@@ -1,0 +1,113 @@
+<?php
+/**
+ * @file
+ * Code for the Tieto Contact feature.
+ */
+
+include_once 'tieto_contact.features.inc';
+
+function tieto_contact_form_alter(&$form, $form_state, $form_id) {
+  if (strpos($form_id, 'webform_client_form_') === 0 && isset($form['#node'])) {
+    // This is a webform.
+    if ($form['#node']->type == 'tieto_contact_form') {
+      // It is a tieto contact form.
+      $access_node = $form['#node'];
+      $contact_node = menu_get_object();
+      if ($contact_node && $contact_node->type == 'contact') {
+        $access_node = $contact_node;
+
+        // We are on contact page.
+        if ($contact_emails = field_get_items('node', $contact_node, 'field_email_address')) {
+          // Contact has email address(es) set
+          $emails = array();
+          foreach ($contact_emails as $item) {
+            $mail = trim($item['value']);
+            // Email address is text field, so let's validate it here...
+            if (!empty($mail) && valid_email_address($mail)) {
+              $emails[] = $mail;
+            }
+          }
+          $contact_emails = $emails;
+
+          // Tieto contact email addresses currently set for the webform.
+          $form_emails = array_filter(array_map('trim', explode(',', $form['submitted']['tieto_contact_email']['#default_value'])));
+
+          // Replace fallback address with contact emails.
+          $fallback_email = variable_get('site_mail', FALSE);
+          $fallback_replace_offset = array_search($fallback_email, $form_emails);
+          if ($fallback_replace_offset !== FALSE) {
+            unset($form_emails[$fallback_replace_offset]);
+          }
+          $form_emails = array_unique(array_merge($form_emails, $contact_emails));
+          $form['submitted']['tieto_contact_email']['#value'] = implode(', ', $form_emails);
+        }
+      }
+
+      if (node_access('update', $access_node)) {
+        // If the user does have edit access, display email as disabled.
+        $form['submitted']['tieto_contact_email']['#disabled'] = TRUE;
+      }
+      else {
+        // If the user does not have edit access, always hide the email field.
+        $form['submitted']['tieto_contact_email']['#access'] = FALSE;
+      }
+
+    }
+  }
+}
+
+function tieto_contact_form_contact_node_form_alter(&$form, $form_state, $form_id) {
+  $form['title']['#title'] = 'Title';
+  $form['title']['#required'] = FALSE;
+  $form['title']['#disabled'] = TRUE;
+  $form['title']['#access'] = user_access('administer tieto contact');
+  $form['title']['#description'] = 'Value of this field is generated automatically and this input field is visible only if user has permission "administer tieto contacts".';
+  $form['title']['#element_validate'][] = '_tieto_contact_validate_node_form_title';
+
+  // Based on contact type we either show or hide elements.
+  $selector = ':input[name="field_contact_type[' . LANGUAGE_NONE . ']"]';
+
+  $person_state = array('#states' => array('visible' => array(
+    $selector => array('value' => 'person'),
+  )));
+
+  $mailbox_state = array('#states' => array('visible' => array(
+    $selector => array('value' => 'mailbox'),
+  )));
+
+  $form = drupal_array_merge_deep($form, array(
+    // If value is person, show first and last name and role.
+    'field_first_name' => $person_state,
+    'field_name' => $person_state,
+    'field_role' => $person_state,
+    // If value is mailbox, show mailbox label field.
+    'field_mailbox_label_text' => $mailbox_state,
+    // Phone and email should be visible on both.
+  ));
+
+}
+
+function _tieto_contact_validate_node_form_title($element, &$form_state, $form) {
+  switch ($form_state['values']['field_contact_type'][LANGUAGE_NONE]) {
+    case 'person':
+      $first_name = $form_state['values']['field_first_name'][LANGUAGE_NONE][0]['value'];
+      $last_name = $form_state['values']['field_name'][LANGUAGE_NONE][0]['value'];
+      $form_state['values']['title'] = trim($first_name . ' ' . $last_name);
+      break;
+    case 'mailbox':
+      $form_state['values']['title'] = trim($form_state['values']['field_mailbox_label_text'][LANGUAGE_NONE][0]['value']);
+      break;
+  }
+}
+
+/**
+ * Implements hook_permission().
+ */
+function tieto_contact_permission() {
+  return array(
+    'administer tieto contact' =>  array(
+      'title' => t('Administer Tieto contact'),
+      'description' => t('Perform administration tasks for tieto contact module.'),
+    ),
+  );
+}

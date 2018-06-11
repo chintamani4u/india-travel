@@ -1,0 +1,178 @@
+<?php
+
+/**
+ * Replace addthis fpp with tieto_addthis.
+ */
+function tieto_common_update_7001() {
+  $affected_rows = db_update('panels_pane')
+    ->fields(array(
+      'type' => 'tieto_addthis',
+      'subtype' => 'tieto_addthis',
+      'configuration' =>  serialize(array()),
+    ))
+    ->condition('type', 'fieldable_panels_pane')
+    ->condition('subtype', 'uuid:aaefe75e-ae80-41c7-9103-f1c0284f4680')
+    ->execute();
+  return t('Updated %affected_rows panes.', array('%affected_rows' => $affected_rows));
+}
+
+
+function tieto_common_update_7101(){
+  #TIET-1528 - adding revision_id to the primary key
+   if(db_field_exists('mee_resource','revision_id')){
+    db_drop_primary_key('mee_resource');
+    db_add_primary_key('mee_resource', array('entity_type', 'entity_id', 'revision_id', 'atom_sid', 'field', 'delta'));
+  }
+}
+
+#TIET-1538 - remove unnecessray servers and indexes
+ function tieto_common_update_7102(){
+  db_delete('search_api_server')
+  ->condition('machine_name', array('database_server', 'solr_server'), 'IN')
+  ->execute();
+  
+  db_delete('search_api_index')
+  ->condition('machine_name', array('node_index', 'database_node_index', 'file'), 'IN')
+  ->execute();
+}
+
+#TIET-1386 - assingning aliases to country contact pages
+function tieto_common_update_7103(){
+  $aliases = array( array('node/21421', 'contact-us','zh-hans'), //tieto.cn
+                  array('node/20572', 'Kontakt','pl'), //tieto.pl
+                  array('node/21406', 'Kontaktivorm','et'), //tieto.ee
+                  array('node/21571', 'Sazinaties_ar_mums','lv'),//tieto.lv
+                  array('node/20548', 'Susisiekite','lt'), //tieto.lt
+                );
+  
+  foreach($aliases as $alias){
+    $path = array();
+    $path['source'] = $alias[0];
+    $path['alias'] =$alias[1];
+    $path['language'] =$alias[2];
+    path_save($path);
+  }
+  variable_set('securepages_pages', 'node/add*
+node/*/edit
+node/*/delete
+user
+user/*
+admin
+admin/*
+contact-us
+customer-area
+Kontakt
+Kontaktivorm
+Sazinaties_ar_mums
+Susisiekite');
+  
+}
+
+
+function tieto_common_update_7104(){
+  variable_set('https',1);
+  variable_set('securepages_enable',1);
+  variable_set('securepages_switch',true);
+  variable_set('securepages_pages', 'node/add*
+node/*/edit
+node/*/delete
+user
+user/*
+admin
+admin/*
+contact-us
+customer-area
+Kontakt
+Kontaktivorm
+Sazinaties_ar_mums
+Susisiekite
+ota-yhteytta
+kontakta-oss
+kontaktujte-nas');
+ 
+}
+
+/**
+ * Implements hook_update_n().
+ */
+function tieto_common_update_7201() {
+ cache_clear_all();
+ if( module_exists('migrate_ui')) {
+  module_disable(array('migrate_ui'));
+  cache_clear_all();
+  drupal_uninstall_modules(array('migrate_ui'));
+ }
+ if( module_exists('elevation_carousel')) {
+  module_disable(array('elevation_carousel'));
+  cache_clear_all();
+  drupal_uninstall_modules(array('elevation_carousel'));
+ }
+ if( module_exists('elevation')) {
+  module_disable(array('elevation'));
+  cache_clear_all();
+  drupal_uninstall_modules(array('elevation'));
+ }
+ if( module_exists('migrate_extras')) {
+  module_disable(array('migrate_extras'));
+  cache_clear_all();
+  drupal_uninstall_modules(array('migrate_extras'));
+ }
+ if( module_exists('date_migrate')) {
+  module_disable(array('date_migrate'));
+  cache_clear_all();
+  drupal_uninstall_modules(array('date_migrate'));
+ }  
+ if( module_exists('scald_migrate')) {
+  module_disable(array('scald_migrate'));
+  cache_clear_all();
+  drupal_uninstall_modules(array('scald_migrate'));
+ } 
+ if( module_exists('migrate')) {
+  module_disable(array('migrate'));
+  cache_clear_all();
+  drupal_uninstall_modules(array('migrate'));
+ } 
+ 
+}
+//TIET-1687 -  add url alias for tieto.at contact page, so that we can bring it under https
+function tieto_common_update_7202() {
+  $path = array();
+  $path['source'] = "node/31746";
+  $path['alias'] ="Kontakt";
+  $path['language'] ="de-at";
+  path_save($path);
+}
+
+function tieto_common_update_7203() {
+ cache_clear_all();
+ if( module_exists('admin_language')) {
+  module_disable(array('admin_language'));
+  cache_clear_all();
+  drupal_uninstall_modules(array('admin_language'));
+ }
+}
+
+
+function tieto_common_update_7204(){
+  variable_set('https',1);
+  variable_set('securepages_enable',1);
+  variable_set('securepages_switch',true);
+  variable_set('securepages_pages', 'node/add*
+node/*/edit
+node/*/delete
+user
+user/*
+admin
+admin/*
+contacts/*
+contact-us
+customer-area
+Kontakt
+Kontaktivorm
+Sazinaties_ar_mums
+Susisiekite
+ota-yhteytta
+kontakta-oss
+kontaktujte-nas
+kontakt-oss');
+}
